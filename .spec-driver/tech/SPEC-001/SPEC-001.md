@@ -336,7 +336,7 @@ src/
 | FR-015 | Selective expansion | FR-017 | cross-cutting |
 | FR-016 | Used-token summary | FR-012 | `normalize/tokens-used.ts` |
 | FR-017 | Typed error hierarchy | FR-016 | `errors.ts` |
-| NF-001 | Token count reduction | NF-001 | — |
+| NF-001 | Representation efficiency (RE-002) | NF-001 | — |
 | NF-002 | Deterministic output | NF-003 | — |
 | NF-003 | Heuristics as pure functions | NF-002 | — |
 | NF-004 | Graceful error handling | FR-016 | `errors.ts` |
@@ -418,7 +418,7 @@ src/
 
 ### Non-Functional Requirements
 
-- **NF-001**: Normalized output MUST be >50% smaller than raw input in token count for typical frames.
+- **NF-001**: Normalized representation efficiency. The normalized schema MUST materially simplify the raw node surface by exposing a smaller, fixed, implementation-oriented top-level field set than typical raw Figma nodes. Total normalized output size, measured as `JSON.stringify` length without pretty-printing, MUST NOT exceed 2.0x the corresponding raw input size on representative fixtures. Size ratio SHOULD be tracked across fixtures to catch regressions, but semantic clarity and implementation utility take precedence over raw byte reduction. *(Revised by RE-002.)*
 
 - **NF-002**: All normalization heuristics MUST be implemented as isolated pure functions with unit tests. Fixture-driven testing for representative UI patterns.
 

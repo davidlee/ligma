@@ -43,4 +43,5 @@ provenance:
   - `max-lines-per-function: 80` (tests exempt)
   - `complexity: 8`, `max-depth: 3`
   - `unicorn/prevent-abbreviations` — `err` → `error`, etc. (allowList: args, env, params, props, ref, refs)
-  - `import/order` with alphabetize + newlines between groups
+  - `import/order` with alphabetize + newlines between groups. Within `type` group: sibling (`./`) before parent (`../`). Value imports from parent come before sibling values. Blank line required between value and type import groups.
+  - `noUncheckedIndexedAccess: true` in tsconfig — array indexing returns `T | undefined`; use `?? default` or null-check

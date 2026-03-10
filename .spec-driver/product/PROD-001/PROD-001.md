@@ -281,7 +281,7 @@ entries:
 - **Problem / Purpose**: Code-generation agents need structured, implementation-oriented design context from Figma. Raw Figma JSON is too noisy, too large, and not shaped for the questions agents actually ask (what is this, how is it laid out, what's reusable, what's a token vs literal). This tool bridges the gap.
 - **Value Signals**: An agent can implement a typical UI frame from `context.md` + `normalized-node.json` + `frame.png` without needing raw Figma JSON.
 - **Guiding Principles**: Structural truth is the product. Visual truth is mandatory. Sparse first, detailed second. Output shaped for implementation, not archival. Determinism over cleverness.
-- **Change History**: Initial specification from `docs/brief.md`. Patch-01: token inventory descoped to used-token summary; expansion triggers made configurable; error hierarchy promoted to FR; opacity deduplication.
+- **Change History**: Initial specification from `docs/brief.md`. Patch-01: token inventory descoped to used-token summary; expansion triggers made configurable; error hierarchy promoted to FR; opacity deduplication. RE-002: NF-001 revised — replaced unrealistic ">50% size reduction" with two-part efficiency metric (schema simplification + 2.0x size ceiling).
 
 ## 2. Stakeholders & Journeys
 
@@ -351,7 +351,7 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 ### Non-Functional Requirements
 
-- **NF-001**: Normalized output MUST be significantly smaller than raw Figma JSON input (target: >50% reduction in token count for typical frames).
+- **NF-001**: Normalized representation efficiency. The normalized schema MUST materially simplify the raw node surface by exposing a smaller, fixed, implementation-oriented top-level field set than typical raw Figma nodes. Total normalized output size, measured as `JSON.stringify` length without pretty-printing, MUST NOT exceed 2.0x the corresponding raw input size on representative fixtures. Size ratio SHOULD be tracked across fixtures to catch regressions, but semantic clarity and implementation utility take precedence over raw byte reduction. *(Revised by RE-002: original ">50% reduction" target was empirically unreachable given intentional structural metadata additions.)*
 
 - **NF-002**: Output MUST be deterministic — identical inputs MUST produce identical outputs (stable, diffable).
 
@@ -367,7 +367,7 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 - **Adoption**: Agent can implement a typical UI frame from `context.md` + `normalized-node.json` + `frame.png` without needing raw Figma JSON.
 - **Quality**: Normalization heuristics produce `high` confidence for >80% of nodes in typical design frames.
-- **Efficiency**: Normalized output is >50% smaller than raw input in token count.
+- **Efficiency**: Normalized output does not exceed 2.0x raw input size (`JSON.stringify` length) on representative fixtures; normalized schema exposes a smaller fixed field set than raw nodes.
 
 ## 4. Solution Outline
 
