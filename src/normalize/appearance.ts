@@ -1,4 +1,5 @@
 import {
+  colorToHex,
   getRawArray,
   getRawNumber,
   getRawString,
@@ -16,25 +17,6 @@ import type {
   PaintKind,
   StrokeAlign,
 } from '../schemas/normalized.js'
-
-function colorToHex(color: unknown): string | null {
-  if (!isRecord(color)) {
-    return null
-  }
-  const { r, g, b, a } = color
-  if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
-    return null
-  }
-  const red = Math.round(r * 255).toString(16).padStart(2, '0')
-  const green = Math.round(g * 255).toString(16).padStart(2, '0')
-  const blue = Math.round(b * 255).toString(16).padStart(2, '0')
-
-  if (typeof a === 'number' && a < 1) {
-    const alpha = Math.round(a * 255).toString(16).padStart(2, '0')
-    return `#${red}${green}${blue}${alpha}`
-  }
-  return `#${red}${green}${blue}`
-}
 
 const PAINT_KIND_MAP: ReadonlyMap<string, PaintKind> = new Map([
   ['SOLID', 'solid'],
@@ -244,15 +226,17 @@ export function extractAppearance(node: FigmaNode): ExtractorResult<NormalizedAp
   const warnings: string[] = []
   const nodeOpacity = node.opacity
 
+  const value = {
+    fills: collectFills(node, warnings),
+    strokes: collectStrokes(node, warnings),
+    cornerRadius: resolveCornerRadius(node),
+    effects: collectEffects(node, warnings),
+    blendMode: resolveBlendMode(node),
+    opacity: typeof nodeOpacity === 'number' && nodeOpacity < 1 ? nodeOpacity : null,
+  }
   return {
-    value: {
-      fills: collectFills(node, warnings),
-      strokes: collectStrokes(node, warnings),
-      cornerRadius: resolveCornerRadius(node),
-      effects: collectEffects(node, warnings),
-      blendMode: resolveBlendMode(node),
-      opacity: typeof nodeOpacity === 'number' && nodeOpacity < 1 ? nodeOpacity : null,
-    },
+    value,
+    confidence: warnings.length > 0 ? 'medium' as const : 'high' as const,
     warnings,
     omittedFields: [],
   }

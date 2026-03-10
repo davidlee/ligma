@@ -1,8 +1,13 @@
 import type { FigmaNode } from '../figma/types-raw.js'
+import type { Confidence } from '../schemas/normalized.js'
 
-export interface ExtractorResult<T> {
+export interface AnalysisResult<T> {
   value: T
+  confidence: Confidence
   warnings: string[]
+}
+
+export interface ExtractorResult<T> extends AnalysisResult<T> {
   omittedFields: string[]
 }
 
@@ -53,5 +58,25 @@ export function getRawRecord(
 }
 
 export function ok<T>(value: T): ExtractorResult<T> {
-  return { value, warnings: [], omittedFields: [] }
+  return { value, confidence: 'high', warnings: [], omittedFields: [] }
+}
+
+/** Convert Figma RGBA color {r, g, b, a} to hex string (DEC-020). */
+export function colorToHex(color: unknown): string | null {
+  if (!isRecord(color)) {
+    return null
+  }
+  const { r, g, b, a } = color
+  if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
+    return null
+  }
+  const red = Math.round(r * 255).toString(16).padStart(2, '0')
+  const green = Math.round(g * 255).toString(16).padStart(2, '0')
+  const blue = Math.round(b * 255).toString(16).padStart(2, '0')
+
+  if (typeof a === 'number' && a < 1) {
+    const alpha = Math.round(a * 255).toString(16).padStart(2, '0')
+    return `#${red}${green}${blue}${alpha}`
+  }
+  return `#${red}${green}${blue}`
 }

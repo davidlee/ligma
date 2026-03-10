@@ -140,9 +140,10 @@ describe('isRecord', () => {
 })
 
 describe('ok', () => {
-  it('wraps a value with empty warnings and omittedFields', () => {
+  it('wraps a value with high confidence, empty warnings and omittedFields', () => {
     expect(ok(42)).toEqual({
       value: 42,
+      confidence: 'high',
       warnings: [],
       omittedFields: [],
     })

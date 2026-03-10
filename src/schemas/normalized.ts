@@ -203,7 +203,7 @@ export const NormalizedComponentInfoSchema = z.object({
   componentId: z.string().nullable(),
   componentName: z.string().nullable(),
   componentSetId: z.string().nullable(),
-  variantProperties: z.record(z.string(), z.string()),
+  propertyValues: z.record(z.string(), z.string()),
   propertyReferences: z.record(z.string(), z.string()),
   isReusable: z.boolean(),
 })

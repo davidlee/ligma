@@ -1,5 +1,6 @@
 import { getRawArray, getRawBoolean, isRecord } from './raw-helpers.js'
 
+import type { AnalysisResult } from './raw-helpers.js'
 import type { FigmaNode } from '../figma/types-raw.js'
 import type { NormalizedNodeType } from '../schemas/normalized.js'
 
@@ -29,14 +30,16 @@ function hasImageFill(node: FigmaNode): boolean {
   )
 }
 
-export function classify(node: FigmaNode): NormalizedNodeType {
+export function classify(node: FigmaNode): AnalysisResult<NormalizedNodeType> {
+  let value: NormalizedNodeType
+
   if (getRawBoolean(node, 'isMask', false)) {
-    return 'mask'
+    value = 'mask'
+  } else if (hasImageFill(node)) {
+    value = 'image'
+  } else {
+    value = TYPE_MAP.get(node.type) ?? 'unknown'
   }
 
-  if (hasImageFill(node)) {
-    return 'image'
-  }
-
-  return TYPE_MAP.get(node.type) ?? 'unknown'
+  return { value, confidence: 'high', warnings: [] }
 }

@@ -5,12 +5,14 @@ import { extractLayout } from './layout.js'
 import { getRawBoolean } from './raw-helpers.js'
 import { extractText } from './text.js'
 
-import type { ExtractorResult } from './raw-helpers.js'
+import type { AnalysisResult, ExtractorResult } from './raw-helpers.js'
 import type { FigmaNode } from '../figma/types-raw.js'
-import type { NormalizedNode, Semantics } from '../schemas/normalized.js'
+import type { Confidence, NormalizedNode, Semantics } from '../schemas/normalized.js'
 
 const SKIP_EXTRACTORS = new Set(['document', 'page'])
-const EMPTY_RESULT: ExtractorResult<null> = { value: null, warnings: [], omittedFields: [] }
+const EMPTY_RESULT: ExtractorResult<null> = {
+  value: null, confidence: 'high', warnings: [], omittedFields: [],
+}
 const DEFAULT_SEMANTICS: Semantics = {
   likelyInteractive: false,
   likelyTextInput: false,
@@ -18,6 +20,12 @@ const DEFAULT_SEMANTICS: Semantics = {
   likelyImage: false,
   likelyMask: false,
   likelyReusableComponent: false,
+}
+
+const CONFIDENCE_ORDER: Record<Confidence, number> = {
+  high: 2,
+  medium: 1,
+  low: 0,
 }
 
 export interface NormalizeContext {
@@ -34,7 +42,17 @@ function extractRotation(node: FigmaNode): number | null {
   return value
 }
 
-function aggregateWarnings(...results: ExtractorResult<unknown>[]): string[] {
+function minConfidence(...results: AnalysisResult<unknown>[]): Confidence {
+  let min: Confidence = 'high'
+  for (const result of results) {
+    if (CONFIDENCE_ORDER[result.confidence] < CONFIDENCE_ORDER[min]) {
+      min = result.confidence
+    }
+  }
+  return min
+}
+
+function aggregateWarnings(...results: AnalysisResult<unknown>[]): string[] {
   const warnings: string[] = []
   for (const result of results) {
     warnings.push(...result.warnings)
@@ -90,9 +108,11 @@ function buildChildContext(raw: FigmaNode, context: NormalizeContext): Normalize
 }
 
 export function normalizeNode(raw: FigmaNode, context: NormalizeContext): NormalizedNode {
-  const type = classify(raw)
+  const classification = classify(raw)
+  const type = classification.value
   const extracted = runExtractors(raw, type)
-  const warnings = aggregateWarnings(...extracted.all)
+  const warnings = aggregateWarnings(classification, ...extracted.all)
+  const confidence = minConfidence(classification, ...extracted.all)
   const childContext = buildChildContext(raw, context)
 
   return {
@@ -116,7 +136,7 @@ export function normalizeNode(raw: FigmaNode, context: NormalizeContext): Normal
       sourceNodeType: raw.type,
       omittedFields: aggregateOmitted(...extracted.all),
       warnings,
-      confidence: warnings.length > 0 ? 'medium' : 'high',
+      confidence,
     },
   }
 }

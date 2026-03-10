@@ -1,4 +1,5 @@
 import {
+  colorToHex,
   getRawArray,
   getRawRecord,
   getRawString,
@@ -8,25 +9,6 @@ import {
 import type { ExtractorResult } from './raw-helpers.js'
 import type { FigmaNode } from '../figma/types-raw.js'
 import type { DimensionValue, NormalizedText } from '../schemas/normalized.js'
-
-function colorToHex(color: unknown): string | null {
-  if (!isRecord(color)) {
-    return null
-  }
-  const { r, g, b, a } = color
-  if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number') {
-    return null
-  }
-  const red = Math.round(r * 255).toString(16).padStart(2, '0')
-  const green = Math.round(g * 255).toString(16).padStart(2, '0')
-  const blue = Math.round(b * 255).toString(16).padStart(2, '0')
-
-  if (typeof a === 'number' && a < 1) {
-    const alpha = Math.round(a * 255).toString(16).padStart(2, '0')
-    return `#${red}${green}${blue}${alpha}`
-  }
-  return `#${red}${green}${blue}`
-}
 
 function resolveLineHeight(style: Record<string, unknown>): DimensionValue | null {
   const unit = style.lineHeightUnit
@@ -112,6 +94,7 @@ export function extractText(node: FigmaNode): ExtractorResult<NormalizedText> {
       semanticKind: 'unknown',
       truncation: resolveTruncation(node),
     },
+    confidence: 'high',
     warnings: [],
     omittedFields: [],
   }

@@ -29,6 +29,7 @@ export function extractBounds(node: FigmaNode): ExtractorResult<Bounds | null> {
   if (bounds === null) {
     return {
       value: null,
+      confidence: 'medium',
       warnings: ['absoluteBoundingBox present but malformed'],
       omittedFields: [],
     }

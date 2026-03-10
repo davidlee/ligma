@@ -38,36 +38,36 @@ describe('classify (VT-008)', () => {
 
     for (const [figmaType, expected] of cases) {
       it(`maps ${figmaType} → "${expected}"`, () => {
-        expect(classify(makeNode(figmaType))).toBe(expected)
+        expect(classify(makeNode(figmaType)).value).toBe(expected)
       })
     }
   })
 
   describe('unmapped types', () => {
     it('returns "unknown" for unrecognised type', () => {
-      expect(classify(makeNode('STICKY'))).toBe('unknown')
+      expect(classify(makeNode('STICKY')).value).toBe('unknown')
     })
 
     it('returns "unknown" for empty type string', () => {
-      expect(classify(makeNode(''))).toBe('unknown')
+      expect(classify(makeNode('')).value).toBe('unknown')
     })
   })
 
   describe('mask detection (isMask override)', () => {
     it('overrides base type when isMask is true', () => {
-      expect(classify(makeNode('RECTANGLE', { isMask: true }))).toBe('mask')
+      expect(classify(makeNode('RECTANGLE', { isMask: true })).value).toBe('mask')
     })
 
     it('overrides even unmapped types', () => {
-      expect(classify(makeNode('VECTOR', { isMask: true }))).toBe('mask')
+      expect(classify(makeNode('VECTOR', { isMask: true })).value).toBe('mask')
     })
 
     it('does not override when isMask is false', () => {
-      expect(classify(makeNode('RECTANGLE', { isMask: false }))).toBe('shape')
+      expect(classify(makeNode('RECTANGLE', { isMask: false })).value).toBe('shape')
     })
 
     it('does not override when isMask is absent', () => {
-      expect(classify(makeNode('RECTANGLE'))).toBe('shape')
+      expect(classify(makeNode('RECTANGLE')).value).toBe('shape')
     })
   })
 
@@ -76,14 +76,14 @@ describe('classify (VT-008)', () => {
       const node = makeNode('RECTANGLE', {
         fills: [{ type: 'IMAGE', visible: true }],
       })
-      expect(classify(node)).toBe('image')
+      expect(classify(node).value).toBe('image')
     })
 
     it('classifies frame with IMAGE fill as "image"', () => {
       const node = makeNode('FRAME', {
         fills: [{ type: 'IMAGE' }],
       })
-      expect(classify(node)).toBe('image')
+      expect(classify(node).value).toBe('image')
     })
 
     it('detects IMAGE among multiple fills', () => {
@@ -93,30 +93,30 @@ describe('classify (VT-008)', () => {
           { type: 'IMAGE', visible: true },
         ],
       })
-      expect(classify(node)).toBe('image')
+      expect(classify(node).value).toBe('image')
     })
 
     it('does not classify as image when no IMAGE fill', () => {
       const node = makeNode('RECTANGLE', {
         fills: [{ type: 'SOLID' }],
       })
-      expect(classify(node)).toBe('shape')
+      expect(classify(node).value).toBe('shape')
     })
 
     it('does not classify as image when fills is empty', () => {
       const node = makeNode('RECTANGLE', { fills: [] })
-      expect(classify(node)).toBe('shape')
+      expect(classify(node).value).toBe('shape')
     })
 
     it('does not classify as image when fills is absent', () => {
-      expect(classify(makeNode('RECTANGLE'))).toBe('shape')
+      expect(classify(makeNode('RECTANGLE')).value).toBe('shape')
     })
 
     it('presence-only: includes invisible IMAGE fills', () => {
       const node = makeNode('RECTANGLE', {
         fills: [{ type: 'IMAGE', visible: false }],
       })
-      expect(classify(node)).toBe('image')
+      expect(classify(node).value).toBe('image')
     })
   })
 
@@ -126,7 +126,20 @@ describe('classify (VT-008)', () => {
         isMask: true,
         fills: [{ type: 'IMAGE' }],
       })
-      expect(classify(node)).toBe('mask')
+      expect(classify(node).value).toBe('mask')
+    })
+  })
+
+  describe('AnalysisResult contract', () => {
+    it('returns high confidence for all classifications', () => {
+      const result = classify(makeNode('FRAME'))
+      expect(result.confidence).toBe('high')
+      expect(result.warnings).toEqual([])
+    })
+
+    it('returns high confidence even for unknown types', () => {
+      const result = classify(makeNode('STICKY'))
+      expect(result.confidence).toBe('high')
     })
   })
 })

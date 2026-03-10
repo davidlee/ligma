@@ -86,7 +86,12 @@ export function extractLayout(node: FigmaNode): ExtractorResult<NormalizedLayout
   const mode = resolveMode(node)
 
   const layout = buildLayout(node, mode, warnings, omittedFields)
-  return { value: layout, warnings, omittedFields }
+  return {
+    value: layout,
+    confidence: warnings.length > 0 ? 'medium' as const : 'high' as const,
+    warnings,
+    omittedFields,
+  }
 }
 
 function buildLayout(
