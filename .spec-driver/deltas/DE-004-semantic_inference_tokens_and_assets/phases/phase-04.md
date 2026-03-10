@@ -164,5 +164,5 @@ Build the tokens-used summary reducer (`aggregateTokensUsed`) and its schema (`T
 ## 11. Wrap-up Checklist
 - [x] Exit criteria satisfied — all 9 criteria met, 571 tests, mise run green
 - [x] Verification evidence stored — commit e84331b
-- [ ] Spec/Delta/Plan updated with lessons
-- [ ] Hand-off notes to next phase (if any)
+- [x] Spec/Delta/Plan updated with lessons (DE-004 closure)
+- [x] Hand-off notes — delta closing, ISSUE-001/ISSUE-002 filed for follow-up

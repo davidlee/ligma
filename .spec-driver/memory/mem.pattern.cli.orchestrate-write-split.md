@@ -12,8 +12,8 @@ tags:
 - cli
 - architecture
 - DEC-006
-summary: orchestrate() in src/orchestrate.ts returns data only; writeOutput() in src/output/write.ts
-  does I/O. CLI composes both. Library consumers skip writeOutput.
+summary: orchestrate() in src/orchestrate.ts returns data only (normalizedNode + tokensUsed);
+  writeOutput() in src/output/write.ts does I/O. CLI composes both. Library consumers skip writeOutput.
 ---
 
 # orchestrate/writeOutput separation

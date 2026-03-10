@@ -4,6 +4,7 @@
 .claude/settings.local.json
 .contracts
 /artifacts
+/temp
 
 node_modules/
 dist/

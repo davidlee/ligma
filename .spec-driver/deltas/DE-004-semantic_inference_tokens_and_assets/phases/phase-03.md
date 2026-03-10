@@ -215,5 +215,5 @@ Build the complete inference layer in `src/normalize/infer/` — five modules im
 ## 11. Wrap-up Checklist
 - [x] Exit criteria satisfied — all 12 criteria met, 548 tests, mise run green
 - [x] Verification evidence stored — commits 65d6872, 68b178a, 79645ca
-- [ ] Spec/Delta/Plan updated with lessons
-- [ ] Hand-off notes to next phase (if any)
+- [x] Spec/Delta/Plan updated with lessons (DE-004 closure)
+- [x] Hand-off notes to next phase — P04 completed, delta closing

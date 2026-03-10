@@ -112,8 +112,9 @@ capabilities:
     summary: >-
       The core value of the system. Transforms raw Figma JSON into compact,
       implementation-oriented normalized representation. Each heuristic is
-      an isolated pure function with tests. The heuristic catalogue defines
-      8 documented detection rules.
+      an isolated pure function with tests. Role inference uses a 13-rule
+      priority chain. Inference operates as a top-down post-pass over the
+      assembled tree via a dedicated infer/ subdirectory.
     success_criteria:
       - Output significantly smaller than input
       - Layout, text, component, variable info is implementation-ready
@@ -236,6 +237,86 @@ entries:
     requirement: SPEC-001.FR-016
     status: verified
     notes: Typed error hierarchy (6 classes) — 32 tests (DE-002)
+  - artefact: VT-008
+    kind: VT
+    requirement: SPEC-001.FR-005
+    status: verified
+    notes: Type classification — 32 tests (DE-003, updated DE-004)
+  - artefact: VT-009
+    kind: VT
+    requirement: SPEC-001.FR-008
+    status: verified
+    notes: Layout extraction — 36 tests (DE-003)
+  - artefact: VT-010
+    kind: VT
+    requirement: SPEC-001.FR-006
+    status: verified
+    notes: Appearance extraction — 30 tests (DE-003, updated DE-004)
+  - artefact: VT-011
+    kind: VT
+    requirement: SPEC-001.FR-009
+    status: verified
+    notes: Text extraction — 29 tests (DE-003, updated DE-004)
+  - artefact: VT-012
+    kind: VT
+    requirement: SPEC-001.FR-006
+    status: verified
+    notes: Node composition + confidence min-rule — 33 tests (DE-003, updated DE-004)
+  - artefact: VT-013
+    kind: VT
+    requirement: SPEC-001.NF-001
+    status: verified
+    notes: Representation efficiency (2.0x ceiling) — 1 test (DE-003, re-verified DE-004)
+  - artefact: VT-014
+    kind: VT
+    requirement: SPEC-001.FR-010
+    status: verified
+    notes: Component metadata extraction — 14 tests (DE-004)
+  - artefact: VT-015
+    kind: VT
+    requirement: SPEC-001.FR-008
+    status: verified
+    notes: Variable/token binding extraction — 27 tests (DE-004)
+  - artefact: VT-016
+    kind: VT
+    requirement: SPEC-001.FR-011
+    status: verified
+    notes: Asset classification — 14 tests (DE-004)
+  - artefact: VT-017
+    kind: VT
+    requirement: SPEC-001.FR-007
+    status: verified
+    notes: Role inference 13-rule priority chain — 39 tests (DE-004)
+  - artefact: VT-018
+    kind: VT
+    requirement: SPEC-001.FR-009
+    status: verified
+    notes: Text semantic kind inference — 16 tests (DE-004)
+  - artefact: VT-019
+    kind: VT
+    requirement: SPEC-001.FR-007
+    status: verified
+    notes: Semantic flag derivation — 20 tests (DE-004)
+  - artefact: VT-020
+    kind: VT
+    requirement: SPEC-001.FR-007
+    status: verified
+    notes: Inference composition and wiring — 11 tests (DE-004)
+  - artefact: VT-021
+    kind: VT
+    requirement: SPEC-001.NF-002
+    status: verified
+    notes: Pure function signal helpers — 53 tests (DE-004)
+  - artefact: VT-022
+    kind: VT
+    requirement: SPEC-001.FR-012
+    status: verified
+    notes: Tokens-used summary aggregation — 21 tests (DE-004)
+  - artefact: VT-023
+    kind: VT
+    requirement: SPEC-001.FR-006
+    status: verified
+    notes: Full pipeline integration with DE-004 fields — 2 tests (DE-004)
 ```
 
 ## 1. Intent & Summary
@@ -284,16 +365,26 @@ src/
   normalize/
     index.ts          → Normalization pipeline orchestration
     classify.ts       → Node type classification
-    node.ts           → Core node normalization
+    node.ts           → Core node normalization (extraction + assembly)
+    raw-helpers.ts    → AnalysisResult<T>, ExtractorResult<T>, colorToHex()
     layout.ts         → Layout property normalization
-    style.ts          → Appearance/paint normalization
+    appearance.ts     → Appearance/paint normalization (opacity here, not node-level)
     text.ts           → Text content and style normalization
     components.ts     → Component/instance metadata extraction
     variables.ts      → Per-node variable/token binding extraction
-    tokens-used.ts    → Used-token summary aggregation
     assets.ts         → Asset classification and export advice
-    outline.ts        → JSON + XML outline generation
-    heuristics.ts     → Role inference and semantic detection
+    infer/
+      index.ts        → applyInferences() composition + recursive post-pass
+      types.ts        → InferenceInput, InferenceResults, toInferenceInput()
+      signals.ts      → Shared signal helpers (name match, size, child inspection)
+      role.ts         → inferRole() 13-rule priority chain
+      text-kind.ts    → inferTextKind() role-derived + fallback
+      semantics.ts    → inferSemantics() flag derivation
+
+  summary/
+    tokens-used.ts    → Used-token summary aggregation
+
+  orchestrate.ts      → Pipeline orchestration (normalize → summary → output)
 
   output/
     manifest.ts       → Manifest generation
@@ -325,7 +416,7 @@ src/
 | FR-004 | Image export | FR-004 | `figma/fetch-image.ts` |
 | FR-005 | Normalized model | FR-006 | `normalize/node.ts`, `layout.ts`, `style.ts`, `text.ts` |
 | FR-006 | Type classification | FR-005 | `normalize/classify.ts` |
-| FR-007 | Role inference | FR-007 | `normalize/heuristics.ts` |
+| FR-007 | Role inference | FR-007 | `normalize/infer/` |
 | FR-008 | Layout normalization | FR-006 | `normalize/layout.ts` |
 | FR-009 | Text normalization | FR-006 | `normalize/text.ts` |
 | FR-010 | Per-node variable bindings | FR-008 | `normalize/variables.ts` |
@@ -334,7 +425,7 @@ src/
 | FR-013 | Artifact directory + manifest | FR-015 | `output/manifest.ts`, `write.ts` |
 | FR-014 | Caching | FR-009 | `util/cache.ts` |
 | FR-015 | Selective expansion | FR-017 | cross-cutting |
-| FR-016 | Used-token summary | FR-012 | `normalize/tokens-used.ts` |
+| FR-016 | Used-token summary | FR-012 | `summary/tokens-used.ts` |
 | FR-017 | Typed error hierarchy | FR-016 | `errors.ts` |
 | NF-001 | Representation efficiency (RE-002) | NF-001 | — |
 | NF-002 | Deterministic output | NF-003 | — |
@@ -357,7 +448,7 @@ src/
 
 - **FR-006**: `normalize/node.ts`, `layout.ts`, `style.ts`, `text.ts` MUST transform raw Figma JSON into `NormalizedNode` trees. Layout MUST normalize to mode/sizing/alignment/padding/gap/wrap/constraints/position/clip. Appearance MUST normalize fills, strokes, effects, corner radius. Opacity MUST be represented only in `NormalizedAppearance`, not duplicated at the node level. Text MUST normalize content, style, color, token refs, semantic kind, truncation.
 
-- **FR-007**: `normalize/heuristics.ts` MUST infer `NormalizedRole` from node properties. Inference MUST be conservative — `unknown` over overconfident guesses. Each heuristic MUST be an isolated pure function. The following heuristic rules MUST be implemented:
+- **FR-007**: `normalize/infer/` MUST infer `NormalizedRole` from node properties via a 13-rule priority chain with noise early-out. Inference MUST be conservative — `null` role over overconfident guesses. Each heuristic MUST be an isolated pure function. The following heuristic rules MUST be implemented:
 
   1. **Container detection**: A node is likely a container if it is a frame/group/component/instance with children, has nontrivial bounds, and has layout or padding properties present.
 
@@ -383,7 +474,7 @@ src/
 
 - **FR-011**: `normalize/assets.ts` MUST classify nodes as likely assets based on: image fills, vector complexity, naming patterns, boolean operations. MUST produce export suggestions with reason strings.
 
-- **FR-012**: `normalize/tokens-used.ts` MUST aggregate variable and style references encountered during normalization of the selected subtree into a `tokens-used.json` artifact. The artifact MUST include: scope metadata (`fileKey`, `rootNodeId`, `isFullInventory: false`), deduplicated variable references (token ID, name (nullable), collection ID, resolved type, encountered-on locations), style references (type, ID, name, encountered-on locations), and a count summary by category. Fields unresolvable without the Variables API MUST accept null.
+- **FR-012**: `summary/tokens-used.ts` MUST aggregate variable and style references encountered during normalization of the selected subtree into a `tokens-used.json` artifact. The artifact MUST include: scope metadata (`fileKey`, `rootNodeId`, `isFullInventory: false`), deduplicated variable references (token ID, name (nullable), collection ID, resolved type, encountered-on locations), style references (type, ID, name, encountered-on locations), and a count summary by category. Fields unresolvable without the Variables API MUST accept null.
 
 - **FR-013**: `normalize/outline.ts` MUST generate JSON and XML outlines from normalized trees. XML MUST use the following element vocabulary mapping `NormalizedNodeType` to element names:
 
@@ -450,17 +541,21 @@ CLI (cli.ts)
   ├─ Error hierarchy (errors.ts)    ← FR-016: shared across all modules
   │
   ├─ Normalizer (normalize/index.ts)
-  │    ├─ classify.ts    ─→ type classification
-  │    ├─ node.ts        ─→ core normalization
-  │    ├─ layout.ts      ─→ layout extraction
-  │    ├─ style.ts       ─→ appearance extraction (opacity here, not node-level)
-  │    ├─ text.ts        ─→ text extraction
-  │    ├─ heuristics.ts  ─→ role inference (8 documented rules)
-  │    ├─ components.ts  ─→ component metadata
-  │    ├─ variables.ts   ─→ per-node token bindings
-  │    ├─ tokens-used.ts ─→ used-token summary aggregation
-  │    ├─ assets.ts      ─→ asset classification
-  │    └─ outline.ts     ─→ JSON + XML outlines (defined element vocabulary)
+  │    ├─ classify.ts      ─→ type classification
+  │    ├─ node.ts          ─→ core normalization (extraction + assembly)
+  │    ├─ raw-helpers.ts   ─→ AnalysisResult<T>, colorToHex()
+  │    ├─ layout.ts        ─→ layout extraction
+  │    ├─ appearance.ts    ─→ appearance extraction (opacity here, not node-level)
+  │    ├─ text.ts          ─→ text extraction
+  │    ├─ components.ts    ─→ component metadata
+  │    ├─ variables.ts     ─→ per-node token bindings
+  │    ├─ assets.ts        ─→ asset classification
+  │    ├─ infer/           ─→ role inference (13 rules), text-kind, semantic flags
+  │    └─ outline.ts       ─→ JSON + XML outlines (defined element vocabulary)
+  │
+  ├─ Summary (summary/tokens-used.ts) ─→ token aggregation
+  │
+  ├─ Orchestrate (orchestrate.ts)  ─→ normalize → summary → output
   │
   └─ Output (output/)
        ├─ manifest.ts    ─→ manifest.json
@@ -473,8 +568,8 @@ CLI (cli.ts)
 1. `cli.ts` parses args, calls `figma/url.ts` to parse URL
 2. `figma/auth.ts` builds auth headers
 3. `util/cache.ts` wraps `figma/client.ts` — fetches node JSON + image in parallel
-4. `normalize/index.ts` orchestrates the normalization pipeline
-5. `normalize/tokens-used.ts` aggregates encountered token references
+4. `normalize/index.ts` orchestrates extraction → assembly → inference post-pass
+5. `summary/tokens-used.ts` aggregates encountered token references
 6. `normalize/outline.ts` generates outlines from normalized tree
 7. `output/` writes everything to disk with manifest
 
