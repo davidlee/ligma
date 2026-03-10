@@ -4,10 +4,12 @@ import { ensureDirectory, writeBinaryFile, writeJsonFile } from '../util/fs.js'
 
 import type { FetchImageResult } from '../figma/fetch-image.js'
 import type { Manifest } from '../schemas/manifest.js'
+import type { TokensUsedSummary } from '../schemas/tokens-used.js'
 
 export interface OutputArtifacts {
   readonly manifest: Manifest
   readonly rawNode: unknown
+  readonly tokensUsed?: TokensUsedSummary | undefined
   readonly image?: FetchImageResult | undefined
 }
 
@@ -20,6 +22,10 @@ export async function writeOutput(
   await createDirectoryStructure(outputDirectory)
   await writeManifest(outputDirectory, artifacts.manifest)
   await writeRawNode(outputDirectory, artifacts.rawNode)
+
+  if (artifacts.tokensUsed !== undefined) {
+    await writeTokensUsed(outputDirectory, artifacts.tokensUsed)
+  }
 
   if (artifacts.image !== undefined) {
     await writeImage(outputDirectory, artifacts)
@@ -44,6 +50,13 @@ async function writeRawNode(
   rawNode: unknown,
 ): Promise<void> {
   await writeJsonFile(join(outputDirectory, 'structure', 'raw-node.json'), rawNode)
+}
+
+async function writeTokensUsed(
+  outputDirectory: string,
+  tokensUsed: TokensUsedSummary,
+): Promise<void> {
+  await writeJsonFile(join(outputDirectory, 'tokens', 'tokens-used.json'), tokensUsed)
 }
 
 async function writeImage(

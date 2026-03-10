@@ -10,6 +10,7 @@ export interface ManifestInput {
   }
   readonly outputs: {
     readonly rawNodeJson: string
+    readonly tokensUsedJson?: string | undefined
     readonly png?: string | undefined
     readonly svg?: string | undefined
     readonly assets: readonly string[]
@@ -51,6 +52,9 @@ function buildOutputs(outputs: ManifestInput['outputs']): Manifest['outputs'] {
   const result: Manifest['outputs'] = {
     rawNodeJson: outputs.rawNodeJson,
     assets: [...outputs.assets],
+  }
+  if (outputs.tokensUsedJson !== undefined) {
+    result.tokensUsedJson = outputs.tokensUsedJson
   }
   if (outputs.png !== undefined) {
     result.png = outputs.png

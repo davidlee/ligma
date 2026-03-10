@@ -9,6 +9,7 @@ import { FigmaAuthError, FigmaUrlParseError } from '../src/errors.js'
 import { orchestrate } from '../src/orchestrate.js'
 import { writeOutput } from '../src/output/write.js'
 import { ManifestSchema } from '../src/schemas/manifest.js'
+import { TokensUsedSummarySchema } from '../src/schemas/tokens-used.js'
 
 import type { FetchConfig } from '../src/config.js'
 
@@ -154,11 +155,30 @@ describe('orchestrate', () => {
     expect(result.manifest.source.fileKey).toBe('abc123')
   })
 
+  it('returns tokensUsed summary', async () => {
+    mockFetchSuccess()
+    const result = await orchestrate(validConfig)
+
+    expect(result.tokensUsed).toBeDefined()
+    const parsed = TokensUsedSummarySchema.safeParse(result.tokensUsed)
+    expect(parsed.success).toBe(true)
+  })
+
+  it('tokensUsed scope matches parsed URL', async () => {
+    mockFetchSuccess()
+    const result = await orchestrate(validConfig)
+
+    expect(result.tokensUsed.scope.fileKey).toBe('abc123')
+    expect(result.tokensUsed.scope.rootNodeId).toBe('0:1')
+    expect(result.tokensUsed.scope.isFullInventory).toBe(false)
+  })
+
   it('sets correct output paths in manifest', async () => {
     mockFetchSuccess()
     const result = await orchestrate(validConfig)
 
     expect(result.manifest.outputs.rawNodeJson).toBe('structure/raw-node.json')
+    expect(result.manifest.outputs.tokensUsedJson).toBe('tokens/tokens-used.json')
     expect(result.manifest.outputs.png).toBe('visual/0:1.png')
   })
 
@@ -216,6 +236,14 @@ describe('orchestrate + writeOutput integration', () => {
     // image file exists
     const imageStat = await stat(join(outputDirectory, 'visual', '0:1.png'))
     expect(imageStat.isFile()).toBe(true)
+
+    // tokens-used.json exists and validates
+    const tokensContent = await readFile(
+      join(outputDirectory, 'tokens', 'tokens-used.json'),
+      'utf-8',
+    )
+    const tokensData: unknown = JSON.parse(tokensContent)
+    expect(TokensUsedSummarySchema.safeParse(tokensData).success).toBe(true)
 
     // all subdirs exist
     for (const subdir of ['visual', 'structure', 'tokens', 'assets', 'logs']) {

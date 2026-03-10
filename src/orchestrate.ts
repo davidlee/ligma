@@ -6,16 +6,19 @@ import { fetchNode } from './figma/fetch-node.js'
 import { parseFigmaUrl } from './figma/url.js'
 import { normalize } from './normalize/index.js'
 import { buildManifest } from './output/manifest.js'
+import { aggregateTokensUsed } from './summary/tokens-used.js'
 
 import type { FetchConfig } from './config.js'
 import type { FetchImageResult } from './figma/fetch-image.js'
 import type { Manifest, ManifestError } from './schemas/manifest.js'
 import type { NormalizedNode } from './schemas/normalized.js'
+import type { TokensUsedSummary } from './schemas/tokens-used.js'
 
 export interface OrchestrateResult {
   readonly manifest: Manifest
   readonly rawNode: unknown
   readonly normalizedNode: NormalizedNode
+  readonly tokensUsed: TokensUsedSummary
   readonly image?: FetchImageResult | undefined
 }
 
@@ -72,6 +75,7 @@ export async function orchestrate(
     },
     outputs: {
       rawNodeJson: 'structure/raw-node.json',
+      tokensUsedJson: 'tokens/tokens-used.json',
       ...(config.format === 'png'
         ? { png: imageOutputPath }
         : { svg: imageOutputPath }),
@@ -81,7 +85,8 @@ export async function orchestrate(
   })
 
   const normalizedNode = normalize(fileResponse.document)
-  return { manifest, rawNode: fileResponse.document, normalizedNode, image }
+  const tokensUsed = aggregateTokensUsed(normalizedNode, parsed.fileKey, parsed.nodeId)
+  return { manifest, rawNode: fileResponse.document, normalizedNode, tokensUsed, image }
 }
 
 function buildImageError(
