@@ -16,4 +16,4 @@ run = "npx vitest run"
 
 [tasks.typecheck]
 description = "typecheck"
-run = "npx tsc --noEmit"
+run = "tsc --noEmit"

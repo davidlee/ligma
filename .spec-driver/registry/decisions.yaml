@@ -2,8 +2,23 @@ decisions:
   ADR-001:
     id: ADR-001
     title: 'ADR-001: Zero tolerance for lint warnings'
-    status: draft
+    status: accepted
     path: .spec-driver/decisions/ADR-001-zero_tolerance_for_lint_warnings.md
+    summary: "All code must pass eslint with zero warnings. No warning-level rules\
+      \ \u2014 every rule is error or off."
+    created: '2026-03-10'
+    updated: '2026-03-10'
+    reviewed: '2026-03-10'
+    specs:
+    - SPEC-001
+    tags:
+    - lint
+    - quality
+  ADR-002:
+    id: ADR-002
+    title: 'ADR-002: Use mise as task runner'
+    status: draft
+    path: .spec-driver/decisions/ADR-002-use_mise_as_task_runner.md
     summary: ''
     created: '2026-03-10'
     updated: '2026-03-10'
