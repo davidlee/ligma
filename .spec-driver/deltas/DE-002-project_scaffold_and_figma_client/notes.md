@@ -45,6 +45,23 @@
 - Default thresholds for expansion triggers (deferred to DE-006)
 - OAuth support timeline (deferred indefinitely)
 
+## Session 2: DR-002 adversarial review patch (2026-03-10)
+
+### What's done
+- All 7 adversarial review findings patched into DR-002:
+  1. Client return types added: `FigmaFileResponse`, `FetchImageResult`
+  2. Image export two-step flow documented (render request → presigned URL → download)
+  3. Concurrency model defined: `concurrency` option on `FigmaClientOptions`, p-limit wraps all outbound calls
+  4. Client design stance section added: stateless, injectable, reusable by DE-003/DE-006
+  5. Manifest errors made structured: `ManifestError[]` with type/message/nodeId
+  6. `fetch-assets.ts` explicitly deferred to DE-004 in Out of Scope
+  7. Schema file roles clarified: `types-raw.ts` = TS types, `schemas/raw.ts` = Zod schemas
+- DR-002 status → accepted
+- NormalizationError annotated as hierarchy placeholder for DE-003+
+
+### Next step
+- `/execute-phase` for IP-002.PHASE-01 (scaffold + errors + URL parser)
+
 ## New Agent Instructions
 
 ### Task card
