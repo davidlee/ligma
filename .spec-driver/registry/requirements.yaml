@@ -689,6 +689,9 @@ requirements:
     - artefact: VT-010
       status: verified
       kind: VT
+    - artefact: VT-010
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-007:
     label: FR-007
@@ -973,9 +976,12 @@ requirements:
     - DE-008
     verified_by: []
     coverage_evidence:
-    - VT-020
+    - VT-024
     coverage_entries:
-    - artefact: VT-020
+    - artefact: VT-024
+      status: verified
+      kind: VT
+    - artefact: VT-024
       status: verified
       kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md

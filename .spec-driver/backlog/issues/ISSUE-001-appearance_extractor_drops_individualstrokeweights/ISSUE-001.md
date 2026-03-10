@@ -3,7 +3,7 @@ id: ISSUE-001
 name: Appearance extractor drops individualStrokeWeights
 created: '2026-03-11'
 updated: '2026-03-11'
-status: open
+status: resolved
 kind: issue
 categories: []
 severity: p2

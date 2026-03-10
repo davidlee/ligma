@@ -254,7 +254,7 @@ entries:
     kind: VT
     requirement: SPEC-001.FR-006
     status: verified
-    notes: Appearance extraction — 30 tests (DE-003, updated DE-004)
+    notes: Appearance extraction — 36 tests (DE-003, updated DE-004, DE-008 per-side stroke weights)
   - artefact: VT-011
     kind: VT
     requirement: SPEC-001.FR-009
@@ -320,6 +320,11 @@ entries:
     requirement: SPEC-001.FR-006
     status: verified
     notes: Full pipeline integration with DE-004 fields — 2 tests (DE-004)
+  - artefact: VT-024
+    kind: VT
+    requirement: SPEC-001.FR-018
+    status: verified
+    notes: Interaction extraction — 30 tests (DE-008)
 ```
 
 ## 1. Intent & Summary

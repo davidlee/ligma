@@ -840,3 +840,84 @@ deltas:
       phases:
       - id: IP-007-P01
         phase: IP-007-P01
+  DE-008:
+    kind: delta
+    status: completed
+    name: 'Delta - Backlog fixes: individualStrokeWeights and interaction extraction'
+    slug: backlog_fixes_individualstrokeweights_and_interaction_extraction
+    updated: '2026-03-11'
+    path: .spec-driver/deltas/DE-008-backlog_fixes_individualstrokeweights_and_interaction_extraction/DE-008.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - SPEC-001.FR-006
+      - SPEC-001.FR-018
+    relations:
+    - type: resolves
+      target: ISSUE-001
+      attributes: {}
+    - type: resolves
+      target: ISSUE-002
+      attributes: {}
+    plan:
+      id: IP-008
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-008
+        delta: DE-008
+        revision_links:
+          aligns_with:
+          - DR-008
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - SPEC-001.FR-006
+          dependencies: []
+        phases:
+        - id: IP-008.PHASE-01
+      phases:
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-008.PHASE-01
+        plan: IP-008
+        delta: DE-008
+        objective: Implement per-side stroke weight support and interaction extraction.
+          Schema extensions, extractor code, tests, lint, contract sync.
+        entrance_criteria:
+        - DR-008 approved
+        - IP-008 active
+        exit_criteria:
+        - mise run passes (typecheck + test + lint)
+        - VT-010 extended for per-side stroke weight
+        - VT-020 interaction extraction test suite passes
+        - Contracts synced
+        verification:
+          tests:
+          - "VT-010 (stroke weight \u2014 extended)"
+          - "VT-020 (interaction extraction \u2014 new)"
+          evidence: []
+        tasks:
+        - id: '1.1'
+          name: StrokeWeight schema
+        - id: '1.2'
+          name: resolveStrokeWeight + collectStrokes update
+        - id: '1.3'
+          name: Stroke weight tests
+        - id: '2.1'
+          name: Interaction schemas
+        - id: '2.2'
+          name: extractInteractions extractor
+        - id: '2.3'
+          name: Wire into node.ts
+        - id: '2.4'
+          name: Interaction tests
+        - id: '3.1'
+          name: Lint + typecheck + contract sync
+        risks:
+        - description: Raw action field names differ from docs
+          mitigation: Verify against REST fixtures

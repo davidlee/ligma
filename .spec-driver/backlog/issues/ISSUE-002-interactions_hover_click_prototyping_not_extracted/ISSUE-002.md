@@ -3,7 +3,7 @@ id: ISSUE-002
 name: Interactions (hover/click prototyping) not extracted
 created: '2026-03-11'
 updated: '2026-03-11'
-status: open
+status: resolved
 kind: issue
 categories: []
 severity: p3
