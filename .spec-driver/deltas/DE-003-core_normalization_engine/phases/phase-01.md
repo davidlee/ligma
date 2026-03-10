@@ -4,7 +4,7 @@ slug: 003-core_normalization_engine-phase-01
 name: Schemas + classify + bounds
 created: '2026-03-10'
 updated: '2026-03-10'
-status: draft
+status: complete
 kind: phase
 ---
 
@@ -67,14 +67,14 @@ Define the complete `NormalizedNode` type surface as Zod schemas (including DE-0
 - [x] DE-002 scaffold in place (FigmaNode type via Zod passthrough, error hierarchy including NormalizationError)
 
 ## 4. Exit Criteria / Done When
-- [ ] `src/schemas/normalized.ts` — all types from DR-003 §4 as Zod schemas with `z.infer` exports
-- [ ] `src/normalize/raw-helpers.ts` — `getRawProperty<T>()` and `ExtractorResult<T>` type
-- [ ] `src/normalize/classify.ts` — `classify(node): NormalizedNodeType` with all mapping rules
-- [ ] `src/normalize/bounds.ts` — `extractBounds(node): ExtractorResult<Bounds | null>`
-- [ ] VT-008 passing: every Figma type mapped, image detection via fills, mask detection via isMask, unmapped → "unknown"
-- [ ] Bounds extractor tested: present/absent absoluteBoundingBox, null for missing
-- [ ] getRawProperty tested: undefined → default, present → value
-- [ ] Zero lint warnings, `tsc --noEmit` clean
+- [x] `src/schemas/normalized.ts` — all types from DR-003 §4 as Zod schemas with `z.infer` exports
+- [x] `src/normalize/raw-helpers.ts` — `getRawProperty()`, typed accessors, `ExtractorResult<T>` type
+- [x] `src/normalize/classify.ts` — `classify(node): NormalizedNodeType` with all mapping rules
+- [x] `src/normalize/bounds.ts` — `extractBounds(node): ExtractorResult<Bounds | null>`
+- [x] VT-008 passing: every Figma type mapped, image detection via fills, mask detection via isMask, unmapped → "unknown" (30 tests)
+- [x] Bounds extractor tested: present/absent absoluteBoundingBox, null for missing, malformed warning (7 tests)
+- [x] getRawProperty tested: undefined → default, present → value, null preserved (22 tests)
+- [x] Zero lint warnings, `tsc --noEmit` clean
 
 ## 5. Verification
 - `npx vitest run` — all new tests pass
@@ -95,10 +95,10 @@ Define the complete `NormalizedNode` type surface as Zod schemas (including DE-0
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 1.1 | Normalized Zod schemas | No | Must be first — all other tasks import these types |
-| [ ] | 1.2 | Raw helpers (getRawProperty) | Yes | Independent of schemas beyond ExtractorResult |
-| [ ] | 1.3 | Type classifier (classify) | Yes | Depends on NormalizedNodeType from 1.1 |
-| [ ] | 1.4 | Bounds extractor | Yes | Depends on Bounds + ExtractorResult from 1.1/1.2 |
+| [x] | 1.1 | Normalized Zod schemas | No | 30+ types, recursive NormalizedNode via z.lazy() |
+| [x] | 1.2 | Raw helpers (getRawProperty) | Yes | Typed accessors (no `as` casts), ok() helper |
+| [x] | 1.3 | Type classifier (classify) | Yes | 30 tests, VT-008 passing |
+| [x] | 1.4 | Bounds extractor | Yes | 7 tests, malformed input warning |
 
 ### Task Details
 
@@ -129,13 +129,17 @@ Define the complete `NormalizedNode` type surface as Zod schemas (including DE-0
 | Zod discriminated union for CornerRadius | Use `z.discriminatedUnion("uniform", [...])` — both branches have `uniform` as literal discriminator | Open |
 
 ## 9. Decisions & Outcomes
-- (to be filled during execution)
+- `2026-03-10` — `getRawProperty` returns `unknown` (not generic `T`) because eslint `consistent-type-assertions: { assertionStyle: 'never' }` forbids `as` casts. Added typed accessors (`getRawString`, `getRawNumber`, `getRawBoolean`, `getRawArray`, `getRawRecord`) that do runtime type narrowing instead. Matches DEC-017 spirit (single location for passthrough access) while being more type-safe than the DR pseudocode.
+- `2026-03-10` — `NormalizedNode` defined as an explicit `interface` (not `z.infer`) to work with `z.lazy()` recursive reference. Schema typed as `z.ZodType<NormalizedNode>`. Same pattern as `FigmaNodeSchema`.
+- `2026-03-10` — `ExtractorResult<T>` placed in `raw-helpers.ts` (not `schemas/normalized.ts`) since it's an internal extractor interface, not a normalized output type.
 
 ## 10. Findings / Research Notes
-- (to be filled during execution)
+- eslint `consistent-type-assertions: { assertionStyle: 'never' }` is a hard constraint for the entire normalize module. No `as` casts anywhere. All passthrough field access must use runtime type checks.
+- `FigmaNode` index signature `[key: string]: unknown` means direct indexing works without casts — `node[key]` returns `unknown`.
+- Zod `z.discriminatedUnion('uniform', [...])` works cleanly for CornerRadius.
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
+- [x] Exit criteria satisfied
+- [x] Verification evidence stored (59 new tests, 223 total, mise run green)
 - [ ] Spec/Delta/Plan updated with lessons
-- [ ] Hand-off notes to next phase (if any)
+- [x] Hand-off notes: Phase 2 can proceed — all types, helpers, and the extractor pattern are proven. Key constraint: no `as` casts; use `getRawString`/`getRawNumber`/`getRawBoolean`/`getRawArray`/`getRawRecord` from raw-helpers.
