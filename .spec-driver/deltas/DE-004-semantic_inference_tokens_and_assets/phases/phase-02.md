@@ -128,14 +128,14 @@ Implement the three new Layer 1 extractors specified in DR-004 §5.3–5.5: `ext
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 2.1 | Implement `extractComponent(raw)` | [P] | DEC-023. New file `src/normalize/components.ts` |
-| [ ] | 2.2 | Write VT-014 tests for component extraction | [P] | TDD — write alongside/before 2.1 |
-| [ ] | 2.3 | Implement `extractVariables(raw)` | [P] | DEC-024. New file `src/normalize/variables.ts` |
-| [ ] | 2.4 | Write VT-015 tests for variable extraction | [P] | TDD — write alongside/before 2.3 |
-| [ ] | 2.5 | Implement `extractAsset(raw)` | [P] | DEC-025. New file `src/normalize/assets.ts` |
-| [ ] | 2.6 | Write VT-016 tests for asset extraction | [P] | TDD — write alongside/before 2.5 |
-| [ ] | 2.7 | Wire new extractors into `node.ts` | | Depends on 2.1, 2.3, 2.5 |
-| [ ] | 2.8 | Update `node.test.ts` for wiring + run full suite | | Depends on 2.7 |
+| [x] | 2.1 | Implement `extractComponent(raw)` | [P] | DEC-023. `src/normalize/components.ts` |
+| [x] | 2.2 | Write VT-014 tests for component extraction | [P] | 14 tests passing |
+| [x] | 2.3 | Implement `extractVariables(raw)` | [P] | DEC-024. `src/normalize/variables.ts` |
+| [x] | 2.4 | Write VT-015 tests for variable extraction | [P] | 27 tests passing |
+| [x] | 2.5 | Implement `extractAsset(raw)` | [P] | DEC-025. `src/normalize/assets.ts` |
+| [x] | 2.6 | Write VT-016 tests for asset extraction | [P] | 14 tests passing |
+| [x] | 2.7 | Wire new extractors into `node.ts` | | `runCoreExtractors` + `runExtractors` split |
+| [x] | 2.8 | Update `node.test.ts` for wiring + run full suite | | 405 total tests, NF-001 1.35x |
 
 ### Task Details
 
@@ -195,7 +195,7 @@ Implement the three new Layer 1 extractors specified in DR-004 §5.3–5.5: `ext
 - Schema `NormalizedVariableBindingsSchema` has per-binding `modeId: z.string().nullable()` — populate as null per DEC-024
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
+- [x] Exit criteria satisfied — all 8 tasks complete, 405 tests passing, mise run green
+- [x] Verification evidence stored — commit f8360e1
 - [ ] Spec/Delta/Plan updated with lessons
 - [ ] Hand-off notes to next phase (if any)

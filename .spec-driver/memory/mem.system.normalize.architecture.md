@@ -60,12 +60,15 @@ Extractors (all in `src/normalize/`):
 - `layout.ts` — `NormalizedLayout` (mode/sizing/align/padding/gap/wrap/grid/constraints/position/clip)
 - `appearance.ts` — `NormalizedAppearance` (fills/strokes/effects/cornerRadius/blendMode/opacity)
 - `text.ts` — `NormalizedText` (content/style/color/tokenRefs/semanticKind/truncation)
+- `components.ts` — `NormalizedComponentInfo | null` (DEC-023). INSTANCE/COMPONENT/COMPONENT_SET → metadata; others → null. Flattens `componentProperties` to `Record<name, value>`.
+- `variables.ts` — `NormalizedVariableBindings | null` (DEC-024). Node-level `boundVariables` → bindings; `explicitVariableModes` → `explicitModes`. Per-binding `modeId` always null; `tokenName`/`collectionId` null in v1.
+- `assets.ts` — `NormalizedAssetInfo | null` (DEC-025). Image fills → bitmap/high; vector complexity → svg/medium; name-only never triggers.
 
 ## Key invariants
 
 - **DEC-018**: `node.ts` gates extractors via `SKIP_EXTRACTORS` set for document/page. Extractors themselves are NOT type-aware — they always return populated defaults when called.
 - **No `as` casts** — [[mem.fact.lint.strict-config]]. All raw field access via typed accessors in `raw-helpers.ts`.
-- **DE-004 placeholders**: `component`, `variables`, `asset` are `null`; `role` is `null`; `semantics` are all `false`. Being populated by DE-004.
+- **DE-004 fields**: `component`, `variables`, `asset` populated by extractors (P02). `role` is `null`; `semantics` are all `false` — pending P03 inference layer.
 - **Confidence**: min-rule across all extraction (and future inference) results. high > medium > low.
 - **hierarchy.path**: ancestor chain (current node excluded). Grows with depth.
 
