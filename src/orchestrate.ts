@@ -4,15 +4,18 @@ import { createClient } from './figma/client.js'
 import { fetchImage } from './figma/fetch-image.js'
 import { fetchNode } from './figma/fetch-node.js'
 import { parseFigmaUrl } from './figma/url.js'
+import { normalize } from './normalize/index.js'
 import { buildManifest } from './output/manifest.js'
 
 import type { FetchConfig } from './config.js'
 import type { FetchImageResult } from './figma/fetch-image.js'
 import type { Manifest, ManifestError } from './schemas/manifest.js'
+import type { NormalizedNode } from './schemas/normalized.js'
 
 export interface OrchestrateResult {
   readonly manifest: Manifest
   readonly rawNode: unknown
+  readonly normalizedNode: NormalizedNode
   readonly image?: FetchImageResult | undefined
 }
 
@@ -77,7 +80,8 @@ export async function orchestrate(
     errors,
   })
 
-  return { manifest, rawNode: fileResponse.document, image }
+  const normalizedNode = normalize(fileResponse.document)
+  return { manifest, rawNode: fileResponse.document, normalizedNode, image }
 }
 
 function buildImageError(
