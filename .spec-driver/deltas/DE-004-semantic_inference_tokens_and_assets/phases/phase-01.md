@@ -105,13 +105,13 @@ Introduce the unified `AnalysisResult<T>` / `ExtractorResult<T>` type hierarchy 
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 1.1 | Add `AnalysisResult<T>` type, refactor `ExtractorResult<T>` | | DEC-021. In `raw-helpers.ts` |
-| [ ] | 1.2 | Move `colorToHex()` to `raw-helpers.ts` | | Export from raw-helpers, update imports in appearance.ts + text.ts |
-| [ ] | 1.3 | Add explicit confidence to all DE-003 extractors | | bounds, layout, appearance, text. `warnings.length > 0 ? 'medium' : 'high'` |
-| [ ] | 1.4 | Refactor `classify()` to return `AnalysisResult<NormalizedNodeType>` | | Not `ExtractorResult` — no omittedFields |
-| [ ] | 1.5 | Update `node.ts` confidence to min-rule | | Remove current derivation; take min across all results |
-| [ ] | 1.6 | Rename `variantProperties` → `propertyValues` in schema | | `src/schemas/normalized.ts` |
-| [ ] | 1.7 | Update all existing tests | | VT-008, VT-010, VT-011, VT-012. Assertions for confidence field, imports for colorToHex |
+| [x] | 1.1 | Add `AnalysisResult<T>` type, refactor `ExtractorResult<T>` | | DEC-021. In `raw-helpers.ts` |
+| [x] | 1.2 | Move `colorToHex()` to `raw-helpers.ts` | | Export from raw-helpers, update imports in appearance.ts + text.ts |
+| [x] | 1.3 | Add explicit confidence to all DE-003 extractors | | bounds, layout, appearance, text. `warnings.length > 0 ? 'medium' : 'high'` |
+| [x] | 1.4 | Refactor `classify()` to return `AnalysisResult<NormalizedNodeType>` | | Not `ExtractorResult` — no omittedFields |
+| [x] | 1.5 | Update `node.ts` confidence to min-rule | | Remove current derivation; take min across all results |
+| [x] | 1.6 | Rename `variantProperties` → `propertyValues` in schema | | `src/schemas/normalized.ts` |
+| [x] | 1.7 | Update all existing tests | | VT-008 (+2 new), raw-helpers ok() test updated. 349 tests passing. |
 
 ### Task Details
 
@@ -166,7 +166,7 @@ Introduce the unified `AnalysisResult<T>` / `ExtractorResult<T>` type hierarchy 
 - Existing `ok<T>()` helper in `raw-helpers.ts` will need `confidence: 'high'` added
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
+- [x] Exit criteria satisfied — all 7 tasks complete, 349 tests passing, mise run green
+- [x] Verification evidence stored — commit f6f53a0
 - [ ] Spec/Delta/Plan updated with lessons
 - [ ] Hand-off notes to next phase (if any)
