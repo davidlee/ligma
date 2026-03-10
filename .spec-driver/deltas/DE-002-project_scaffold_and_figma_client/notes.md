@@ -62,6 +62,32 @@
 ### Next step
 - `/execute-phase` for IP-002.PHASE-01 (scaffold + errors + URL parser)
 
+## Session 2 (cont.): IP-002.PHASE-01 implementation (2026-03-10)
+
+### What's done
+- Project scaffold: pnpm, ESM, strict TS, vitest, eslint with typescript-eslint
+- Error hierarchy (`src/errors.ts`): 6 typed subclasses with `FigmaErrorOptions` (context + cause). `FigmaRateLimitError` adds `retryAfter`. 32 tests.
+- URL parser (`src/figma/url.ts`): parses `/design/` and `/file/` URLs, node ID dash→colon normalization, throws `FigmaUrlParseError` with context. 13 tests.
+- VT-001 and VT-005 verified. All 45 tests pass, lint clean, typecheck clean.
+- DE-002 → in-progress, PHASE-01 → complete, IP-002 progress tracking updated.
+
+### Adaptations
+- **pnpm** chosen over bun (flake.nix had bun; user chose pnpm as middle ground)
+- **Split tsconfig**: `tsconfig.json` is the base (includes src+tests, noEmit — used by eslint projectService and IDE). `tsconfig.build.json` extends it for compilation (src only, emits to dist). This resolved the eslint/typescript-eslint problem of test files not being in a project.
+
+### Commits
+- `4a5f3f9` fix(DE-002): patch DR-002 with 7 adversarial review findings
+- `22a94b1` feat(DE-002): create IP-002.PHASE-01 phase sheet
+- `ba7b759` feat(DE-002): implement IP-002.PHASE-01 — scaffold, errors, URL parser
+
+### Spec-driver state
+- All `.spec-driver` changes committed together with code per doctrine
+- DE-002 status: in-progress
+- IP-002: PHASE-01 complete, VT-001/VT-005 verified
+
+### Next step
+- `/execute-phase` for IP-002.PHASE-02 (auth, HTTP client, node fetch, image export)
+
 ## New Agent Instructions
 
 ### Task card
@@ -81,15 +107,19 @@ DE-002 — Project scaffold and Figma client
 - `docs/patch-01.md` — token inventory decision (option 3: used-token summary)
 
 ### Key files
-- No code exists yet. This is greenfield.
-- `flake.nix` exists (Nix dev environment)
+- `src/errors.ts` — error hierarchy (6 classes)
+- `src/figma/url.ts` — URL parser
+- `tests/errors.test.ts` — VT-005 (32 tests)
+- `tests/figma/url.test.ts` — VT-001 (13 tests)
+- `tsconfig.json` — base (src+tests, noEmit, used by eslint/IDE)
+- `tsconfig.build.json` — build (src only, emits to dist)
 
-### What the next agent must do BEFORE implementation
-1. **Patch DR-002** with the 7 adversarial review findings listed above. The 3 "must fix" items are implementation blockers — the client contract is incomplete without return types, the image export two-step flow must be acknowledged, and the concurrency model must be defined.
-2. After patching DR-002, proceed to `/execute-phase` for IP-002.PHASE-01.
+### What the next agent must do
+1. Create PHASE-02 phase sheet via `/plan-phases`
+2. `/execute-phase` for IP-002.PHASE-02 (auth, HTTP client, node fetch, image export)
 
 ### Routing
-Invoke `/draft-design-revision` targeting DR-002 to apply the adversarial review patches, then `/execute-phase` for IP-002.PHASE-01.
+`/plan-phases` then `/execute-phase` for IP-002.PHASE-02.
 
 ### Gotchas
 - `spec-driver sync --force` does NOT prune stale requirements from the registry. If a requirement is removed from a spec, you must manually edit `.spec-driver/registry/requirements.yaml`.
