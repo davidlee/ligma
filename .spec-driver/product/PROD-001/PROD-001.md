@@ -274,6 +274,36 @@ entries:
     requirement: PROD-001.NF-006
     status: verified
     notes: Minimal deps — commander, p-limit, zod only (DE-002)
+  - artefact: VT-012
+    kind: VT
+    requirement: PROD-001.FR-005
+    status: verified
+    notes: Normalized model — recursive tree, hierarchy, diagnostics. 26 tests in tests/normalize/node.test.ts (DE-003)
+  - artefact: VT-008
+    kind: VT
+    requirement: PROD-001.FR-006
+    status: verified
+    notes: Type classification — 30 tests in tests/normalize/classify.test.ts (DE-003)
+  - artefact: VT-009
+    kind: VT
+    requirement: PROD-001.FR-008
+    status: verified
+    notes: Layout normalization — 36 tests in tests/normalize/layout.test.ts (DE-003)
+  - artefact: VT-011
+    kind: VT
+    requirement: PROD-001.FR-009
+    status: verified
+    notes: Text normalization — 29 tests in tests/normalize/text.test.ts (DE-003)
+  - artefact: VT-013
+    kind: VT
+    requirement: PROD-001.NF-001
+    status: verified
+    notes: Representation efficiency (RE-002) — fixed field set + size ≤2.0x raw. 2 tests in tests/normalize/node.test.ts (DE-003)
+  - artefact: VT-010
+    kind: VT
+    requirement: PROD-001.NF-003
+    status: verified
+    notes: Pure function heuristics — all extractors isolated and tested independently. 95 tests across layout/appearance/text suites (DE-003)
 ```
 
 ## 1. Intent & Summary
