@@ -5,7 +5,7 @@ export interface FigmaErrorOptions extends ErrorOptions {
 }
 
 export class FigmaError extends Error {
-  readonly context?: ErrorContext
+  readonly context: ErrorContext | undefined
 
   constructor(message: string, options?: FigmaErrorOptions) {
     super(message, options)
@@ -23,7 +23,7 @@ export interface FigmaRateLimitErrorOptions extends FigmaErrorOptions {
 }
 
 export class FigmaRateLimitError extends FigmaError {
-  readonly retryAfter?: number
+  readonly retryAfter: number | undefined
 
   constructor(message: string, options?: FigmaRateLimitErrorOptions) {
     super(message, options)

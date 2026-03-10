@@ -1,6 +1,6 @@
 import { FigmaUrlParseError } from '../errors.js'
 
-export type ParsedFigmaUrl = {
+export interface ParsedFigmaUrl {
   fileKey: string
   nodeId: string      // API format: "123:456"
   originalUrl: string
@@ -34,14 +34,14 @@ export function parseFigmaUrl(url: string): ParsedFigmaUrl {
   const prefix = segments[0]
   const fileKey = segments[1]
 
-  if (!prefix || !VALID_PATH_PREFIXES.includes(prefix) || !fileKey) {
+  if (prefix === undefined || !VALID_PATH_PREFIXES.includes(prefix) || fileKey === undefined) {
     throw new FigmaUrlParseError('Unrecognized Figma URL path', {
       context: { url },
     })
   }
 
   const rawNodeId = parsed.searchParams.get('node-id')
-  if (!rawNodeId) {
+  if (rawNodeId === null || rawNodeId === '') {
     throw new FigmaUrlParseError('Missing node-id query parameter', {
       context: { url, fileKey },
     })

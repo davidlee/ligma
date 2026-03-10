@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
-import { parseFigmaUrl } from '../../src/figma/url.js'
+import { describe, expect, it } from 'vitest'
+
 import { FigmaUrlParseError } from '../../src/errors.js'
+import { parseFigmaUrl } from '../../src/figma/url.js'
 
 describe('parseFigmaUrl', () => {
   describe('standard design URLs', () => {
@@ -97,11 +98,13 @@ describe('parseFigmaUrl', () => {
       try {
         parseFigmaUrl('https://example.com')
         expect.fail('should have thrown')
-      } catch (err) {
-        expect(err).toBeInstanceOf(FigmaUrlParseError)
-        expect((err as FigmaUrlParseError).context).toEqual({
-          url: 'https://example.com',
-        })
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(FigmaUrlParseError)
+        if (error instanceof FigmaUrlParseError) {
+          expect(error.context).toEqual({
+            url: 'https://example.com',
+          })
+        }
       }
     })
 

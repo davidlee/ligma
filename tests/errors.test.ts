@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+
 import {
   FigmaError,
   FigmaUrlParseError,
@@ -11,17 +12,17 @@ import {
 
 describe('error hierarchy', () => {
   it('FigmaError extends Error', () => {
-    const err = new FigmaError('base error')
-    expect(err).toBeInstanceOf(Error)
-    expect(err).toBeInstanceOf(FigmaError)
-    expect(err.message).toBe('base error')
-    expect(err.name).toBe('FigmaError')
+    const error = new FigmaError('base error')
+    expect(error).toBeInstanceOf(Error)
+    expect(error).toBeInstanceOf(FigmaError)
+    expect(error.message).toBe('base error')
+    expect(error.name).toBe('FigmaError')
   })
 
   it('FigmaError carries cause', () => {
     const cause = new Error('root')
-    const err = new FigmaError('wrapped', { cause })
-    expect(err.cause).toBe(cause)
+    const error = new FigmaError('wrapped', { cause })
+    expect(error.cause).toBe(cause)
   })
 
   describe.each([
@@ -33,66 +34,66 @@ describe('error hierarchy', () => {
     ['NormalizationError', NormalizationError],
   ] as const)('%s', (name, ErrorClass) => {
     it('is instantiable', () => {
-      const err = new ErrorClass('test')
-      expect(err).toBeInstanceOf(ErrorClass)
-      expect(err.message).toBe('test')
+      const error = new ErrorClass('test')
+      expect(error).toBeInstanceOf(ErrorClass)
+      expect(error.message).toBe('test')
     })
 
     it('extends FigmaError and Error', () => {
-      const err = new ErrorClass('test')
-      expect(err).toBeInstanceOf(FigmaError)
-      expect(err).toBeInstanceOf(Error)
+      const error = new ErrorClass('test')
+      expect(error).toBeInstanceOf(FigmaError)
+      expect(error).toBeInstanceOf(Error)
     })
 
     it('has correct name', () => {
-      const err = new ErrorClass('test')
-      expect(err.name).toBe(name)
+      const error = new ErrorClass('test')
+      expect(error.name).toBe(name)
     })
 
     it('carries cause chain', () => {
       const cause = new Error('root cause')
-      const err = new ErrorClass('wrapped', { cause })
-      expect(err.cause).toBe(cause)
+      const error = new ErrorClass('wrapped', { cause })
+      expect(error.cause).toBe(cause)
     })
   })
 
   describe('FigmaRateLimitError', () => {
     it('carries retryAfter', () => {
-      const err = new FigmaRateLimitError('rate limited', { retryAfter: 30 })
-      expect(err.retryAfter).toBe(30)
+      const error = new FigmaRateLimitError('rate limited', { retryAfter: 30 })
+      expect(error.retryAfter).toBe(30)
     })
 
     it('retryAfter defaults to undefined', () => {
-      const err = new FigmaRateLimitError('rate limited')
-      expect(err.retryAfter).toBeUndefined()
+      const error = new FigmaRateLimitError('rate limited')
+      expect(error.retryAfter).toBeUndefined()
     })
   })
 
   describe('context fields', () => {
     it('FigmaUrlParseError carries url context', () => {
-      const err = new FigmaUrlParseError('invalid URL', {
+      const error = new FigmaUrlParseError('invalid URL', {
         context: { url: 'https://bad.url' },
       })
-      expect(err.context).toEqual({ url: 'https://bad.url' })
+      expect(error.context).toEqual({ url: 'https://bad.url' })
     })
 
     it('FigmaNotFoundError carries fileKey and nodeId', () => {
-      const err = new FigmaNotFoundError('not found', {
+      const error = new FigmaNotFoundError('not found', {
         context: { fileKey: 'abc', nodeId: '1:2' },
       })
-      expect(err.context).toEqual({ fileKey: 'abc', nodeId: '1:2' })
+      expect(error.context).toEqual({ fileKey: 'abc', nodeId: '1:2' })
     })
 
     it('FigmaRenderError carries fileKey, nodeId, httpStatus', () => {
-      const err = new FigmaRenderError('render failed', {
+      const error = new FigmaRenderError('render failed', {
         context: { fileKey: 'abc', nodeId: '1:2', httpStatus: 500 },
       })
-      expect(err.context).toEqual({ fileKey: 'abc', nodeId: '1:2', httpStatus: 500 })
+      expect(error.context).toEqual({ fileKey: 'abc', nodeId: '1:2', httpStatus: 500 })
     })
 
     it('context defaults to undefined', () => {
-      const err = new FigmaError('no context')
-      expect(err.context).toBeUndefined()
+      const error = new FigmaError('no context')
+      expect(error.context).toBeUndefined()
     })
   })
 })
