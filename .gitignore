@@ -1,4 +1,7 @@
 .envrc
+.direnv/
 .spec-driver/run/
 .claude/settings.local.json
 
+node_modules/
+dist/

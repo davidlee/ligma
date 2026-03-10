@@ -14,7 +14,8 @@
             # pkgs.nodePackages.pnpm
             pkgs.nodePackages.typescript
             pkgs.nodePackages.typescript-language-server
-            pkgs.bun
+            # pkgs.bun
+            pkgs.pnpm
             pkgs.eslint
           ];
         };
