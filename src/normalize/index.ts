@@ -1,5 +1,6 @@
 import { NormalizationError } from '../errors.js'
 
+import { applyInferencesRecursive } from './infer/index.js'
 import { normalizeNode } from './node.js'
 
 import type { NormalizeContext } from './node.js'
@@ -19,5 +20,7 @@ export function normalize(rawNode: FigmaNode): NormalizedNode {
     path: [],
   }
 
-  return normalizeNode(rawNode, rootContext)
+  const root = normalizeNode(rawNode, rootContext)
+  applyInferencesRecursive(root)
+  return root
 }

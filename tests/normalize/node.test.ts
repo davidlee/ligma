@@ -230,6 +230,47 @@ describe('normalize() entry point', () => {
   })
 })
 
+describe('inference wiring via normalize()', () => {
+  it('image node gets image role and likelyImage semantic', () => {
+    const raw = FigmaNodeSchema.parse({
+      id: '0:1', name: 'Photo', type: 'RECTANGLE',
+      fills: [{ type: 'IMAGE', visible: true, imageRef: 'img:1' }],
+    })
+    const result = normalize(raw)
+    expect(result.role).toBe('image')
+    expect(result.semantics.likelyImage).toBe(true)
+  })
+
+  it('text node heading gets semanticKind heading', () => {
+    const raw = FigmaNodeSchema.parse({
+      id: '0:1', name: 'Title', type: 'TEXT',
+      characters: 'Welcome',
+      style: { fontFamily: 'Inter', fontWeight: 700, fontSize: 24 },
+    })
+    const result = normalize(raw)
+    expect(result.role).toBe('heading')
+    expect(result.text?.semanticKind).toBe('heading')
+  })
+
+  it('line type gets divider role', () => {
+    const raw = FigmaNodeSchema.parse({
+      id: '0:1', name: 'Separator', type: 'LINE',
+    })
+    const result = normalize(raw)
+    expect(result.role).toBe('divider')
+  })
+
+  it('confidence reflects inference results', () => {
+    const raw = FigmaNodeSchema.parse({
+      id: '0:1', name: 'Mystery', type: 'RECTANGLE',
+      absoluteBoundingBox: { x: 0, y: 0, width: 100, height: 100 },
+    })
+    const result = normalize(raw)
+    // Unmatched shape → role null/low → confidence includes low
+    expect(result.diagnostics.confidence).toBe('low')
+  })
+})
+
 describe('representation efficiency (VT-013, RE-002)', () => {
   const NORMALIZED_TOP_LEVEL_FIELDS = 17 // fixed schema surface
 
