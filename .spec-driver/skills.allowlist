@@ -1,0 +1,24 @@
+# Skills allowlist — one skill name per line.
+# Remove a line to stop installing that skill.
+audit-change
+boot
+capturing-memory
+close-change
+consult
+continuation
+doctrine
+draft-design-revision
+execute-phase
+implement
+maintaining-memory
+next
+notes
+plan-phases
+preflight
+retrieving-memory
+reviewing-memory
+scope-delta
+shape-revision
+spec-driver
+update-delta-docs
+using-spec-driver

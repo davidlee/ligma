@@ -1,0 +1,91 @@
+spec_driver_installed_version = "0.7.9"
+## spec-driver workflow configuration
+##
+## All options below show their defaults.  Uncomment and change any
+## value to override.  Missing keys always fall back to built-in defaults,
+## so you only need to include what you want to change.
+##
+## Ceremony mode controls governance posture: how much structure agents
+## apply.  Options: "pioneer" (lightweight), "settler" (moderate),
+## "town_planner" (full governance).
+
+# ceremony = "town_planner"
+
+## When true, delta completion enforces all coverage gates.
+## When false (default), agents may use --force to bypass.
+# strict_mode = false
+
+## How to invoke spec-driver.  Detected automatically at install time.
+[tool]
+exec = "spec-driver"
+
+## Command agents run to verify the project (tests + lint).
+# [verification]
+# command = "just check"
+
+## Kanban-style task cards for lightweight work tracking.
+## Disable with enabled = false if you only use deltas.
+## artefacts_root / plans_root: where design docs and plans live.
+# [kanban]
+# enabled = false
+# root = "kanban"
+# lanes = ["backlog", "next", "doing", "finishing", "done"]
+# id_prefix = "T"
+# artefacts_root = "docs/artefacts"
+# plans_root = "docs/plans"
+
+## Toggle governance layers.  ADRs are always recommended.
+## Enable policies and standards for stricter governance.
+# [policy]
+# adrs = true
+# policies = true
+# standards = true
+
+## Event logging for spec-driver operations (powers TUI track mode).
+# [events]
+# enabled = true
+
+## Controls for the sync subsystem.
+## spec_autocreate: automatically create unit specs during sync.
+# [sync]
+# spec_autocreate = false
+
+## Generated API contracts corpus.
+## root: directory under the repo root (always derived/regenerable).
+# [contracts]
+# enabled = true
+# root = ".contracts"
+
+## Path to the project doctrine file loaded by agents at boot.
+# [bootstrap]
+# doctrine_path = ".spec-driver/doctrine.md"
+
+## Agent skill sync targets.  Each entry is a directory name under
+## the agent config root (e.g. .claude/, .codex/).
+# [skills]
+# targets = ["claude", "codex"]
+
+## Controls @-references injected into root agent config files.
+## Disable if you manage AGENTS.md / CLAUDE.md yourself.
+# [integration]
+# agents_md = true
+# claude_md = true
+
+## Directory name overrides for spec-driver workspace subdirectories.
+## All paths are relative to .spec-driver/.  Change these if your
+## project uses non-standard directory names.
+# [dirs]
+# backlog = "backlog"
+# memory = "memory"
+# tech_specs = "tech"
+# product_specs = "product"
+# decisions = "decisions"
+# policies = "policies"
+# standards = "standards"
+# deltas = "deltas"
+# revisions = "revisions"
+# audits = "audits"
+# issues = "issues"
+# problems = "problems"
+# improvements = "improvements"
+# risks = "risks"
