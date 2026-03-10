@@ -18,3 +18,17 @@
 - NF-001: 1.35x (up from 1.28x in P01). Well within 2.0x ceiling.
 - 405 tests (up from 349 — added 55: VT-014 14, VT-015 27, VT-016 14)
 
+## P03 — Inference layer (complete)
+- 6 new modules in `src/normalize/infer/`: types.ts, signals.ts, role.ts, text-kind.ts, semantics.ts, index.ts
+- `InferenceInput` is a named recursive readonly type (DEC-022) — not `Pick<NormalizedNode>`. `toInferenceInput()` strips write-target and extraction-only fields, recursively maps children. Excludes `id`, `rotation`, `variables`, `asset`, `role`, `semantics`, `diagnostics`.
+- 12 signal helpers in signals.ts — all pure, all take typed input. Used across role rules and sibling inspection.
+- `inferRole()`: 13-rule priority chain with noise early-out. Each rule is a standalone function to stay under complexity 8. `buttonRule` required extracting `countButtonSignals()`, `bodyTextRule` required extracting `isBodyTextStyle()`, `inferTextKindFallback` required extracting `isHeadingStyle()`.
+- Sibling access for label rule: `inferRecursive` computes `childSiblingInputs` from parent's children, passes to each child's `inferRole` call.
+- `applyInferencesRecursive()` wired in `normalize/index.ts` after `normalizeNode()` returns the completed tree (DEC-031 top-down post-pass). `normalizeNode` still returns defaults; inference mutates in-place.
+- Existing `normalizeNode` tests unaffected — they call `normalizeNode` directly, not `normalize()`. New inference-wiring tests added to `node.test.ts` via `normalize()`.
+- Lint surprises: `import/order` requires sibling (`./`) type imports before parent (`../`) type imports. `@typescript-eslint/prefer-optional-chain` caught `layout === null || layout.padding === null` pattern. `no-duplicate-type-constituents` rejected `T | null | undefined` on optional params.
+- NF-001: 1.36x (up from 1.35x in P02). Minimal size increase from populating role/semantics/textKind.
+- 548 tests (up from 405 — added 143: VT-021 53, VT-017 39, VT-018 16, VT-019 20, VT-020 11, node.test.ts 4)
+- Commits: 65d6872 (types+signals), 68b178a (inference modules+tests), 79645ca (wiring)
+- `mise run` green. `.spec-driver` phase sheet committed earlier (333d5ae). Notes pending commit.
+

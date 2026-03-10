@@ -102,18 +102,18 @@ Build the complete inference layer in `src/normalize/infer/` — five modules im
 - [x] DR-004 §5.2/5.6–5.9 design stable (no open questions)
 
 ## 4. Exit Criteria / Done When
-- [ ] `src/normalize/infer/types.ts` — `InferenceInput`, `InferenceResults`, `toInferenceInput()` implemented
-- [ ] `src/normalize/infer/signals.ts` — signal helpers (name matching, size checks, child inspection, has-visible-fill/stroke)
-- [ ] `src/normalize/infer/role.ts` — `inferRole()` with noise early-out + 13 prioritized rules
-- [ ] `src/normalize/infer/text-kind.ts` — `inferTextKind()` with role-derived primary path, parent context, fallback
-- [ ] `src/normalize/infer/semantics.ts` — `inferSemantics()` deriving 6 boolean flags
-- [ ] `src/normalize/infer/index.ts` — `applyInferences()` + `applyInferencesRecursive()`
-- [ ] `node.ts` / `normalize/index.ts` calls `applyInferencesRecursive()` as top-down post-pass
-- [ ] `role`, `semantics`, `text.semanticKind` populated on normalized output
-- [ ] Confidence min-rule includes inference results
-- [ ] VT-017, VT-018, VT-019, VT-020, VT-021 all passing
-- [ ] All existing tests still passing
-- [ ] `mise run` green
+- [x] `src/normalize/infer/types.ts` — `InferenceInput`, `InferenceResults`, `toInferenceInput()` implemented
+- [x] `src/normalize/infer/signals.ts` — signal helpers (name matching, size checks, child inspection, has-visible-fill/stroke)
+- [x] `src/normalize/infer/role.ts` — `inferRole()` with noise early-out + 13 prioritized rules
+- [x] `src/normalize/infer/text-kind.ts` — `inferTextKind()` with role-derived primary path, parent context, fallback
+- [x] `src/normalize/infer/semantics.ts` — `inferSemantics()` deriving 6 boolean flags
+- [x] `src/normalize/infer/index.ts` — `applyInferences()` + `applyInferencesRecursive()`
+- [x] `normalize/index.ts` calls `applyInferencesRecursive()` as top-down post-pass
+- [x] `role`, `semantics`, `text.semanticKind` populated on normalized output
+- [x] Confidence min-rule includes inference results
+- [x] VT-017, VT-018, VT-019, VT-020, VT-021 all passing
+- [x] All existing tests still passing (548 total)
+- [x] `mise run` green
 
 ## 5. Verification
 - VT-021: `tests/normalize/infer/signals.test.ts` — name matching (case-insensitive, substring, patterns), size checks (bounds thresholds, aspect ratio), child inspection (text children, icon children), has-visible-fill/stroke
@@ -141,14 +141,14 @@ Build the complete inference layer in `src/normalize/infer/` — five modules im
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 3.1 | Define `InferenceInput`, `InferenceResults`, `toInferenceInput()` | | Foundation — all others depend on this |
-| [ ] | 3.2 | Implement signal helpers + write VT-021 | | Depends on 3.1 |
-| [ ] | 3.3 | Implement `inferRole()` 13-rule chain + write VT-017 | | Depends on 3.1, 3.2. Largest task. |
-| [ ] | 3.4 | Implement `inferTextKind()` + write VT-018 | [P] | Depends on 3.1. Parallel with 3.5. |
-| [ ] | 3.5 | Implement `inferSemantics()` + write VT-019 | [P] | Depends on 3.1. Parallel with 3.4. |
-| [ ] | 3.6 | Implement `applyInferences()` composition + write VT-020 | | Depends on 3.3, 3.4, 3.5 |
-| [ ] | 3.7 | Wire `applyInferencesRecursive` into node.ts / normalize index | | Depends on 3.6 |
-| [ ] | 3.8 | Extend `node.test.ts` for inference wiring + run full suite | | Depends on 3.7 |
+| [x] | 3.1 | Define `InferenceInput`, `InferenceResults`, `toInferenceInput()` | | 65d6872 |
+| [x] | 3.2 | Implement signal helpers + write VT-021 | | 65d6872 — 53 tests |
+| [x] | 3.3 | Implement `inferRole()` 13-rule chain + write VT-017 | | 68b178a — 39 tests |
+| [x] | 3.4 | Implement `inferTextKind()` + write VT-018 | [P] | 68b178a — 16 tests |
+| [x] | 3.5 | Implement `inferSemantics()` + write VT-019 | [P] | 68b178a — 20 tests |
+| [x] | 3.6 | Implement `applyInferences()` composition + write VT-020 | | 68b178a — 11 tests |
+| [x] | 3.7 | Wire `applyInferencesRecursive` into normalize/index.ts | | 79645ca |
+| [x] | 3.8 | Extend `node.test.ts` for inference wiring + run full suite | | 79645ca — 4 new tests, 548 total |
 
 ### Task Details
 
@@ -201,13 +201,19 @@ Build the complete inference layer in `src/normalize/infer/` — five modules im
 | Existing test expectations broken by populated role/semantics | Extend assertions rather than changing fixture expectations; role=null may become non-null | open |
 
 ## 9. Decisions & Outcomes
-*(Populated during execution)*
+- 2026-03-11 — Complexity budget required extracting helper functions in 3 places: `countButtonSignals` (role.ts), `isBodyTextStyle` (role.ts), `isHeadingStyle` (text-kind.ts). Design preserved; each rule remains a standalone function.
+- 2026-03-11 — Wired inference in `normalize/index.ts` (not `node.ts`) — keeps `normalizeNode` focused on extraction+assembly. Existing `normalizeNode` tests unaffected.
+- 2026-03-11 — `toInferenceInput()` allocates recursively for the full subtree. Accepted as boundary enforcement cost per DR-004 §5.2.
 
 ## 10. Findings / Research Notes
-*(Populated during execution)*
+- `import/order`: sibling (`./`) type imports must precede parent (`../`) type imports. Caught in types.ts and signals.ts.
+- `@typescript-eslint/prefer-optional-chain`: `x === null || x.y === null` patterns flagged — use `x?.y` with explicit null/undefined check instead.
+- `@typescript-eslint/no-duplicate-type-constituents`: `T | null | undefined` on optional params rejected — use `T | null` since `?` already covers undefined.
+- Card test for rule 11 (card) initially failed because default bounds 200×100 triggered input rule first (aspect 2.0). Fixed by using 300×250 bounds.
+- Text with fontSize 14 / fontWeight 400 matches body-text rule. Parent-context tests for button need text with null fontSize to avoid self-matching.
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
+- [x] Exit criteria satisfied — all 12 criteria met, 548 tests, mise run green
+- [x] Verification evidence stored — commits 65d6872, 68b178a, 79645ca
 - [ ] Spec/Delta/Plan updated with lessons
 - [ ] Hand-off notes to next phase (if any)

@@ -12,7 +12,7 @@ tags:
   - architecture
 summary: >-
   How the normalization pipeline works: extractor pattern, node compositor,
-  DEC-018 skip gates, orchestrate wiring, confidence min-rule.
+  inference post-pass, DEC-018 skip gates, orchestrate wiring, confidence min-rule.
 scope:
   globs:
     - src/normalize/**
@@ -31,10 +31,12 @@ provenance:
 
 ```
 orchestrate() → normalize(rawRoot) → normalizeNode(raw, context) per node
+                                    → applyInferencesRecursive(root) top-down
 ```
 
-- `normalize/index.ts` — entry point. Creates root context, validates root has id/name/type, throws `NormalizationError` on malformed input.
-- `normalize/node.ts` — recursive compositor. For each node: classify → run extractors → build hierarchy → recurse children. Confidence via min-rule across all results.
+- `normalize/index.ts` — entry point. Creates root context, validates root, calls `normalizeNode()` then `applyInferencesRecursive()`.
+- `normalize/node.ts` — recursive compositor. For each node: classify → run extractors → build hierarchy → recurse children. Returns tree with role=null, semantics=defaults.
+- `normalize/infer/index.ts` — top-down post-pass (DEC-031). Mutates tree in-place: populates `role`, `semantics`, `text.semanticKind`. Updates `diagnostics.confidence` to include inference results.
 - `orchestrate.ts` — calls `normalize()`, stores result as `normalizedNode` in `OrchestrateResult`.
 
 ## Result type hierarchy (DEC-021)
@@ -64,12 +66,23 @@ Extractors (all in `src/normalize/`):
 - `variables.ts` — `NormalizedVariableBindings | null` (DEC-024). Node-level `boundVariables` → bindings; `explicitVariableModes` → `explicitModes`. Per-binding `modeId` always null; `tokenName`/`collectionId` null in v1.
 - `assets.ts` — `NormalizedAssetInfo | null` (DEC-025). Image fills → bitmap/high; vector complexity → svg/medium; name-only never triggers.
 
+## Inference layer (DEC-026–031)
+
+All modules in `src/normalize/infer/`. Operates on `InferenceInput` (readonly view of assembled node, excludes write-targets). Pure functions returning `AnalysisResult<T>`.
+
+- `types.ts` — `InferenceInput`, `InferenceResults`, `toInferenceInput()`. Named recursive type, not `Pick<NormalizedNode>`. Excludes `variables`, `asset`, `role`, `semantics`, `diagnostics`, `id`, `rotation`.
+- `signals.ts` — 12 shared signal helpers (name matching, size/geometry, appearance, layout, child/sibling inspection). Used by role rules.
+- `role.ts` — `inferRole()` 13-rule priority chain + noise early-out. Each rule is a standalone function. First match wins. Returns `AnalysisResult<NormalizedRole | null>`.
+- `text-kind.ts` — `inferTextKind()`. Primary: derive from role. Parent context: text inside button → button. Fallback: fontSize/fontWeight heuristics.
+- `semantics.ts` — `inferSemantics()`. 6 boolean flags derived from role/type/component. No independent heuristics.
+- `index.ts` — `applyInferences()` composition, `applyInferencesRecursive()` top-down tree walk. Passes parent role to children, sibling inputs for label rule.
+
 ## Key invariants
 
 - **DEC-018**: `node.ts` gates extractors via `SKIP_EXTRACTORS` set for document/page. Extractors themselves are NOT type-aware — they always return populated defaults when called.
 - **No `as` casts** — [[mem.fact.lint.strict-config]]. All raw field access via typed accessors in `raw-helpers.ts`.
-- **DE-004 fields**: `component`, `variables`, `asset` populated by extractors (P02). `role` is `null`; `semantics` are all `false` — pending P03 inference layer.
-- **Confidence**: min-rule across all extraction (and future inference) results. high > medium > low.
+- **DE-004 fields**: `component`, `variables`, `asset` populated by extractors (P02). `role`, `semantics`, `text.semanticKind` populated by inference post-pass (P03).
+- **Confidence**: min-rule across all extraction AND inference results. high > medium > low. Unmatched nodes get role=null/low, which drags overall confidence to low.
 - **hierarchy.path**: ancestor chain (current node excluded). Grows with depth.
 
 ## Shared utilities
