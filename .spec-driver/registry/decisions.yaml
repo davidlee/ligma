@@ -1,1 +1,10 @@
-decisions: {}
+decisions:
+  ADR-001:
+    id: ADR-001
+    title: 'ADR-001: Zero tolerance for lint warnings'
+    status: draft
+    path: .spec-driver/decisions/ADR-001-zero_tolerance_for_lint_warnings.md
+    summary: ''
+    created: '2026-03-10'
+    updated: '2026-03-10'
+    reviewed: '2026-03-10'
