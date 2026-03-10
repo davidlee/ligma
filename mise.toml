@@ -12,7 +12,7 @@ run = "pnpm lint"
 
 [tasks.test]
 description = "test. TDD."
-run = "npx vitest run"
+run = "pnpx vitest run"
 
 [tasks.typecheck]
 description = "typecheck"

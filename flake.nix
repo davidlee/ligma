@@ -18,6 +18,7 @@
             pkgs.pnpm
             pkgs.eslint
             pkgs.mise
+            pkgs.corepack
           ];
         };
       }
