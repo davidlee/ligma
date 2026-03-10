@@ -431,22 +431,26 @@ deltas:
             + size ceiling)
   DE-004:
     kind: delta
-    status: draft
+    status: completed
     name: Delta - Semantic inference, tokens, and assets
     slug: semantic_inference_tokens_and_assets
-    updated: '2026-03-10'
+    updated: '2026-03-11'
     path: .spec-driver/deltas/DE-004-semantic_inference_tokens_and_assets/DE-004.md
     applies_to:
       specs:
       - SPEC-001
       requirements:
+      - PROD-001.FR-005
       - PROD-001.FR-007
+      - PROD-001.FR-009
       - PROD-001.FR-010
       - PROD-001.FR-016
     relations:
     - type: depends-on
       target: DE-003
       attributes: {}
+    - type: introduces
+      target: DR-004
     plan:
       id: IP-004
       overview:
@@ -455,21 +459,275 @@ deltas:
         plan: IP-004
         delta: DE-004
         revision_links:
-          aligns_with: []
+          aligns_with:
+          - DR-004
         specs:
           primary:
           - SPEC-001
           collaborators: []
         requirements:
           targets:
+          - PROD-001.FR-005
           - PROD-001.FR-007
+          - PROD-001.FR-009
           - PROD-001.FR-010
-          dependencies: []
+          - PROD-001.FR-016
+          dependencies:
+          - DE-003
         phases:
-        - id: IP-004-P01
+        - id: IP-004.PHASE-01
+        - id: IP-004.PHASE-02
+        - id: IP-004.PHASE-03
+        - id: IP-004.PHASE-04
+        - id: IP-004.PHASE-04
       phases:
-      - id: IP-004-P01
-        phase: IP-004-P01
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-004.PHASE-01
+        plan: IP-004
+        delta: DE-004
+        objective: "Introduce AnalysisResult<T> base type, add explicit confidence\
+          \ to all extractors, deduplicate colorToHex(), rename variantProperties\
+          \ \u2192 propertyValues. Zero behavioral change \u2014 all existing tests\
+          \ must pass with updated types."
+        entrance_criteria:
+        - DR-004 drafted and approved
+        - DE-003 complete, all VTs passing
+        exit_criteria:
+        - AnalysisResult<T> and ExtractorResult<T> types in raw-helpers.ts
+        - All existing extractors return explicit confidence field
+        - classify() returns AnalysisResult<NormalizedNodeType>
+        - colorToHex() in raw-helpers.ts, removed from appearance.ts and text.ts
+        - variantProperties renamed to propertyValues in schema
+        - node.ts computes confidence via min-rule
+        - All existing tests updated and passing (VT-008, VT-010, VT-011, VT-012,
+          VT-013)
+        - mise run green
+        verification:
+          tests:
+          - "VT-008 (classify) \u2014 updated assertions for AnalysisResult return\
+            \ type"
+          - "VT-010 (appearance) \u2014 updated imports, confidence assertions"
+          - "VT-011 (text) \u2014 updated imports, confidence assertions"
+          - "VT-012 (node) \u2014 confidence min-rule assertions"
+          - "VT-013 (reduction-check) \u2014 still passing (no size change expected)"
+          evidence:
+          - mise run output showing all tests pass
+        tasks:
+        - id: '1.1'
+          description: Add AnalysisResult<T> type and refactor ExtractorResult<T>
+        - id: '1.2'
+          description: Move colorToHex() to raw-helpers.ts
+        - id: '1.3'
+          description: Add explicit confidence to all DE-003 extractors
+        - id: '1.4'
+          description: Refactor classify() to return AnalysisResult
+        - id: '1.5'
+          description: Update node.ts confidence computation to min-rule
+        - id: '1.6'
+          description: "Rename variantProperties \u2192 propertyValues in schema"
+        - id: '1.7'
+          description: Update all existing tests
+        risks:
+        - description: Refactor introduces regressions in DE-003 extractors
+          mitigation: Atomic change with all tests updated simultaneously; run mise
+            run after each task
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-004.PHASE-02
+        plan: IP-004
+        delta: DE-004
+        objective: "Implement extractComponent, extractVariables, and extractAsset\
+          \ \u2014 three new Layer 1 extractors. Wire them into node.ts runExtractors.\
+          \ All three return ExtractorResult<T | null> following the established extractor\
+          \ pattern. VT-014, VT-015, VT-016 passing. mise run green."
+        entrance_criteria:
+        - "P01 complete \u2014 AnalysisResult<T>/ExtractorResult<T> types available"
+        - All existing tests passing (349 tests)
+        - mise run green on current main
+        exit_criteria:
+        - extractComponent returns ExtractorResult<NormalizedComponentInfo | null>
+        - extractVariables returns ExtractorResult<NormalizedVariableBindings | null>
+        - extractAsset returns ExtractorResult<NormalizedAssetInfo | null>
+        - All three wired into node.ts runExtractors
+        - node.ts populates component/variables/asset fields from extractor results
+        - Confidence min-rule includes new extractor results
+        - VT-014 (component extraction) passing
+        - VT-015 (variable extraction) passing
+        - VT-016 (asset extraction) passing
+        - All existing tests still passing
+        - mise run green
+        verification:
+          tests:
+          - "VT-014 \u2014 tests/normalize/components.test.ts"
+          - "VT-015 \u2014 tests/normalize/variables.test.ts"
+          - "VT-016 \u2014 tests/normalize/assets.test.ts"
+          - "VT-012 \u2014 tests/normalize/node.test.ts (extended for wiring)"
+          - "VT-013 \u2014 tests/normalize/reduction-check.test.ts (NF-001 regression)"
+          evidence:
+          - mise run output showing all tests pass
+        tasks:
+        - id: '2.1'
+          description: Implement extractComponent(raw) extractor
+        - id: '2.2'
+          description: Write VT-014 tests for component extraction
+        - id: '2.3'
+          description: Implement extractVariables(raw) extractor
+        - id: '2.4'
+          description: Write VT-015 tests for variable extraction
+        - id: '2.5'
+          description: Implement extractAsset(raw) extractor
+        - id: '2.6'
+          description: Write VT-016 tests for asset extraction
+        - id: '2.7'
+          description: Wire new extractors into node.ts
+        - id: '2.8'
+          description: Update node.test.ts for wiring and run full suite
+        risks:
+        - description: boundVariables shape differs between node-level and paint-level
+            contexts
+          mitigation: Handle node-level boundVariables per DR-004; paint-level tokenRef
+            is supplemental (P04 tokens-used)
+        - description: NF-001 size ceiling breached when populating null fields
+          mitigation: Monitor via VT-013 reduction-check after wiring
+        - description: Fixture lacks componentPropertyReferences and explicitVariableModes
+            examples
+          mitigation: Create targeted synthetic fixtures for edge cases; design handles
+            null gracefully
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-004.PHASE-03
+        plan: IP-004
+        delta: DE-004
+        objective: "Build the inference layer (src/normalize/infer/) \u2014 inferRole,\
+          \ inferTextKind, inferSemantics, signal helpers, types. Wire into node.ts\
+          \ as a top-down post-pass (applyInferencesRecursive). VT-017 through VT-021\
+          \ passing. mise run green."
+        entrance_criteria:
+        - "P02 complete \u2014 extractors wired, 405 tests passing"
+        - mise run green on current main
+        - "DR-004 \xA75.2/5.6\u20135.9 design stable"
+        exit_criteria:
+        - "src/normalize/infer/types.ts \u2014 InferenceInput, InferenceResults, toInferenceInput()"
+        - "src/normalize/infer/signals.ts \u2014 shared signal helpers (name match,\
+          \ size, child inspection)"
+        - "src/normalize/infer/role.ts \u2014 inferRole() 13-rule priority chain +\
+          \ noise early-out"
+        - "src/normalize/infer/text-kind.ts \u2014 inferTextKind() role-derived +\
+          \ fallback"
+        - "src/normalize/infer/semantics.ts \u2014 inferSemantics() boolean flag derivation"
+        - "src/normalize/infer/index.ts \u2014 applyInferences() + applyInferencesRecursive()"
+        - node.ts calls applyInferencesRecursive() as top-down post-pass
+        - role, semantics, text.semanticKind populated on normalized output
+        - Confidence updated to include inference results in min-rule
+        - VT-017 (role inference) passing
+        - VT-018 (text kind inference) passing
+        - VT-019 (semantics inference) passing
+        - VT-020 (inference composition) passing
+        - VT-021 (signal helpers) passing
+        - All existing tests still passing
+        - mise run green
+        verification:
+          tests:
+          - "VT-021 \u2014 tests/normalize/infer/signals.test.ts"
+          - "VT-017 \u2014 tests/normalize/infer/role.test.ts"
+          - "VT-018 \u2014 tests/normalize/infer/text-kind.test.ts"
+          - "VT-019 \u2014 tests/normalize/infer/semantics.test.ts"
+          - "VT-020 \u2014 tests/normalize/infer/index.test.ts"
+          - "VT-012 \u2014 tests/normalize/node.test.ts (extended for inference wiring)"
+          evidence:
+          - mise run output showing all tests pass
+        tasks:
+        - id: '3.1'
+          description: Define InferenceInput, InferenceResults, toInferenceInput()
+            in types.ts
+        - id: '3.2'
+          description: Implement signal helpers in signals.ts + write VT-021
+        - id: '3.3'
+          description: Implement inferRole() 13-rule chain + write VT-017
+        - id: '3.4'
+          description: Implement inferTextKind() + write VT-018
+        - id: '3.5'
+          description: Implement inferSemantics() + write VT-019
+        - id: '3.6'
+          description: Implement applyInferences() composition + write VT-020
+        - id: '3.7'
+          description: Wire applyInferencesRecursive into node.ts / normalize index
+        - id: '3.8'
+          description: Extend node.test.ts for inference wiring + run full suite
+        risks:
+        - description: InferenceInput shape drift from assembled NormalizedNode
+          mitigation: toInferenceInput() enforces boundary at runtime; verify field
+            set matches P02 output
+        - description: Rule interaction produces unexpected priority conflicts
+          mitigation: One test per rule + explicit priority-ordering tests in VT-017
+        - description: Complexity budget (max 8) exceeded in inferRole
+          mitigation: Each rule is a standalone function; inferRole orchestrates via
+            chain iteration
+        - description: Label rule sibling inspection requires access patterns not
+            on InferenceInput
+          mitigation: "DR-004 \xA75.6 rule 6 reads sibling structural signals (name,\
+            \ bounds, appearance) from InferenceInput \u2014 verified shape has these\
+            \ fields"
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-004.PHASE-04
+        plan: IP-004
+        delta: DE-004
+        objective: Build aggregateTokensUsed() summary reducer and TokensUsedSummary
+          schema. Wire into orchestrate.ts as a post-normalization step. Extend OrchestrateResult
+          and OutputArtifacts to carry tokens-used.json. Write VT-022 (tokens-used
+          unit), VT-023 (integration). Verify NF-001 2.0x ceiling still holds. mise
+          run green.
+        entrance_criteria:
+        - "P03 complete \u2014 inference wired, 548 tests passing (commit 79645ca)"
+        - mise run green on current main
+        - "DR-004 \xA75.10 design stable"
+        exit_criteria:
+        - "src/schemas/tokens-used.ts \u2014 TokensUsedSummary, TokenReference, StyleReference,\
+          \ EncounteredLocation schemas"
+        - "src/summary/tokens-used.ts \u2014 aggregateTokensUsed(root, fileKey, rootNodeId)\
+          \ implemented"
+        - orchestrate.ts calls aggregateTokensUsed() after normalize(), includes tokensUsed
+          in result
+        - OrchestrateResult extended with tokensUsed field
+        - OutputArtifacts extended with tokensUsed field
+        - writeOutput writes tokens/tokens-used.json when tokensUsed present
+        - VT-022 (tokens-used summary) passing
+        - VT-023 (full pipeline integration with DE-004 fields) passing
+        - NF-001 2.0x ceiling verified (tokens-used.json is separate artifact, not
+          in normalized tree)
+        - All existing tests still passing
+        - mise run green
+        verification:
+          tests:
+          - "VT-022 \u2014 tests/summary/tokens-used.test.ts"
+          - "VT-023 \u2014 tests/normalize/node.test.ts (extended), tests/orchestrate.test.ts\
+            \ (extended)"
+          - "VT-013 \u2014 tests/normalize/node.test.ts (NF-001 ceiling re-verified)"
+          evidence:
+          - mise run output showing all tests pass
+        tasks:
+        - id: '4.1'
+          description: Create TokensUsedSummary schemas in src/schemas/tokens-used.ts
+        - id: '4.2'
+          description: Implement aggregateTokensUsed() in src/summary/tokens-used.ts
+            + write VT-022
+        - id: '4.3'
+          description: Wire into orchestrate.ts + extend OrchestrateResult and OutputArtifacts
+        - id: '4.4'
+          description: Extend VT-023 integration tests + verify NF-001 ceiling + run
+            full suite
+        risks:
+        - description: NF-001 ceiling breach after populating fields
+          mitigation: "tokens-used.json is a separate artifact outside NormalizedNode;\
+            \ P03 ratio was 1.36x \u2014 large headroom"
+        - description: Paint-level tokenRef supplemental logic adds complexity
+          mitigation: "Appearance paints already carry tokenRef (nullable string)\
+            \ \u2014 straightforward to collect"
+        - description: counts.typography classification ambiguity
+          mitigation: DR-004 schema defines it; no resolvedType maps to 'typography'
+            in DE-004; set to 0 (styles array is empty placeholder)
   DE-005:
     kind: delta
     status: draft
