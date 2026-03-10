@@ -93,7 +93,7 @@ deltas:
         risks: []
   DE-002:
     kind: delta
-    status: in-progress
+    status: completed
     name: Delta - Project scaffold and Figma client
     slug: project_scaffold_and_figma_client
     updated: '2026-03-10'
@@ -145,7 +145,6 @@ deltas:
         - id: IP-002.PHASE-01
         - id: IP-002.PHASE-02
         - id: IP-002.PHASE-03
-        - id: IP-002.PHASE-01
       phases:
       - schema: supekku.phase.overview
         version: 1
@@ -180,10 +179,112 @@ deltas:
         risks:
         - description: Package manager choice may conflict with flake.nix
           mitigation: "Resolved \u2014 pnpm per user decision, available in flake.nix"
-      - id: IP-002.PHASE-02
+      - schema: supekku.phase.overview
+        version: 1
         phase: IP-002.PHASE-02
-      - id: IP-002.PHASE-03
+        plan: IP-002
+        delta: DE-002
+        objective: "Implement the Figma API interaction layer: auth module, HTTP client\
+          \ with retry/rate-limit, endpoint URL builders, node subtree fetching, and\
+          \ two-step image export. All tested with mocked HTTP \u2014 no real API\
+          \ calls."
+        entrance_criteria:
+        - Phase 1 complete (scaffold, errors, URL parser)
+        - DR-002 accepted
+        exit_criteria:
+        - VT-002 (auth) passing
+        - VT-003 (client retry/rate-limit) passing
+        - VT-004 (image export) passing
+        - Zero lint warnings
+        - tsc --noEmit clean
+        verification:
+          tests:
+          - VT-002
+          - VT-003
+          - VT-004
+          evidence:
+          - 118 tests passing (45 Phase 1 + 73 Phase 2)
+          - eslint clean
+          - tsc --noEmit clean
+          - mise run passes
+        tasks:
+        - id: '2.1'
+          name: Auth module
+        - id: '2.2'
+          name: Endpoint URL builders
+        - id: '2.3'
+          name: Retry utility
+        - id: '2.4'
+          name: Raw type stubs + Zod schemas
+        - id: '2.5'
+          name: HTTP client core
+        - id: '2.6'
+          name: Node fetch
+        - id: '2.7'
+          name: Image export (two-step)
+        risks:
+        - description: "Figma Images API uses GET not POST \u2014 DR-002 says \"POST\
+            \ render request\""
+          mitigation: Verified against API docs. GET /v1/images/:key with query params.
+            Phase plan corrects this.
+        - description: FigmaNode recursive type may be complex to express in Zod
+          mitigation: "Minimal schema with z.lazy() and .passthrough() \u2014 just\
+            \ enough for response envelope validation"
+      - schema: supekku.phase.overview
+        version: 1
         phase: IP-002.PHASE-03
+        plan: IP-002
+        delta: DE-002
+        objective: "Implement manifest schema + builder, artifact directory writer,\
+          \ config types, CLI entry point with commander, and orchestration function\
+          \ that wires parseFigmaUrl \u2192 createAuth \u2192 createClient \u2192\
+          \ fetchNode + fetchImage \u2192 buildManifest \u2192 writeOutput. VT-006\
+          \ (manifest accuracy) and VT-007 (CLI smoke) verified."
+        entrance_criteria:
+        - Phase 2 complete (auth, client, fetch-node, fetch-image)
+        - DR-002 accepted
+        exit_criteria:
+        - VT-006 (manifest accuracy) passing
+        - VT-007 (CLI smoke) passing
+        - figma-fetch --help prints usage
+        - Artifact directory written with manifest.json + raw-node.json + image
+        - Zero lint warnings
+        - tsc --noEmit clean
+        - mise run passes
+        verification:
+          tests:
+          - VT-006
+          - VT-007
+          evidence:
+          - 164 tests passing (118 Phase 1+2 + 46 Phase 3)
+          - eslint clean
+          - tsc --noEmit clean
+          - mise run passes
+        tasks:
+        - id: '3.1'
+          name: Manifest Zod schema
+        - id: '3.2'
+          name: Manifest builder
+        - id: '3.3'
+          name: Config types
+        - id: '3.4'
+          name: Directory writer
+        - id: '3.5'
+          name: Orchestration function
+        - id: '3.6'
+          name: CLI entry point
+        - id: '3.7'
+          name: CLI smoke test (VT-007)
+        risks:
+        - description: "Orchestration error handling \u2014 partial failures (image\
+            \ export fails but node fetch succeeds) must produce manifest with errors,\
+            \ not crash"
+          mitigation: Orchestration catches FigmaRenderError specifically, records
+            it in manifest errors array, continues writing available artifacts
+        - description: "Commander ESM import \u2014 commander v13 is ESM-native but\
+            \ bin shebang needs care"
+          mitigation: Package.json already has type=module and bin pointing to dist/cli.js;
+            add shebang in cli.ts
   DE-003:
     kind: delta
     status: draft
