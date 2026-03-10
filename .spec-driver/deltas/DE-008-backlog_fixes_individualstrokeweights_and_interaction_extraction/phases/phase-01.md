@@ -4,7 +4,7 @@ slug: 008-backlog_fixes_individualstrokeweights_and_interaction_extraction-phase
 name: 'Schema, extractors, and tests'
 created: '2026-03-11'
 updated: '2026-03-11'
-status: draft
+status: in-progress
 kind: phase
 ---
 
