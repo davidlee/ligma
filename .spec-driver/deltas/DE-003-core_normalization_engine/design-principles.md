@@ -21,6 +21,7 @@ Each extractor takes a raw `FigmaNode`, returns `ExtractorResult<T>`. No extract
 This means:
 - No extractor imports another extractor
 - No extractor reads from `NormalizedNode` — only from raw input
+- No extractor checks node type to decide applicability — `node.ts` gates calls (DEC-018)
 - Diagnostics (warnings, omittedFields) flow up, never sideways
 - Testing is trivial: raw node in, typed result out
 
