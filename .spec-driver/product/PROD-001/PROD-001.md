@@ -18,6 +18,7 @@ assumptions:
   - Figma REST API v1 remains stable
   - Personal access token auth is sufficient for v1
   - Target consumers are code-generation agents (Claude Code primarily)
+  - Variables REST API requires Enterprise full-seat access; v1 does not depend on it
 ---
 
 # PROD-001 – Figma fetch and normalization pipeline
@@ -43,6 +44,8 @@ requirements:
     - PROD-001.FR-013
     - PROD-001.FR-014
     - PROD-001.FR-015
+    - PROD-001.FR-016
+    - PROD-001.FR-017
     - PROD-001.NF-001
     - PROD-001.NF-002
     - PROD-001.NF-003
@@ -129,6 +132,23 @@ capabilities:
       - Heuristic inferences include confidence and provenance diagnostics
       - An agent can implement a typical UI frame from normalized output + PNG
 
+  - id: token-summary
+    name: Used-token summary
+    responsibilities:
+      - Aggregate variable/token references encountered during normalization
+      - Aggregate style references encountered during normalization
+      - Emit a scoped summary artifact (not a file-level inventory)
+    requirements:
+      - PROD-001.FR-016
+    summary: >-
+      Collect and deduplicate token/variable and style references encountered
+      while normalizing the selected node subtree. Output is scoped to what
+      was seen, not a full file inventory.
+    success_criteria:
+      - All encountered variable bindings appear in summary
+      - Summary correctly scoped (isFullInventory: false)
+      - Null-safe for missing token names/collections
+
   - id: outline-generation
     name: Sparse outline generation
     responsibilities:
@@ -147,7 +167,7 @@ capabilities:
     name: Agent context file generation
     responsibilities:
       - Generate context.md summarizing all artifacts
-      - Include structural summary, tokens, assets, implementation notes
+      - Include structural summary, tokens used, assets, implementation notes
     requirements:
       - PROD-001.FR-012
     summary: >-
@@ -168,10 +188,25 @@ capabilities:
       - PROD-001.FR-014
     summary: >-
       Emit a deterministic artifact bundle with manifest, visual references,
-      structural data, token extracts, and optional asset exports.
+      structural data, token summary, and optional asset exports.
     success_criteria:
       - Output directory structure matches specification
       - Manifest accurately describes all produced artifacts
+
+  - id: error-handling
+    name: Typed error hierarchy
+    responsibilities:
+      - Define typed error classes for all failure modes
+      - Ensure partial failures preserve best-effort output
+    requirements:
+      - PROD-001.FR-017
+    summary: >-
+      Provide a shared typed error hierarchy used across all modules.
+      Each error type carries actionable context. Partial failures
+      preserve output with diagnostics rather than aborting.
+    success_criteria:
+      - Every documented failure mode has a typed error class
+      - Partial failures produce diagnostics, not crashes
 
   - id: selective-expansion
     name: Selective child expansion
@@ -186,7 +221,7 @@ capabilities:
       shallow fetch, outline, then targeted expansion of relevant children.
     success_criteria:
       - Large frames handled without excessive API calls
-      - Expansion triggers are explicit and testable
+      - Expansion triggers are configurable and testable
 ```
 
 ```yaml supekku:verification.coverage@v1
@@ -201,7 +236,7 @@ entries: []
 - **Problem / Purpose**: Code-generation agents need structured, implementation-oriented design context from Figma. Raw Figma JSON is too noisy, too large, and not shaped for the questions agents actually ask (what is this, how is it laid out, what's reusable, what's a token vs literal). This tool bridges the gap.
 - **Value Signals**: An agent can implement a typical UI frame from `context.md` + `normalized-node.json` + `frame.png` without needing raw Figma JSON.
 - **Guiding Principles**: Structural truth is the product. Visual truth is mandatory. Sparse first, detailed second. Output shaped for implementation, not archival. Determinism over cleverness.
-- **Change History**: Initial specification from `docs/brief.md`.
+- **Change History**: Initial specification from `docs/brief.md`. Patch-01: token inventory descoped to used-token summary; expansion triggers made configurable; error hierarchy promoted to FR; opacity deduplication.
 
 ## 2. Stakeholders & Journeys
 
@@ -214,7 +249,7 @@ entries: []
   2. Runs `figma-fetch "<url>" --token "$FIGMA_TOKEN" --out ./artifacts`
   3. CLI parses URL, fetches node subtree + PNG render
   4. Normalization layer transforms raw JSON → compact structural representation
-  5. Pipeline emits artifact bundle: `context.md`, normalized JSON, outline, visual refs, tokens, manifest
+  5. Pipeline emits artifact bundle: `context.md`, normalized JSON, outline, visual refs, used-token summary, manifest
   6. Agent consumes `context.md` as entrypoint, references normalized JSON and PNG for implementation
 
 - **Edge Cases & Non-goals**:
@@ -224,6 +259,8 @@ entries: []
   - Full-fidelity vector reconstruction: out of scope
   - Design generation, Code Connect, plugin authoring: out of scope
   - Image processing beyond download/export: out of scope
+  - Full file-level token/variable inventory (requires Variables API, Enterprise access): explicitly out of scope for v1. Future enhancement.
+  - Full file-level style inventory: out of scope for v1. Local style metadata from file JSON may be used opportunistically but is not a v1 deliverable.
 
 ## 3. Responsibilities & Requirements
 
@@ -241,7 +278,7 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 - **FR-004**: System MUST export a PNG render of the target node via `GET /v1/images/:key?ids=:nodeId&format=png&scale=2`. SVG export MUST be available as an option. If image export fails but JSON fetch succeeds, the pipeline MUST continue and record the render failure in the manifest.
 
-- **FR-005**: System MUST normalize raw Figma JSON into a compact, recursively structured, implementation-oriented representation. The normalized model MUST include: id, name, type classification, role inference, visibility, bounds, hierarchy metadata, layout, appearance, text, component info, variable bindings, asset info, semantic flags, children, and diagnostics.
+- **FR-005**: System MUST normalize raw Figma JSON into a compact, recursively structured, implementation-oriented representation. The normalized model MUST include: id, name, type classification, role inference, visibility, bounds, hierarchy metadata, layout, appearance, text, component info, variable bindings, asset info, semantic flags, children, and diagnostics. Opacity MUST be represented only in the appearance sub-object, not duplicated at the node level.
 
 - **FR-006**: System MUST classify Figma node types into a reduced implementation-relevant type set: `document`, `page`, `frame`, `group`, `component`, `instance`, `variant-set`, `text`, `shape`, `vector`, `image`, `line`, `boolean-operation`, `mask`, `section`, `unknown`.
 
@@ -251,17 +288,21 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 - **FR-009**: System MUST normalize text nodes to include: content, style (font family/weight/size/line-height/letter-spacing/case/alignment), color, token references, semantic kind (heading/label/body/caption/button/unknown), and truncation settings.
 
-- **FR-010**: System MUST extract and normalize variable/token bindings, distinguishing literal values from variable-bound values. Where possible, expose both resolved literal value and token reference (e.g., `color: "#FFFFFF"` + `tokenRef: "color.bg.surface"`).
+- **FR-010**: System MUST extract and normalize per-node variable/token bindings from `boundVariables` and `explicitVariableModes` in the node JSON, distinguishing literal values from variable-bound values. Where possible, expose both resolved literal value and token reference (e.g., `color: "#FFFFFF"` + `tokenRef: "color.bg.surface"`). This is per-node extraction only — file-level variable inventory is out of scope for v1.
 
 - **FR-011**: System MUST generate sparse outlines in both JSON and XML formats. Outlines MUST include: id, name, type, role, visibility, bounds, child count, and children. The XML outline MUST be compact and human-readable.
 
 - **FR-012**: System MUST generate a `context.md` file as the primary agent entrypoint, containing: source metadata, visual reference path, structural summary, important children list, tokens used, assets, and implementation notes.
 
-- **FR-013**: System MUST emit all artifacts to a structured output directory with subdirectories: `visual/`, `structure/`, `tokens/`, `assets/`, `logs/`. A machine-readable `manifest.json` MUST describe all produced artifacts.
+- **FR-013**: System MUST emit all artifacts to a structured output directory with subdirectories: `visual/`, `structure/`, `tokens/`, `assets/`, `logs/`. The `tokens/` directory MUST contain a single `tokens-used.json` file (see FR-016). A machine-readable `manifest.json` MUST describe all produced artifacts.
 
-- **FR-014**: System MUST implement file-based caching under `.cache/figma-fetch`. Cache key MUST include: file key, node ID, requested depth, version (if pinned), and relevant fetch flags.
+- **FR-014**: System MUST implement file-based caching under `.cache/figma-fetch`. Cache key MUST include: file key, node ID, requested depth, version (if pinned), and relevant fetch flags. Caching is a day-one requirement, not optional quality-of-life.
 
-- **FR-015**: System MUST support selective expansion of child nodes when normalization detects ambiguity or truncation. Expansion triggers include: many descendants, incomplete layout container children, text nodes needing deeper inspection, component instances needing referenced metadata, vector/icon nodes needing export data, image fills needing extraction, and incomplete variable binding context.
+- **FR-015**: System MUST support selective expansion of child nodes when normalization detects ambiguity or truncation. Expansion triggers MUST be configurable with documented default thresholds. Triggers include: child count exceeding threshold, incomplete layout container children, text nodes needing deeper inspection, component instances needing referenced metadata, vector/icon nodes needing export data, image fills needing extraction, and incomplete variable binding context. The requirement is testable by verifying that triggers are configurable and that defaults are documented.
+
+- **FR-016**: System MUST emit a `tokens-used.json` artifact containing a best-effort aggregation of variable and style references encountered during normalization of the selected node subtree. This is NOT a full file-level inventory. The artifact MUST include: scope metadata (fileKey, rootNodeId, `isFullInventory: false`), deduplicated variable references with token ID, name (nullable), collection ID, resolved type, and encountered-on locations, style references with type, ID, name, and encountered-on locations, and a count summary by category (colors, typography, spacing). Fields that cannot be resolved without the Variables API (token name, collection name, resolved values by mode) MUST accept null.
+
+- **FR-017**: System MUST implement a typed error hierarchy shared across all modules. Error types MUST include: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`, `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Each error MUST carry actionable context. Partial failures (e.g., render failure, subtree normalization failure) MUST preserve best-effort output with diagnostics rather than aborting the pipeline.
 
 ### Non-Functional Requirements
 
@@ -271,7 +312,7 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 - **NF-003**: Every normalization heuristic MUST be implemented as an isolated pure function with unit tests.
 
-- **NF-004**: System MUST handle API errors gracefully: auth failure, file/node not found, rate limiting, render failure, and normalization failure MUST produce typed, actionable errors.
+- **NF-004**: System MUST handle API errors gracefully: auth failure, file/node not found, rate limiting, render failure, and normalization failure MUST produce typed, actionable errors via the FR-017 error hierarchy.
 
 - **NF-005**: System MUST be structured as a library + CLI, not a single script. Core logic MUST be importable for future MCP wrapper.
 
@@ -286,7 +327,29 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 ## 4. Solution Outline
 
 - **User Experience / Outcomes**: Single CLI command transforms a Figma URL into an agent-ready artifact bundle. The `context.md` file serves as the primary orientation artifact; normalized JSON provides detailed structural truth; PNG provides visual validation backstop.
-- **Data & Contracts**: See brief §§ Critical data model, Classification model, Role inference, Layout normalization, Appearance normalization, Text normalization, Component normalization, Variable normalization, Asset normalization, Outline format, Manifest.
+- **Data & Contracts**: See brief §§ Critical data model, Classification model, Role inference, Layout normalization, Appearance normalization, Text normalization, Component normalization, Variable normalization, Asset normalization, Outline format, Manifest. Note: `NormalizedNode.opacity` removed from top-level — opacity lives in `NormalizedAppearance` only.
+
+### Expected output directory (v1)
+
+```text
+artifacts/
+  manifest.json
+  context.md
+  visual/
+    frame.png
+    frame.svg            # optional
+  structure/
+    raw-node.json
+    normalized-node.json
+    outline.xml
+    outline.json
+  tokens/
+    tokens-used.json     # scoped to fetched subtree, not file-level
+  assets/
+    ...
+  logs/
+    fetch-metadata.json  # optional debug
+```
 
 ## 5. Behaviour & Scenarios
 
@@ -298,37 +361,41 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
   5. Build sparse outline from JSON
   6. Normalize root + immediate descendants
   7. Evaluate expansion triggers → selectively refetch children if needed
-  8. Extract tokens/variables
-  9. Classify assets
-  10. Generate context.md
-  11. Write artifact bundle + manifest
+  8. Extract per-node token/variable bindings
+  9. Aggregate encountered tokens into used-token summary
+  10. Classify assets
+  11. Generate context.md
+  12. Write artifact bundle + manifest
 
 - **Error Handling / Guards**:
-  - Invalid URL → exit with precise parse error
-  - Auth failure → exit with auth error
-  - Node not found → exit with not-found error
-  - Rate limit → retry with backoff
-  - Render failure → continue, record in manifest
-  - Partial normalization failure → preserve best-effort parent, record diagnostics
+  - Invalid URL → exit with `FigmaUrlParseError`
+  - Auth failure → exit with `FigmaAuthError`
+  - Node not found → exit with `FigmaNotFoundError`
+  - Rate limit → retry with backoff, then `FigmaRateLimitError`
+  - Render failure → continue, record in manifest via `FigmaRenderError`
+  - Partial normalization failure → preserve best-effort parent, record `NormalizationError` diagnostics
 
 ## 6. Quality & Verification
 
 - **Testing Strategy**:
-  - Unit tests: URL parsing, layout mapping, role inference, text normalization, component extraction, token binding extraction, asset classification, outline generation
+  - Unit tests: URL parsing, layout mapping, role inference, text normalization, component extraction, token binding extraction, asset classification, outline generation, used-token aggregation
   - Fixture tests: raw Figma JSON fixtures for representative UI patterns (card, form, table row, nav bar, modal, icon button, marketing block, component instance, token-bound theme)
-  - Golden tests: raw input → expected normalized JSON + outline XML + context.md
+  - Golden tests: raw input → expected normalized JSON + outline XML + context.md + tokens-used.json
   - Normalization layer developed like a compiler pass with snapshot tests
 
 - **Observability & Analysis**: Debug mode (`--debug`) emits `logs/fetch-metadata.json` with request/response metadata.
 
 ## 7. Backlog Hooks & Dependencies
 
-- **Related Specs / PROD**: Future TECH assembly spec to be created for system architecture.
+- **Related Specs / PROD**: SPEC-001 (tech assembly spec).
 - **Risks & Mitigations**:
   - Figma API rate limiting → caching + p-limit concurrency control
   - Heuristic inaccuracy → conservative defaults + diagnostics + confidence scoring
   - Large frames exceeding practical limits → staged retrieval strategy
-- **Known Gaps / Debt**: MCP wrapper deferred to future phase.
+- **Known Gaps / Debt**:
+  - MCP wrapper deferred to future phase
+  - Full file-level variable inventory (requires Variables API, Enterprise access) deferred
+  - Full file-level style inventory deferred
 - **Open Decisions / Questions**:
-  - Exact thresholds for expansion triggers (child count, vector complexity)
+  - Default thresholds for expansion triggers (to be determined during DE-006 implementation)
   - OAuth support timeline and requirements

@@ -82,7 +82,8 @@ requirements:
       implementation-oriented representation. The normalized model MUST include: id,
       name, type classification, role inference, visibility, bounds, hierarchy metadata,
       layout, appearance, text, component info, variable bindings, asset info, semantic
-      flags, children, and diagnostics.'
+      flags, children, and diagnostics. Opacity MUST be represented only in the appearance
+      sub-object, not duplicated at the node level.'
     specs:
     - PROD-001
     primary_spec: PROD-001
@@ -181,9 +182,12 @@ requirements:
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-010:
     label: FR-010
-    title: 'System MUST extract and normalize variable/token bindings, distinguishing
-      literal values from variable-bound values. Where possible, expose both resolved
-      literal value and token reference (e.g., `color: "#FFFFFF"` + `tokenRef: "color.bg.surface"`).'
+    title: "System MUST extract and normalize per-node variable/token bindings from\
+      \ `boundVariables` and `explicitVariableModes` in the node JSON, distinguishing\
+      \ literal values from variable-bound values. Where possible, expose both resolved\
+      \ literal value and token reference (e.g., `color: \"#FFFFFF\"` + `tokenRef:\
+      \ \"color.bg.surface\"`). This is per-node extraction only \u2014 file-level\
+      \ variable inventory is out of scope for v1."
     specs:
     - PROD-001
     primary_spec: PROD-001
@@ -239,8 +243,9 @@ requirements:
   PROD-001.FR-013:
     label: FR-013
     title: 'System MUST emit all artifacts to a structured output directory with subdirectories:
-      `visual/`, `structure/`, `tokens/`, `assets/`, `logs/`. A machine-readable `manifest.json`
-      MUST describe all produced artifacts.'
+      `visual/`, `structure/`, `tokens/`, `assets/`, `logs/`. The `tokens/` directory
+      MUST contain a single `tokens-used.json` file (see FR-016). A machine-readable
+      `manifest.json` MUST describe all produced artifacts.'
     specs:
     - PROD-001
     primary_spec: PROD-001
@@ -259,7 +264,7 @@ requirements:
     label: FR-014
     title: 'System MUST implement file-based caching under `.cache/figma-fetch`. Cache
       key MUST include: file key, node ID, requested depth, version (if pinned), and
-      relevant fetch flags.'
+      relevant fetch flags. Caching is a day-one requirement, not optional quality-of-life.'
     specs:
     - PROD-001
     primary_spec: PROD-001
@@ -277,10 +282,13 @@ requirements:
   PROD-001.FR-015:
     label: FR-015
     title: 'System MUST support selective expansion of child nodes when normalization
-      detects ambiguity or truncation. Expansion triggers include: many descendants,
+      detects ambiguity or truncation. Expansion triggers MUST be configurable with
+      documented default thresholds. Triggers include: child count exceeding threshold,
       incomplete layout container children, text nodes needing deeper inspection,
       component instances needing referenced metadata, vector/icon nodes needing export
-      data, image fills needing extraction, and incomplete variable binding context.'
+      data, image fills needing extraction, and incomplete variable binding context.
+      The requirement is testable by verifying that triggers are configurable and
+      that defaults are documented.'
     specs:
     - PROD-001
     primary_spec: PROD-001
@@ -291,6 +299,53 @@ requirements:
     introduced: null
     implemented_by:
     - DE-006
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-016:
+    label: FR-016
+    title: 'System MUST emit a `tokens-used.json` artifact containing a best-effort
+      aggregation of variable and style references encountered during normalization
+      of the selected node subtree. This is NOT a full file-level inventory. The artifact
+      MUST include: scope metadata (fileKey, rootNodeId, `isFullInventory: false`),
+      deduplicated variable references with token ID, name (nullable), collection
+      ID, resolved type, and encountered-on locations, style references with type,
+      ID, name, and encountered-on locations, and a count summary by category (colors,
+      typography, spacing). Fields that cannot be resolved without the Variables API
+      (token name, collection name, resolved values by mode) MUST accept null.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-004
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-017:
+    label: FR-017
+    title: 'System MUST implement a typed error hierarchy shared across all modules.
+      Error types MUST include: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`,
+      `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Each error
+      MUST carry actionable context. Partial failures (e.g., render failure, subtree
+      normalization failure) MUST preserve best-effort output with diagnostics rather
+      than aborting the pipeline.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
     verified_by: []
     coverage_evidence: []
     coverage_entries: []
@@ -353,7 +408,7 @@ requirements:
     label: NF-004
     title: 'System MUST handle API errors gracefully: auth failure, file/node not
       found, rate limiting, render failure, and normalization failure MUST produce
-      typed, actionable errors.'
+      typed, actionable errors via the FR-017 error hierarchy.'
     specs:
     - PROD-001
     primary_spec: PROD-001
@@ -424,10 +479,10 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-002:
     label: FR-002
-    title: '`figma/client.ts` MUST send authenticated requests to Figma REST API with
-      configurable depth, geometry, and plugin data options. Auth MUST use `X-Figma-Token`
-      header. Failed requests MUST be retried with exponential backoff (max 3 attempts).
-      Rate limit responses (429) MUST trigger backoff.'
+    title: '`figma/auth.ts` MUST provide an authentication module with the contract
+      `{ token: string; header(): Record<string, string> }` that produces `X-Figma-Token`
+      headers. The module MUST be designed so OAuth support can be added later without
+      changing consumer code.'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -443,6 +498,26 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-003:
     label: FR-003
+    title: '`figma/client.ts` MUST send authenticated requests to the Figma REST API
+      with configurable depth, geometry, and plugin data options. Failed requests
+      MUST be retried with exponential backoff (max 3 attempts). Rate limit responses
+      (429) MUST trigger backoff. The client MUST use the auth module (FR-002) for
+      header injection.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-004:
+    label: FR-004
     title: "`figma/fetch-image.ts` MUST export PNG at scale=2 by default. SVG export\
       \ MUST be available via option. Render failure MUST NOT block the pipeline \u2014\
       \ failure is recorded in manifest."
@@ -459,8 +534,8 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-004:
-    label: FR-004
+  SPEC-001.FR-005:
+    label: FR-005
     title: '`normalize/classify.ts` MUST map raw Figma node types to the `NormalizedNodeType`
       enum: `document`, `page`, `frame`, `group`, `component`, `instance`, `variant-set`,
       `text`, `shape`, `vector`, `image`, `line`, `boolean-operation`, `mask`, `section`,
@@ -478,31 +553,13 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-005:
-    label: FR-005
-    title: '`normalize/node.ts`, `layout.ts`, `style.ts`, `text.ts` MUST transform
-      raw Figma JSON into `NormalizedNode` trees. Layout MUST normalize to mode/sizing/alignment/padding/gap/wrap/constraints/position/clip.
-      Appearance MUST normalize fills, strokes, effects, corner radius. Text MUST
-      normalize content, style, color, token refs, semantic kind, truncation.'
-    specs:
-    - SPEC-001
-    primary_spec: SPEC-001
-    kind: functional
-    category: assembly
-    status: pending
-    tags: []
-    introduced: null
-    implemented_by: []
-    verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
-    path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-006:
     label: FR-006
-    title: "`normalize/heuristics.ts` MUST infer `NormalizedRole` from node properties\
-      \ using documented heuristic rules (container, stack, button, input, icon, heading,\
-      \ etc.). Inference MUST be conservative \u2014 `unknown` over overconfident\
-      \ guesses. Each heuristic MUST be an isolated pure function."
+    title: '`normalize/node.ts`, `layout.ts`, `style.ts`, `text.ts` MUST transform
+      raw Figma JSON into `NormalizedNode` trees. Layout MUST normalize to mode/sizing/alignment/padding/gap/wrap/constraints/position/clip.
+      Appearance MUST normalize fills, strokes, effects, corner radius. Opacity MUST
+      be represented only in `NormalizedAppearance`, not duplicated at the node level.
+      Text MUST normalize content, style, color, token refs, semantic kind, truncation.'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -518,6 +575,64 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-007:
     label: FR-007
+    title: "`normalize/heuristics.ts` MUST infer `NormalizedRole` from node properties.\
+      \ Inference MUST be conservative \u2014 `unknown` over overconfident guesses.\
+      \ Each heuristic MUST be an isolated pure function. The following heuristic\
+      \ rules MUST be implemented:"
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-008:
+    label: FR-008
+    title: "`normalize/variables.ts` MUST extract `boundVariables` and `explicitVariableModes`\
+      \ from node JSON, mapping them to `NormalizedVariableBindings` with resolved\
+      \ token names where available. Both literal value and token reference MUST be\
+      \ surfaced. This is per-node extraction only \u2014 file-level variable inventory\
+      \ is out of scope."
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-009:
+    label: FR-009
+    title: '`util/cache.ts` MUST implement file-based caching under `.cache/figma-fetch`.
+      Cache key MUST include: file key, node ID, requested depth, version (if pinned),
+      and relevant fetch flags. Caching is a day-one requirement. Cache MUST be wrapping
+      Figma client calls.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-010:
+    label: FR-010
     title: '`normalize/components.ts` MUST extract component/instance metadata including
       componentId, componentName, componentSetId, variant properties, property references,
       and reusability assessment.'
@@ -534,26 +649,8 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-008:
-    label: FR-008
-    title: '`normalize/variables.ts` MUST extract `boundVariables` and `explicitVariableModes`,
-      mapping them to `NormalizedVariableBindings` with resolved token names where
-      available. Both literal value and token reference MUST be surfaced.'
-    specs:
-    - SPEC-001
-    primary_spec: SPEC-001
-    kind: functional
-    category: assembly
-    status: pending
-    tags: []
-    introduced: null
-    implemented_by: []
-    verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
-    path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-009:
-    label: FR-009
+  SPEC-001.FR-011:
+    label: FR-011
     title: '`normalize/assets.ts` MUST classify nodes as likely assets based on: image
       fills, vector complexity, naming patterns, boolean operations. MUST produce
       export suggestions with reason strings.'
@@ -570,11 +667,15 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-010:
-    label: FR-010
-    title: '`normalize/outline.ts` MUST generate JSON and XML outlines from normalized
-      trees. XML MUST use compact element-per-node format with key attributes (id,
-      name, role, bounds).'
+  SPEC-001.FR-012:
+    label: FR-012
+    title: '`normalize/tokens-used.ts` MUST aggregate variable and style references
+      encountered during normalization of the selected subtree into a `tokens-used.json`
+      artifact. The artifact MUST include: scope metadata (`fileKey`, `rootNodeId`,
+      `isFullInventory: false`), deduplicated variable references (token ID, name
+      (nullable), collection ID, resolved type, encountered-on locations), style references
+      (type, ID, name, encountered-on locations), and a count summary by category.
+      Fields unresolvable without the Variables API MUST accept null.'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -588,8 +689,26 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-011:
-    label: FR-011
+  SPEC-001.FR-013:
+    label: FR-013
+    title: '`normalize/outline.ts` MUST generate JSON and XML outlines from normalized
+      trees. XML MUST use the following element vocabulary mapping `NormalizedNodeType`
+      to element names:'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-014:
+    label: FR-014
     title: '`output/context-md.ts` MUST generate `context.md` with sections: source
       metadata, visual reference, structural summary, important children, tokens used,
       assets, implementation notes.'
@@ -606,11 +725,12 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-012:
-    label: FR-012
+  SPEC-001.FR-015:
+    label: FR-015
     title: '`output/write.ts` MUST create the artifact directory structure (`visual/`,
       `structure/`, `tokens/`, `assets/`, `logs/`) and write all artifacts. `output/manifest.ts`
-      MUST generate `manifest.json` describing all produced artifacts.'
+      MUST generate `manifest.json` describing all produced artifacts. The `tokens/`
+      directory contains `tokens-used.json` only.'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -624,12 +744,35 @@ requirements:
     coverage_evidence: []
     coverage_entries: []
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.FR-013:
-    label: FR-013
-    title: Selective expansion MUST detect ambiguity/truncation triggers (many descendants,
-      incomplete layout containers, text needing deeper inspection, component instances
-      needing referenced metadata, vectors needing export data, image fills needing
-      extraction, incomplete variable context) and refetch specific child nodes.
+  SPEC-001.FR-016:
+    label: FR-016
+    title: '`errors.ts` MUST define a typed error hierarchy: `FigmaUrlParseError`,
+      `FigmaAuthError`, `FigmaNotFoundError`, `FigmaRateLimitError`, `FigmaRenderError`,
+      `NormalizationError`. Each error MUST carry actionable context (message, cause,
+      relevant IDs). Partial failures MUST preserve best-effort output with diagnostics.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-017:
+    label: FR-017
+    title: 'Selective expansion MUST evaluate configurable expansion triggers with
+      documented default thresholds after initial normalization. Triggers: child count
+      exceeding configurable threshold, incomplete layout container children, text
+      nodes needing deeper inspection, component instances needing referenced component
+      metadata, vector/icon nodes needing export data, image fills needing extraction,
+      incomplete variable binding context. Default thresholds MUST be documented and
+      overridable via configuration. The system MUST refetch specific child nodes
+      and merge expanded data into the normalized tree.'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -696,26 +839,9 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.NF-004:
     label: NF-004
-    title: 'Typed error hierarchy: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`,
-      `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Partial failures
-      MUST preserve best-effort output with diagnostics.'
-    specs:
-    - SPEC-001
-    primary_spec: SPEC-001
-    kind: non-functional
-    category: assembly
-    status: pending
-    tags: []
-    introduced: null
-    implemented_by: []
-    verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
-    path: .spec-driver/tech/SPEC-001/SPEC-001.md
-  SPEC-001.NF-005:
-    label: NF-005
-    title: 'File-based caching under `.cache/figma-fetch`. Cache key includes: file
-      key, node ID, depth, version, fetch flags.'
+    title: 'System MUST be structured as a library + CLI, not a single script. Core
+      logic MUST be importable for future MCP wrapper. Minimal dependencies: TypeScript,
+      Zod, native fetch/undici, commander/yargs, p-limit, vitest.'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
