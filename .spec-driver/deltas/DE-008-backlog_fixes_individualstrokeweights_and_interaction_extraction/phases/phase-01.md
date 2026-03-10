@@ -4,7 +4,7 @@ slug: 008-backlog_fixes_individualstrokeweights_and_interaction_extraction-phase
 name: 'Schema, extractors, and tests'
 created: '2026-03-11'
 updated: '2026-03-11'
-status: in-progress
+status: completed
 kind: phase
 ---
 
@@ -74,14 +74,14 @@ Implement both DE-008 work streams: per-side stroke weight support (ISSUE-001) a
 - [x] IP-008 active
 
 ## 4. Exit Criteria / Done When
-- [ ] `StrokeWeight` discriminated union in schema
-- [ ] `resolveStrokeWeight()` prefers `individualStrokeWeights` over scalar
-- [ ] `NormalizedNode.interactions` field added
-- [ ] `extractInteractions()` extractor wired into pipeline
-- [ ] VT-010 extended (per-side, uniform, zero, precedence, malformed)
-- [ ] VT-020 interaction tests (triggers, actions, navigation derivation, unknowns, malformed)
-- [ ] `mise run` passes
-- [ ] Contracts synced
+- [x] `StrokeWeight` discriminated union in schema
+- [x] `resolveStrokeWeight()` prefers `individualStrokeWeights` over scalar
+- [x] `NormalizedNode.interactions` field added
+- [x] `extractInteractions()` extractor wired into pipeline
+- [x] VT-010 extended (per-side, uniform, zero, precedence, malformed)
+- [x] VT-020 interaction tests (triggers, actions, navigation derivation, unknowns, malformed)
+- [x] `mise run` passes — 607 tests, zero lint warnings
+- [x] Contracts synced
 
 ## 5. Verification
 - `pnpm vitest run` — all tests green
@@ -97,14 +97,14 @@ Implement both DE-008 work streams: per-side stroke weight support (ISSUE-001) a
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 1.1 | `StrokeWeightSchema` in `schemas/normalized.ts` | [P] | DEC-030 |
-| [ ] | 1.2 | `resolveStrokeWeight()` + update `collectStrokes`/`normalizeStroke` | | Depends on 1.1 |
-| [ ] | 1.3 | Stroke weight tests (VT-010 extension) | | Depends on 1.2 |
-| [ ] | 2.1 | Interaction schemas in `schemas/normalized.ts` | [P] | DEC-031, DEC-032, DEC-033 |
-| [ ] | 2.2 | `extractInteractions()` in `normalize/interactions.ts` | | Depends on 2.1 |
-| [ ] | 2.3 | Wire `extractInteractions` into `node.ts` | | Depends on 2.2 |
-| [ ] | 2.4 | Interaction tests (VT-020) | | Depends on 2.3 |
-| [ ] | 3.1 | Lint + typecheck + contract sync | | Depends on all above |
+| [x] | 1.1 | `StrokeWeightSchema` in `schemas/normalized.ts` | [P] | DEC-030 |
+| [x] | 1.2 | `resolveStrokeWeight()` + update `collectStrokes`/`normalizeStroke` | | Depends on 1.1 |
+| [x] | 1.3 | Stroke weight tests (VT-010 extension) | | Depends on 1.2 |
+| [x] | 2.1 | Interaction schemas in `schemas/normalized.ts` | [P] | DEC-031, DEC-032, DEC-033 |
+| [x] | 2.2 | `extractInteractions()` in `normalize/interactions.ts` | | Depends on 2.1 |
+| [x] | 2.3 | Wire `extractInteractions` into `node.ts` | | Depends on 2.2 |
+| [x] | 2.4 | Interaction tests (VT-020) | | Depends on 2.3 |
+| [x] | 3.1 | Lint + typecheck + contract sync | | Depends on all above |
 
 ### Task Details
 
