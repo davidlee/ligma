@@ -2,6 +2,7 @@
 .direnv/
 .spec-driver/run/
 .claude/settings.local.json
+.contracts
 /artifacts
 
 node_modules/
