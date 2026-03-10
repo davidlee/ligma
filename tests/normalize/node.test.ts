@@ -178,16 +178,21 @@ describe('normalizeNode (VT-012)', () => {
     })
   })
 
-  describe('DE-003 placeholder fields', () => {
-    it('component is null', () => {
-      expect(normalizeNode(makeNode('COMPONENT'), ROOT_CONTEXT).component).toBeNull()
+  describe('DE-004 extractor wiring', () => {
+    it('component populated for COMPONENT type', () => {
+      const node = normalizeNode(makeNode('COMPONENT'), ROOT_CONTEXT)
+      expect(node.component).toMatchObject({ kind: 'component', isReusable: true })
     })
 
-    it('variables is null', () => {
+    it('component null for non-component type', () => {
+      expect(normalizeNode(makeNode('FRAME'), ROOT_CONTEXT).component).toBeNull()
+    })
+
+    it('variables null when no boundVariables', () => {
       expect(normalizeNode(makeNode('FRAME'), ROOT_CONTEXT).variables).toBeNull()
     })
 
-    it('asset is null', () => {
+    it('asset null when no asset signals', () => {
       expect(normalizeNode(makeNode('FRAME'), ROOT_CONTEXT).asset).toBeNull()
     })
 

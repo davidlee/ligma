@@ -1,9 +1,12 @@
 import { extractAppearance } from './appearance.js'
+import { extractAsset } from './assets.js'
 import { extractBounds } from './bounds.js'
 import { classify } from './classify.js'
+import { extractComponent } from './components.js'
 import { extractLayout } from './layout.js'
 import { getRawBoolean } from './raw-helpers.js'
 import { extractText } from './text.js'
+import { extractVariables } from './variables.js'
 
 import type { AnalysisResult, ExtractorResult } from './raw-helpers.js'
 import type { FigmaNode } from '../figma/types-raw.js'
@@ -84,19 +87,37 @@ interface ExtractionResults {
   layout: ExtractorResult<NormalizedNode['layout']>
   appearance: ExtractorResult<NormalizedNode['appearance']>
   text: ExtractorResult<NormalizedNode['text']> | null
+  component: ExtractorResult<NormalizedNode['component']>
+  variables: ExtractorResult<NormalizedNode['variables']>
+  asset: ExtractorResult<NormalizedNode['asset']>
   all: ExtractorResult<unknown>[]
+}
+
+function runCoreExtractors(raw: FigmaNode): Omit<ExtractionResults, 'text' | 'all'> {
+  return {
+    bounds: extractBounds(raw),
+    layout: extractLayout(raw),
+    appearance: extractAppearance(raw),
+    component: extractComponent(raw),
+    variables: extractVariables(raw),
+    asset: extractAsset(raw),
+  }
 }
 
 function runExtractors(raw: FigmaNode, type: string): ExtractionResults {
   const skip = SKIP_EXTRACTORS.has(type)
-  const bounds = skip ? EMPTY_RESULT : extractBounds(raw)
-  const layout = skip ? EMPTY_RESULT : extractLayout(raw)
-  const appearance = skip ? EMPTY_RESULT : extractAppearance(raw)
+  const core = skip
+    ? { bounds: EMPTY_RESULT, layout: EMPTY_RESULT, appearance: EMPTY_RESULT, component: EMPTY_RESULT, variables: EMPTY_RESULT, asset: EMPTY_RESULT }
+    : runCoreExtractors(raw)
   const text = type === 'text' ? extractText(raw) : null
-  const all: ExtractorResult<unknown>[] = text !== null
-    ? [bounds, layout, appearance, text]
-    : [bounds, layout, appearance]
-  return { bounds, layout, appearance, text, all }
+  const all: ExtractorResult<unknown>[] = [
+    core.bounds, core.layout, core.appearance,
+    core.component, core.variables, core.asset,
+  ]
+  if (text !== null) {
+    all.push(text)
+  }
+  return { ...core, text, all }
 }
 
 function buildChildContext(raw: FigmaNode, context: NormalizeContext): NormalizeContext {
@@ -127,9 +148,9 @@ export function normalizeNode(raw: FigmaNode, context: NormalizeContext): Normal
     layout: extracted.layout.value,
     appearance: extracted.appearance.value,
     text: extracted.text?.value ?? null,
-    component: null,
-    variables: null,
-    asset: null,
+    component: extracted.component.value,
+    variables: extracted.variables.value,
+    asset: extracted.asset.value,
     semantics: DEFAULT_SEMANTICS,
     children: (raw.children ?? []).map((child) => normalizeNode(child, childContext)),
     diagnostics: {
