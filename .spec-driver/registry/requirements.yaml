@@ -157,14 +157,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-004
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-017
+    coverage_entries:
+    - artefact: VT-017
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-008:
     label: FR-008
@@ -227,14 +231,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-004
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-015
+    coverage_entries:
+    - artefact: VT-015
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-011:
     label: FR-011
@@ -357,14 +365,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-004
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-022
+    coverage_entries:
+    - artefact: VT-022
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-017:
     label: FR-017
@@ -630,13 +642,17 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-008
+    coverage_entries:
+    - artefact: VT-008
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-006:
     label: FR-006
@@ -650,32 +666,56 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-010
+    - VT-012
+    - VT-023
+    coverage_entries:
+    - artefact: VT-010
+      status: verified
+      kind: VT
+    - artefact: VT-012
+      status: verified
+      kind: VT
+    - artefact: VT-023
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-007:
     label: FR-007
-    title: "`normalize/heuristics.ts` MUST infer `NormalizedRole` from node properties.\
-      \ Inference MUST be conservative \u2014 `unknown` over overconfident guesses.\
-      \ Each heuristic MUST be an isolated pure function. The following heuristic\
-      \ rules MUST be implemented:"
+    title: "`normalize/infer/` MUST infer `NormalizedRole` from node properties via\
+      \ a 13-rule priority chain with noise early-out. Inference MUST be conservative\
+      \ \u2014 `null` role over overconfident guesses. Each heuristic MUST be an isolated\
+      \ pure function. The following heuristic rules MUST be implemented:"
     specs:
     - SPEC-001
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-017
+    - VT-019
+    - VT-020
+    coverage_entries:
+    - artefact: VT-017
+      status: verified
+      kind: VT
+    - artefact: VT-019
+      status: verified
+      kind: VT
+    - artefact: VT-020
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-008:
     label: FR-008
@@ -689,13 +729,21 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-009
+    - VT-015
+    coverage_entries:
+    - artefact: VT-009
+      status: verified
+      kind: VT
+    - artefact: VT-015
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-009:
     label: FR-009
@@ -708,13 +756,21 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-011
+    - VT-018
+    coverage_entries:
+    - artefact: VT-011
+      status: verified
+      kind: VT
+    - artefact: VT-018
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-010:
     label: FR-010
@@ -726,13 +782,17 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-014
+    coverage_entries:
+    - artefact: VT-014
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-011:
     label: FR-011
@@ -744,17 +804,21 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-016
+    coverage_entries:
+    - artefact: VT-016
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-012:
     label: FR-012
-    title: '`normalize/tokens-used.ts` MUST aggregate variable and style references
+    title: '`summary/tokens-used.ts` MUST aggregate variable and style references
       encountered during normalization of the selected subtree into a `tokens-used.json`
       artifact. The artifact MUST include: scope metadata (`fileKey`, `rootNodeId`,
       `isFullInventory: false`), deduplicated variable references (token ID, name
@@ -766,13 +830,17 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-022
+    coverage_entries:
+    - artefact: VT-022
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-013:
     label: FR-013
@@ -894,13 +962,17 @@ requirements:
     primary_spec: SPEC-001
     kind: non-functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-013
+    coverage_entries:
+    - artefact: VT-013
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.NF-002:
     label: NF-002
@@ -911,13 +983,17 @@ requirements:
     primary_spec: SPEC-001
     kind: non-functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-021
+    coverage_entries:
+    - artefact: VT-021
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.NF-003:
     label: NF-003
