@@ -1,1 +1,317 @@
-deltas: {}
+deltas:
+  DE-001:
+    kind: delta
+    status: completed
+    name: Delta - PROD-001 delivery planning
+    slug: prod_001_delivery_planning
+    updated: '2026-03-10'
+    path: .spec-driver/deltas/DE-001-prod_001_delivery_planning/DE-001.md
+    applies_to:
+      specs:
+      - PROD-001
+      requirements: []
+    plan:
+      id: IP-001
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-001
+        delta: DE-001
+        revision_links:
+          aligns_with:
+          - DR-001
+        specs:
+          primary:
+          - PROD-001
+          collaborators: []
+        requirements:
+          targets: []
+          dependencies: []
+        phases:
+        - id: IP-001.PHASE-01
+        - id: IP-001.PHASE-02
+      phases:
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-001.PHASE-01
+        plan: IP-001
+        delta: DE-001
+        objective: Create SPEC-001 (TECH assembly spec) defining system module architecture,
+          responsibilities, and PROD-001 requirement allocation.
+        entrance_criteria:
+        - PROD-001 drafted with requirements
+        exit_criteria:
+        - SPEC-001 created with module definitions
+        - All PROD-001 requirements allocated to modules
+        - spec-driver validate passes
+        verification:
+          tests: []
+          evidence: []
+        tasks:
+        - id: '1.1'
+          description: Create SPEC-001 tech spec (assembly category)
+          status: todo
+        - id: '1.2'
+          description: Define module responsibilities and requirement allocation
+          status: todo
+        - id: '1.3'
+          description: Validate and commit
+          status: todo
+        risks: []
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-001.PHASE-02
+        plan: IP-001
+        delta: DE-001
+        objective: Create DE-002 through DE-006 as scoped delivery deltas with applies-to
+          requirements from PROD-001 and SPEC-001.
+        entrance_criteria:
+        - SPEC-001 created with module definitions
+        exit_criteria:
+        - All 5 delivery deltas created
+        - Each delta has applies-to requirements
+        - spec-driver validate passes
+        verification:
+          tests: []
+          evidence: []
+        tasks:
+        - id: '2.1'
+          description: Create DE-002 (scaffold + Figma client)
+          status: todo
+        - id: '2.2'
+          description: Create DE-003 (core normalization)
+          status: todo
+        - id: '2.3'
+          description: Create DE-004 (semantic inference + tokens + assets)
+          status: todo
+        - id: '2.4'
+          description: Create DE-005 (outline + context.md)
+          status: todo
+        - id: '2.5'
+          description: Create DE-006 (selective expansion + caching)
+          status: todo
+        risks: []
+  DE-002:
+    kind: delta
+    status: draft
+    name: Delta - Project scaffold and Figma client
+    slug: project_scaffold_and_figma_client
+    updated: '2026-03-10'
+    path: .spec-driver/deltas/DE-002-project_scaffold_and_figma_client/DE-002.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - PROD-001.FR-001
+      - PROD-001.FR-002
+      - PROD-001.FR-003
+      - PROD-001.FR-004
+      - PROD-001.FR-013
+      - PROD-001.FR-017
+      - PROD-001.NF-004
+      - PROD-001.NF-005
+      - PROD-001.NF-006
+    relations:
+    - type: depends-on
+      target: DE-001
+      attributes: {}
+    plan:
+      id: IP-002
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-002
+        delta: DE-002
+        revision_links:
+          aligns_with: []
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - PROD-001.FR-001
+          - PROD-001.FR-002
+          - PROD-001.FR-003
+          - PROD-001.FR-004
+          - PROD-001.FR-013
+          - PROD-001.NF-004
+          - PROD-001.NF-005
+          - PROD-001.NF-006
+          dependencies: []
+        phases:
+        - id: IP-002-P01
+      phases:
+      - id: IP-002-P01
+        phase: IP-002-P01
+  DE-003:
+    kind: delta
+    status: draft
+    name: Delta - Core normalization engine
+    slug: core_normalization_engine
+    updated: '2026-03-10'
+    path: .spec-driver/deltas/DE-003-core_normalization_engine/DE-003.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - PROD-001.FR-005
+      - PROD-001.FR-006
+      - PROD-001.FR-008
+      - PROD-001.FR-009
+      - PROD-001.NF-001
+      - PROD-001.NF-003
+    relations:
+    - type: depends-on
+      target: DE-002
+      attributes: {}
+    plan:
+      id: IP-003
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-003
+        delta: DE-003
+        revision_links:
+          aligns_with: []
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - PROD-001.FR-005
+          - PROD-001.FR-006
+          - PROD-001.FR-008
+          - PROD-001.FR-009
+          - PROD-001.NF-001
+          - PROD-001.NF-003
+          dependencies: []
+        phases:
+        - id: IP-003-P01
+      phases:
+      - id: IP-003-P01
+        phase: IP-003-P01
+  DE-004:
+    kind: delta
+    status: draft
+    name: Delta - Semantic inference, tokens, and assets
+    slug: semantic_inference_tokens_and_assets
+    updated: '2026-03-10'
+    path: .spec-driver/deltas/DE-004-semantic_inference_tokens_and_assets/DE-004.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - PROD-001.FR-007
+      - PROD-001.FR-010
+      - PROD-001.FR-016
+    relations:
+    - type: depends-on
+      target: DE-003
+      attributes: {}
+    plan:
+      id: IP-004
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-004
+        delta: DE-004
+        revision_links:
+          aligns_with: []
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - PROD-001.FR-007
+          - PROD-001.FR-010
+          dependencies: []
+        phases:
+        - id: IP-004-P01
+      phases:
+      - id: IP-004-P01
+        phase: IP-004-P01
+  DE-005:
+    kind: delta
+    status: draft
+    name: Delta - Outline and context generation
+    slug: outline_and_context_generation
+    updated: '2026-03-10'
+    path: .spec-driver/deltas/DE-005-outline_and_context_generation/DE-005.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - PROD-001.FR-011
+      - PROD-001.FR-012
+      - PROD-001.NF-002
+    relations:
+    - type: depends-on
+      target: DE-003
+      attributes: {}
+    plan:
+      id: IP-005
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-005
+        delta: DE-005
+        revision_links:
+          aligns_with: []
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - PROD-001.FR-011
+          - PROD-001.FR-012
+          - PROD-001.NF-002
+          dependencies: []
+        phases:
+        - id: IP-005-P01
+      phases:
+      - id: IP-005-P01
+        phase: IP-005-P01
+  DE-006:
+    kind: delta
+    status: draft
+    name: Delta - Selective expansion and caching
+    slug: selective_expansion_and_caching
+    updated: '2026-03-10'
+    path: .spec-driver/deltas/DE-006-selective_expansion_and_caching/DE-006.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - PROD-001.FR-014
+      - PROD-001.FR-015
+    relations:
+    - type: depends-on
+      target: DE-003
+      attributes: {}
+    plan:
+      id: IP-006
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-006
+        delta: DE-006
+        revision_links:
+          aligns_with: []
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - PROD-001.FR-014
+          - PROD-001.FR-015
+          dependencies: []
+        phases:
+        - id: IP-006-P01
+      phases:
+      - id: IP-006-P01
+        phase: IP-006-P01
