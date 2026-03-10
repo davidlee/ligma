@@ -17,6 +17,7 @@
             # pkgs.bun
             pkgs.pnpm
             pkgs.eslint
+            pkgs.mise
           ];
         };
       }

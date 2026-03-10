@@ -21,7 +21,7 @@ exec = "spec-driver"
 
 ## Command agents run to verify the project (tests + lint).
 # [verification]
-# command = "just check"
+command = "mise run"
 
 ## Kanban-style task cards for lightweight work tracking.
 ## Disable with enabled = false if you only use deltas.

@@ -1,0 +1,19 @@
+[tasks.default]
+description = "pre-commit check."
+run = "mise check"
+
+[tasks.check]
+description = "pre-commit check."
+run = "mise run typecheck && mise run test && mise run lint"
+
+[tasks.lint]
+description = "lint. zero warnings."
+run = "pnpm lint"
+
+[tasks.test]
+description = "test. TDD."
+run = "npx vitest run"
+
+[tasks.typecheck]
+description = "typecheck"
+run = "npx tsc --noEmit"
