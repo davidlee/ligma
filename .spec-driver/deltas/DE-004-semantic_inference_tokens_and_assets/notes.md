@@ -46,3 +46,35 @@
 - 571 tests (up from 548 — added 23: VT-022 21, orchestrate 2). 31 test files.
 - Commits: 81758c8 (phase sheet), e84331b (implementation + tests)
 - `mise run` green. Phase sheet and notes pending commit together.
+
+## Value-prop evaluation (post-P04)
+
+Ran a live comparison: fetched a real production Figma frame (depth 10), normalized it, extracted representative subtrees (a card component and a filter bar), and sent both raw and normalized representations to an external model with the prompt "implement this in React + Tailwind — which input is more useful?"
+
+### What works well
+
+- **Structure and comprehension**: Normalized output dramatically faster to understand. Role inference (`button`, `icon`, `heading`, `grid`, `stack`) gives an AI agent immediate understanding of what each node IS without parsing raw Figma properties.
+- **Signal vs noise**: Raw Figma JSON carries large amounts of renderer-internal data (`absoluteRenderBounds`, `scrollBehavior`, `cornerSmoothing`, `styleOverrideTable`, `imageTransform`) that are useless for implementation. Normalized output strips this effectively.
+- **Implementation clarity**: Layout normalization (`mode: "horizontal"` → flexbox, `mode: "absolute"` → positioned) maps directly to CSS concepts. Appearance separation is clean. `asset.exportSuggested` is directly actionable.
+- **Component metadata**: `component.kind`, `propertyValues` (e.g. `State: "Selected"` vs `"Unselected"`) immediately communicates component variant state — high value for implementation.
+
+### What doesn't work yet
+
+- **Data loss — per-side stroke weights (ISSUE-001, p2)**: `extractAppearance()` reads `strokeWeight` (scalar) and ignores `individualStrokeWeights` (per-side). A bottom-only 2px underline becomes `weight: 1`. Produces incorrect CSS. This is the most critical finding — the normalized output is factually wrong for these nodes.
+- **Data loss — interactions (ISSUE-002, p3)**: `interactions` array (hover/click prototyping) dropped entirely. Lower priority but still useful signal for interactive components.
+- **Token names**: `tokenName: null` across all bindings. The `variables.bindings` structure is better organized than raw `boundVariables`, but not actionable without resolved names. Would become high-value if populated (requires Variables API / Enterprise access).
+- **Paint-level tokenRef**: Always `null` in `extractAppearance()`. The supplemental collection path in `aggregateTokensUsed()` is a no-op. Variables `boundVariables` covers the same tokens at the node level, so this is not a data loss — just an unfulfilled schema field.
+
+### Size comparison (real frame)
+
+- Raw (minified): 312KB
+- Normalized (minified): 420KB (1.35x ratio)
+- Raw (pretty): 721KB
+- Normalized (pretty): 1.07MB
+- tokens-used.json: 47KB
+
+The normalized output is larger because it adds semantic fields (role, semantics, component, variables, asset, diagnostics, hierarchy) that don't exist in raw. This is expected and acceptable — the value is in the enrichment, not compression.
+
+### Verdict
+
+The normalization engine delivers clear value for structure, comprehension, and implementation planning. The role inference and layout normalization are the highest-value features. The critical gap is data fidelity — per-side stroke weights must not be lost. Filed as ISSUE-001 (p2) and ISSUE-002 (p3).
