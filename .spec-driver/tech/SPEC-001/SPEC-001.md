@@ -205,7 +205,37 @@ capabilities:
 schema: supekku.verification.coverage
 version: 1
 subject: SPEC-001
-entries: []
+entries:
+  - artefact: VT-001
+    kind: VT
+    requirement: SPEC-001.FR-001
+    status: verified
+    notes: URL parsing + node ID normalization — 13 tests (DE-002)
+  - artefact: VT-002
+    kind: VT
+    requirement: SPEC-001.FR-002
+    status: verified
+    notes: Auth module (X-Figma-Token header) — 6 tests (DE-002)
+  - artefact: VT-003
+    kind: VT
+    requirement: SPEC-001.FR-003
+    status: verified
+    notes: HTTP client + retry + rate-limit — 27 tests across 3 suites (DE-002)
+  - artefact: VT-004
+    kind: VT
+    requirement: SPEC-001.FR-004
+    status: verified
+    notes: Two-step image export (PNG/SVG) — 9 tests (DE-002)
+  - artefact: VT-006
+    kind: VT
+    requirement: SPEC-001.FR-015
+    status: verified
+    notes: Manifest + directory writer + artifact structure — 28 tests (DE-002)
+  - artefact: VT-005
+    kind: VT
+    requirement: SPEC-001.FR-016
+    status: verified
+    notes: Typed error hierarchy (6 classes) — 32 tests (DE-002)
 ```
 
 ## 1. Intent & Summary

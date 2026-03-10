@@ -17,9 +17,15 @@ decisions:
   ADR-002:
     id: ADR-002
     title: 'ADR-002: Use mise as task runner'
-    status: draft
+    status: accepted
     path: .spec-driver/decisions/ADR-002-use_mise_as_task_runner.md
-    summary: ''
+    summary: mise is the canonical task runner. `mise run` is the quality gate before
+      task completion and commits.
     created: '2026-03-10'
     updated: '2026-03-10'
     reviewed: '2026-03-10'
+    related_decisions:
+    - ADR-001
+    tags:
+    - tooling
+    - quality

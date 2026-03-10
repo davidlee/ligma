@@ -228,7 +228,52 @@ capabilities:
 schema: supekku.verification.coverage
 version: 1
 subject: PROD-001
-entries: []
+entries:
+  - artefact: VT-001
+    kind: VT
+    requirement: PROD-001.FR-001
+    status: verified
+    notes: URL parsing — 13 tests in tests/figma/url.test.ts (DE-002)
+  - artefact: VT-003
+    kind: VT
+    requirement: PROD-001.FR-002
+    status: verified
+    notes: Node subtree fetch — 9 tests in tests/figma/fetch-node.test.ts (DE-002)
+  - artefact: VT-002
+    kind: VT
+    requirement: PROD-001.FR-003
+    status: verified
+    notes: Auth module — 6 tests in tests/figma/auth.test.ts (DE-002)
+  - artefact: VT-004
+    kind: VT
+    requirement: PROD-001.FR-004
+    status: verified
+    notes: Image export (two-step) — 9 tests in tests/figma/fetch-image.test.ts (DE-002)
+  - artefact: VT-006
+    kind: VT
+    requirement: PROD-001.FR-013
+    status: verified
+    notes: Manifest + directory writer — 28 tests across 3 suites (DE-002)
+  - artefact: VT-005
+    kind: VT
+    requirement: PROD-001.FR-017
+    status: verified
+    notes: Error hierarchy — 32 tests in tests/errors.test.ts (DE-002)
+  - artefact: VT-005
+    kind: VT
+    requirement: PROD-001.NF-004
+    status: verified
+    notes: Graceful error handling via typed hierarchy + partial failure recovery (DE-002)
+  - artefact: VT-007
+    kind: VT
+    requirement: PROD-001.NF-005
+    status: verified
+    notes: Library + CLI architecture — orchestrate/writeOutput split (DE-002)
+  - artefact: VT-007
+    kind: VT
+    requirement: PROD-001.NF-006
+    status: verified
+    notes: Minimal deps — commander, p-limit, zod only (DE-002)
 ```
 
 ## 1. Intent & Summary

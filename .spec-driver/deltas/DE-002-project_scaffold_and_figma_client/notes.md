@@ -171,6 +171,24 @@
 - Commit Phase 3 work
 - `/audit-change` for DE-002 closure
 
+## Session 5: AUD-001 conformance audit (2026-03-10)
+
+### What's done
+- Created AUD-001 (conformance audit for DE-002)
+- 9 findings recorded, all dispositioned:
+  - F-001 through F-005: aligned (code impacts, tests, deps, architecture, error handling)
+  - F-006: spec_patch — PROD-001 coverage block populated (9 DE-002 requirements → verified)
+  - F-007: spec_patch — SPEC-001 coverage block populated (6 SPEC-001 requirements → verified)
+  - F-008: spec_patch — IP-002 status `draft` → `completed`
+  - F-009: spec_patch — DE-002 §5 system touchpoints updated to include `src/orchestrate.ts`
+- All reconciliation patches applied
+- `spec-driver sync` and `spec-driver validate` run (warnings only: audit gates on other deltas)
+- AUD-001 status → completed
+
+### Next step
+- Commit audit + reconciliation changes
+- `/close-change` for DE-002
+
 ## New Agent Instructions
 
 ### Task card
