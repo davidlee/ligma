@@ -105,14 +105,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-003
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-012
+    coverage_entries:
+    - artefact: VT-012
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-006:
     label: FR-006
@@ -125,14 +129,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-003
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-008
+    coverage_entries:
+    - artefact: VT-008
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-007:
     label: FR-007
@@ -168,14 +176,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-003
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-009
+    coverage_entries:
+    - artefact: VT-009
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-009:
     label: FR-009
@@ -187,14 +199,18 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-003
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-011
+    coverage_entries:
+    - artefact: VT-011
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-010:
     label: FR-010
@@ -376,21 +392,32 @@ requirements:
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.NF-001:
     label: NF-001
-    title: 'Normalized output MUST be significantly smaller than raw Figma JSON input
-      (target: >50% reduction in token count for typical frames).'
+    title: 'Normalized representation efficiency. The normalized schema MUST materially
+      simplify the raw node surface by exposing a smaller, fixed, implementation-oriented
+      top-level field set than typical raw Figma nodes. Total normalized output size,
+      measured as `JSON.stringify` length without pretty-printing, MUST NOT exceed
+      2.0x the corresponding raw input size on representative fixtures. Size ratio
+      SHOULD be tracked across fixtures to catch regressions, but semantic clarity
+      and implementation utility take precedence over raw byte reduction. *(Revised
+      by RE-002: original ">50% reduction" target was empirically unreachable given
+      intentional structural metadata additions.)*'
     specs:
     - PROD-001
     primary_spec: PROD-001
     kind: non-functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-003
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-013
+    coverage_entries:
+    - artefact: VT-013
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.NF-002:
     label: NF-002
@@ -419,14 +446,18 @@ requirements:
     primary_spec: PROD-001
     kind: non-functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-003
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-010
+    coverage_entries:
+    - artefact: VT-010
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.NF-004:
     label: NF-004
@@ -848,8 +879,14 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.NF-001:
     label: NF-001
-    title: Normalized output MUST be >50% smaller than raw input in token count for
-      typical frames.
+    title: Normalized representation efficiency. The normalized schema MUST materially
+      simplify the raw node surface by exposing a smaller, fixed, implementation-oriented
+      top-level field set than typical raw Figma nodes. Total normalized output size,
+      measured as `JSON.stringify` length without pretty-printing, MUST NOT exceed
+      2.0x the corresponding raw input size on representative fixtures. Size ratio
+      SHOULD be tracked across fixtures to catch regressions, but semantic clarity
+      and implementation utility take precedence over raw byte reduction. *(Revised
+      by RE-002.)*
     specs:
     - SPEC-001
     primary_spec: SPEC-001

@@ -5,7 +5,7 @@
 ### OrchestrateResult
 
 ```typescript
-interface OrchestrateResult { readonly manifest: Manifest; readonly rawNode: unknown; readonly image?: FetchImageResult | undefined }
+interface OrchestrateResult { readonly manifest: Manifest; readonly rawNode: unknown; readonly normalizedNode: NormalizedNode; ... }
 ```
 
 ## Functions

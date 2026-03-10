@@ -287,10 +287,10 @@ deltas:
             add shebang in cli.ts
   DE-003:
     kind: delta
-    status: draft
+    status: completed
     name: Delta - Core normalization engine
     slug: core_normalization_engine
-    updated: '2026-03-10'
+    updated: '2026-03-11'
     path: .spec-driver/deltas/DE-003-core_normalization_engine/DE-003.md
     applies_to:
       specs:
@@ -314,7 +314,8 @@ deltas:
         plan: IP-003
         delta: DE-003
         revision_links:
-          aligns_with: []
+          aligns_with:
+          - DR-003
         specs:
           primary:
           - SPEC-001
@@ -327,12 +328,107 @@ deltas:
           - PROD-001.FR-009
           - PROD-001.NF-001
           - PROD-001.NF-003
-          dependencies: []
+          dependencies:
+          - DE-002
         phases:
-        - id: IP-003-P01
+        - id: IP-003.PHASE-01
+        - id: IP-003.PHASE-02
+        - id: IP-003.PHASE-03
       phases:
-      - id: IP-003-P01
-        phase: IP-003-P01
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-003.PHASE-01
+        plan: IP-003
+        delta: DE-003
+        objective: Define the full NormalizedNode type surface as Zod schemas, implement
+          shared raw-field accessor, type classifier with image/mask detection, and
+          bounds extractor. Establishes the foundation all subsequent extractors build
+          on.
+        entrance_criteria:
+        - DR-003 accepted (tightened, internally consistent)
+        - DE-002 scaffold in place (FigmaNode type, error hierarchy, Zod conventions)
+        exit_criteria:
+        - All normalized types defined as Zod schemas with inferred TS types
+        - VT-008 passing (type classification)
+        - Bounds extractor tested
+        - getRawProperty utility tested
+        - Zero lint warnings, tsc clean
+        verification:
+          tests:
+          - VT-008
+          evidence: []
+        tasks:
+        - id: '1.1'
+          name: Normalized Zod schemas
+        - id: '1.2'
+          name: Raw helpers (getRawProperty)
+        - id: '1.3'
+          name: Type classifier (classify)
+        - id: '1.4'
+          name: Bounds extractor
+        risks:
+        - description: Zod schema complexity for discriminated unions (CornerRadius,
+            NormalizedPaint)
+          mitigation: Use z.discriminatedUnion where possible, z.union as fallback
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-003.PHASE-02
+        plan: IP-003
+        delta: DE-003
+        objective: "Implement layout, appearance, and text extractors per DR-003 \xA7\
+          4. Each is independent, pure, and tested in isolation."
+        entrance_criteria:
+        - Phase 1 complete (schemas, raw helpers, classify, bounds)
+        exit_criteria:
+        - VT-009 passing (layout)
+        - VT-010 passing (appearance)
+        - VT-011 passing (text)
+        - Zero lint warnings, tsc clean
+        verification:
+          tests:
+          - VT-009
+          - VT-010
+          - VT-011
+          evidence: []
+        tasks:
+        - id: '2.1'
+          name: Layout extractor
+        - id: '2.2'
+          name: Appearance extractor
+        - id: '2.3'
+          name: Text extractor
+        risks: []
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-003.PHASE-03
+        plan: IP-003
+        delta: DE-003
+        objective: Recursive node normalizer composing all extractors, orchestrate
+          wiring, representation efficiency verification.
+        entrance_criteria:
+        - Phase 2 complete (all extractors tested in isolation)
+        exit_criteria:
+        - VT-012 passing (recursive tree, hierarchy, diagnostics)
+        - VT-013 passing (representation efficiency per RE-002)
+        - mise run green (typecheck + test + lint)
+        verification:
+          tests:
+          - VT-012
+          - VT-013
+          evidence: []
+        tasks:
+        - id: '3.1'
+          name: Recursive node normalizer (node.ts)
+        - id: '3.2'
+          name: Normalization entry point (index.ts)
+        - id: '3.3'
+          name: Orchestrate wiring
+        - id: '3.4'
+          name: VT-012 + VT-013 tests
+        risks:
+        - description: NF-001 token reduction target unreachable with current schema
+          mitigation: RE-002 revised the metric to two-part efficiency (schema simplification
+            + size ceiling)
   DE-004:
     kind: delta
     status: draft
