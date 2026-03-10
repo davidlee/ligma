@@ -49,6 +49,7 @@ requirements:
     - SPEC-001.FR-015
     - SPEC-001.FR-016
     - SPEC-001.FR-017
+    - SPEC-001.FR-018
     - SPEC-001.NF-001
     - SPEC-001.NF-002
     - SPEC-001.NF-003
@@ -100,6 +101,7 @@ capabilities:
       - Component/instance metadata extraction
       - Per-node variable/token binding extraction
       - Asset classification and export advice
+      - Interaction extraction (trigger/action pairs from prototyping data)
       - Diagnostic generation (confidence, warnings, provenance)
     requirements:
       - SPEC-001.FR-005
@@ -109,6 +111,7 @@ capabilities:
       - SPEC-001.FR-009
       - SPEC-001.FR-010
       - SPEC-001.FR-011
+      - SPEC-001.FR-018
     summary: >-
       The core value of the system. Transforms raw Figma JSON into compact,
       implementation-oriented normalized representation. Each heuristic is
@@ -506,6 +509,8 @@ src/
 - **FR-016**: `errors.ts` MUST define a typed error hierarchy: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`, `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Each error MUST carry actionable context (message, cause, relevant IDs). Partial failures MUST preserve best-effort output with diagnostics.
 
 - **FR-017**: Selective expansion MUST evaluate configurable expansion triggers with documented default thresholds after initial normalization. Triggers: child count exceeding configurable threshold, incomplete layout container children, text nodes needing deeper inspection, component instances needing referenced component metadata, vector/icon nodes needing export data, image fills needing extraction, incomplete variable binding context. Default thresholds MUST be documented and overridable via configuration. The system MUST refetch specific child nodes and merge expanded data into the normalized tree.
+
+- **FR-018**: `normalize/interactions.ts` MUST extract Figma `interactions` arrays into `NormalizedInteraction[]`. Trigger types MUST be normalized to lowercase kebab-case. Action kinds for node-navigation MUST be derived from the `navigation` field, not the top-level action type. Direct actions (BACK, CLOSE, URL/OPEN_URL) MUST be mapped to their respective kinds. Unsupported action families (SET_VARIABLE, SET_VARIABLE_MODE, CONDITIONAL, UPDATE_MEDIA_RUNTIME) and media triggers (ON_MEDIA_HIT, ON_MEDIA_END) MUST normalize to `unknown` with warnings. Absent or empty interactions MUST normalize to `null`. *(Added by DE-008.)*
 
 ### Non-Functional Requirements
 

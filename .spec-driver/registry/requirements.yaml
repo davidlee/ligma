@@ -686,6 +686,9 @@ requirements:
     - artefact: VT-023
       status: verified
       kind: VT
+    - artefact: VT-010
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-007:
     label: FR-007
@@ -947,6 +950,34 @@ requirements:
     verified_by: []
     coverage_evidence: []
     coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-018:
+    label: FR-018
+    title: '`normalize/interactions.ts` MUST extract Figma `interactions` arrays into
+      `NormalizedInteraction[]`. Trigger types MUST be normalized to lowercase kebab-case.
+      Action kinds for node-navigation MUST be derived from the `navigation` field,
+      not the top-level action type. Direct actions (BACK, CLOSE, URL/OPEN_URL) MUST
+      be mapped to their respective kinds. Unsupported action families (SET_VARIABLE,
+      SET_VARIABLE_MODE, CONDITIONAL, UPDATE_MEDIA_RUNTIME) and media triggers (ON_MEDIA_HIT,
+      ON_MEDIA_END) MUST normalize to `unknown` with warnings. Absent or empty interactions
+      MUST normalize to `null`. *(Added by DE-008.)*'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: active
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-008
+    verified_by: []
+    coverage_evidence:
+    - VT-020
+    coverage_entries:
+    - artefact: VT-020
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.NF-001:
     label: NF-001
