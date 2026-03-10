@@ -1,1 +1,731 @@
-requirements: {}
+requirements:
+  PROD-001.FR-001:
+    label: FR-001
+    title: System MUST parse Figma URLs containing file key and node-id, extracting
+      `fileKey`, `nodeId`, and `originalUrl`. Node IDs in URL format (`123-456`) MUST
+      be normalized to API format (`123:456`). Invalid URLs MUST produce precise error
+      messages.
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-002:
+    label: FR-002
+    title: 'System MUST fetch node subtree JSON via `GET /v1/files/:key/nodes?ids=:nodeId`
+      with configurable depth (default: 2), optional `geometry=paths`, and optional
+      plugin data inclusion.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-003:
+    label: FR-003
+    title: System MUST authenticate via `X-Figma-Token` header using personal access
+      token. Auth module MUST be designed so OAuth support can be added later without
+      changing the core fetch pipeline.
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-004:
+    label: FR-004
+    title: System MUST export a PNG render of the target node via `GET /v1/images/:key?ids=:nodeId&format=png&scale=2`.
+      SVG export MUST be available as an option. If image export fails but JSON fetch
+      succeeds, the pipeline MUST continue and record the render failure in the manifest.
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-005:
+    label: FR-005
+    title: 'System MUST normalize raw Figma JSON into a compact, recursively structured,
+      implementation-oriented representation. The normalized model MUST include: id,
+      name, type classification, role inference, visibility, bounds, hierarchy metadata,
+      layout, appearance, text, component info, variable bindings, asset info, semantic
+      flags, children, and diagnostics.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-003
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-006:
+    label: FR-006
+    title: 'System MUST classify Figma node types into a reduced implementation-relevant
+      type set: `document`, `page`, `frame`, `group`, `component`, `instance`, `variant-set`,
+      `text`, `shape`, `vector`, `image`, `line`, `boolean-operation`, `mask`, `section`,
+      `unknown`.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-003
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-007:
+    label: FR-007
+    title: "System MUST infer UI semantic roles from node properties (type, name,\
+      \ text content, auto-layout config, dimensions, child structure, component metadata).\
+      \ Role vocabulary: `screen`, `container`, `stack`, `grid`, `card`, `button`,\
+      \ `icon-button`, `label`, `heading`, `body-text`, `input`, `image`, `icon`,\
+      \ `divider`, `badge`, `avatar`, `list`, `list-item`, `modal`, `navigation`,\
+      \ `unknown`. Inference MUST be conservative \u2014 prefer `unknown` over overconfident\
+      \ guesses."
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-004
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-008:
+    label: FR-008
+    title: 'System MUST normalize layout properties into implementation-facing terms:
+      mode (none/horizontal/vertical/absolute), sizing (fixed/fill/hug/unknown per
+      axis), alignment (main/cross), padding, gap, wrap, constraints, position, and
+      clip behavior.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-003
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-009:
+    label: FR-009
+    title: 'System MUST normalize text nodes to include: content, style (font family/weight/size/line-height/letter-spacing/case/alignment),
+      color, token references, semantic kind (heading/label/body/caption/button/unknown),
+      and truncation settings.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-003
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-010:
+    label: FR-010
+    title: 'System MUST extract and normalize variable/token bindings, distinguishing
+      literal values from variable-bound values. Where possible, expose both resolved
+      literal value and token reference (e.g., `color: "#FFFFFF"` + `tokenRef: "color.bg.surface"`).'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-004
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-011:
+    label: FR-011
+    title: 'System MUST generate sparse outlines in both JSON and XML formats. Outlines
+      MUST include: id, name, type, role, visibility, bounds, child count, and children.
+      The XML outline MUST be compact and human-readable.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-005
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-012:
+    label: FR-012
+    title: 'System MUST generate a `context.md` file as the primary agent entrypoint,
+      containing: source metadata, visual reference path, structural summary, important
+      children list, tokens used, assets, and implementation notes.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-005
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-013:
+    label: FR-013
+    title: 'System MUST emit all artifacts to a structured output directory with subdirectories:
+      `visual/`, `structure/`, `tokens/`, `assets/`, `logs/`. A machine-readable `manifest.json`
+      MUST describe all produced artifacts.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-014:
+    label: FR-014
+    title: 'System MUST implement file-based caching under `.cache/figma-fetch`. Cache
+      key MUST include: file key, node ID, requested depth, version (if pinned), and
+      relevant fetch flags.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-006
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.FR-015:
+    label: FR-015
+    title: 'System MUST support selective expansion of child nodes when normalization
+      detects ambiguity or truncation. Expansion triggers include: many descendants,
+      incomplete layout container children, text nodes needing deeper inspection,
+      component instances needing referenced metadata, vector/icon nodes needing export
+      data, image fills needing extraction, and incomplete variable binding context.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-006
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.NF-001:
+    label: NF-001
+    title: 'Normalized output MUST be significantly smaller than raw Figma JSON input
+      (target: >50% reduction in token count for typical frames).'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: non-functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-003
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.NF-002:
+    label: NF-002
+    title: "Output MUST be deterministic \u2014 identical inputs MUST produce identical\
+      \ outputs (stable, diffable)."
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: non-functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-005
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.NF-003:
+    label: NF-003
+    title: Every normalization heuristic MUST be implemented as an isolated pure function
+      with unit tests.
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: non-functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-003
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.NF-004:
+    label: NF-004
+    title: 'System MUST handle API errors gracefully: auth failure, file/node not
+      found, rate limiting, render failure, and normalization failure MUST produce
+      typed, actionable errors.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: non-functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.NF-005:
+    label: NF-005
+    title: System MUST be structured as a library + CLI, not a single script. Core
+      logic MUST be importable for future MCP wrapper.
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: non-functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  PROD-001.NF-006:
+    label: NF-006
+    title: 'System MUST use minimal dependencies: TypeScript, Zod, native fetch/undici,
+      commander/yargs, p-limit, vitest.'
+    specs:
+    - PROD-001
+    primary_spec: PROD-001
+    kind: non-functional
+    category: null
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by:
+    - DE-002
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/product/PROD-001/PROD-001.md
+  SPEC-001.FR-001:
+    label: FR-001
+    title: '`figma/url.ts` MUST parse Figma URLs into `{ fileKey, nodeId, originalUrl
+      }`, converting node IDs from URL format (`123-456`) to API format (`123:456`).
+      Invalid URLs MUST throw typed `FigmaUrlParseError`.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-002:
+    label: FR-002
+    title: '`figma/client.ts` MUST send authenticated requests to Figma REST API with
+      configurable depth, geometry, and plugin data options. Auth MUST use `X-Figma-Token`
+      header. Failed requests MUST be retried with exponential backoff (max 3 attempts).
+      Rate limit responses (429) MUST trigger backoff.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-003:
+    label: FR-003
+    title: "`figma/fetch-image.ts` MUST export PNG at scale=2 by default. SVG export\
+      \ MUST be available via option. Render failure MUST NOT block the pipeline \u2014\
+      \ failure is recorded in manifest."
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-004:
+    label: FR-004
+    title: '`normalize/classify.ts` MUST map raw Figma node types to the `NormalizedNodeType`
+      enum: `document`, `page`, `frame`, `group`, `component`, `instance`, `variant-set`,
+      `text`, `shape`, `vector`, `image`, `line`, `boolean-operation`, `mask`, `section`,
+      `unknown`.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-005:
+    label: FR-005
+    title: '`normalize/node.ts`, `layout.ts`, `style.ts`, `text.ts` MUST transform
+      raw Figma JSON into `NormalizedNode` trees. Layout MUST normalize to mode/sizing/alignment/padding/gap/wrap/constraints/position/clip.
+      Appearance MUST normalize fills, strokes, effects, corner radius. Text MUST
+      normalize content, style, color, token refs, semantic kind, truncation.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-006:
+    label: FR-006
+    title: "`normalize/heuristics.ts` MUST infer `NormalizedRole` from node properties\
+      \ using documented heuristic rules (container, stack, button, input, icon, heading,\
+      \ etc.). Inference MUST be conservative \u2014 `unknown` over overconfident\
+      \ guesses. Each heuristic MUST be an isolated pure function."
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-007:
+    label: FR-007
+    title: '`normalize/components.ts` MUST extract component/instance metadata including
+      componentId, componentName, componentSetId, variant properties, property references,
+      and reusability assessment.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-008:
+    label: FR-008
+    title: '`normalize/variables.ts` MUST extract `boundVariables` and `explicitVariableModes`,
+      mapping them to `NormalizedVariableBindings` with resolved token names where
+      available. Both literal value and token reference MUST be surfaced.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-009:
+    label: FR-009
+    title: '`normalize/assets.ts` MUST classify nodes as likely assets based on: image
+      fills, vector complexity, naming patterns, boolean operations. MUST produce
+      export suggestions with reason strings.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-010:
+    label: FR-010
+    title: '`normalize/outline.ts` MUST generate JSON and XML outlines from normalized
+      trees. XML MUST use compact element-per-node format with key attributes (id,
+      name, role, bounds).'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-011:
+    label: FR-011
+    title: '`output/context-md.ts` MUST generate `context.md` with sections: source
+      metadata, visual reference, structural summary, important children, tokens used,
+      assets, implementation notes.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-012:
+    label: FR-012
+    title: '`output/write.ts` MUST create the artifact directory structure (`visual/`,
+      `structure/`, `tokens/`, `assets/`, `logs/`) and write all artifacts. `output/manifest.ts`
+      MUST generate `manifest.json` describing all produced artifacts.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.FR-013:
+    label: FR-013
+    title: Selective expansion MUST detect ambiguity/truncation triggers (many descendants,
+      incomplete layout containers, text needing deeper inspection, component instances
+      needing referenced metadata, vectors needing export data, image fills needing
+      extraction, incomplete variable context) and refetch specific child nodes.
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.NF-001:
+    label: NF-001
+    title: Normalized output MUST be >50% smaller than raw input in token count for
+      typical frames.
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: non-functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.NF-002:
+    label: NF-002
+    title: All normalization heuristics MUST be implemented as isolated pure functions
+      with unit tests. Fixture-driven testing for representative UI patterns.
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: non-functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.NF-003:
+    label: NF-003
+    title: "Output MUST be deterministic \u2014 identical inputs produce identical\
+      \ byte-for-byte output."
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: non-functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.NF-004:
+    label: NF-004
+    title: 'Typed error hierarchy: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`,
+      `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Partial failures
+      MUST preserve best-effort output with diagnostics.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: non-functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
+  SPEC-001.NF-005:
+    label: NF-005
+    title: 'File-based caching under `.cache/figma-fetch`. Cache key includes: file
+      key, node ID, depth, version, fetch flags.'
+    specs:
+    - SPEC-001
+    primary_spec: SPEC-001
+    kind: non-functional
+    category: assembly
+    status: pending
+    tags: []
+    introduced: null
+    implemented_by: []
+    verified_by: []
+    coverage_evidence: []
+    coverage_entries: []
+    path: .spec-driver/tech/SPEC-001/SPEC-001.md
