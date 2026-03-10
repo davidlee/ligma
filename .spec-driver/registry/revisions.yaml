@@ -1,1 +1,42 @@
-revisions: {}
+revisions:
+  RE-001:
+    kind: revision
+    status: completed
+    name: Spec Revision - Delta DE-002 completion
+    slug: delta_de_002_completion
+    updated: '2026-03-10'
+    path: .spec-driver/revisions/RE-001-delta_de_002_completion/RE-001.md
+    relations:
+    - type: documents
+      target: DE-002
+      attributes: {}
+  RE-002:
+    kind: revision
+    status: completed
+    name: 'Revise NF-001: replace unrealistic 50% size reduction target with two-part
+      efficiency metric'
+    slug: revise_nf_001_replace_unrealistic_50_size_reduction_target_with_two_part_efficiency_metric
+    updated: '2026-03-11'
+    path: .spec-driver/revisions/RE-002-revise_nf_001_replace_unrealistic_50_size_reduction_target_with_two_part_efficiency_metric/RE-002.md
+    relations:
+    - type: blocks
+      target: DE-003
+      attributes: {}
+  RE-003:
+    kind: revision
+    status: completed
+    name: Spec Revision - Delta DE-003 completion
+    slug: delta_de_003_completion
+    updated: '2026-03-11'
+    path: .spec-driver/revisions/RE-003-delta_de_003_completion/RE-003.md
+    relations:
+    - type: documents
+      target: DE-003
+      attributes: {}
+  RE-004:
+    kind: revision
+    status: completed
+    name: Spec Revision - Expand FR-007 with concrete heuristic sub-requirements
+    slug: expand_fr_007_with_concrete_heuristic_sub_requirements
+    updated: '2026-03-11'
+    path: .spec-driver/revisions/RE-004-expand_fr_007_with_concrete_heuristic_sub_requirements/RE-004.md

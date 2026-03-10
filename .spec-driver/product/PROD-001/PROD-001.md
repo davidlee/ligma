@@ -311,7 +311,7 @@ entries:
 - **Problem / Purpose**: Code-generation agents need structured, implementation-oriented design context from Figma. Raw Figma JSON is too noisy, too large, and not shaped for the questions agents actually ask (what is this, how is it laid out, what's reusable, what's a token vs literal). This tool bridges the gap.
 - **Value Signals**: An agent can implement a typical UI frame from `context.md` + `normalized-node.json` + `frame.png` without needing raw Figma JSON.
 - **Guiding Principles**: Structural truth is the product. Visual truth is mandatory. Sparse first, detailed second. Output shaped for implementation, not archival. Determinism over cleverness.
-- **Change History**: Initial specification from `docs/brief.md`. Patch-01: token inventory descoped to used-token summary; expansion triggers made configurable; error hierarchy promoted to FR; opacity deduplication. RE-002: NF-001 revised — replaced unrealistic ">50% size reduction" with two-part efficiency metric (schema simplification + 2.0x size ceiling).
+- **Change History**: Initial specification from `docs/brief.md`. Patch-01: token inventory descoped to used-token summary; expansion triggers made configurable; error hierarchy promoted to FR; opacity deduplication. RE-002: NF-001 revised — replaced unrealistic ">50% size reduction" with two-part efficiency metric (schema simplification + 2.0x size ceiling). RE-004: FR-007 expanded with 8 concrete heuristic sub-requirements (container, stack, text semantic, button-like, input-like, icon, export-worthy asset, noise reduction), confidence indicator, and provenance trail (driven by DR-004/DE-004).
 
 ## 2. Stakeholders & Journeys
 
@@ -357,7 +357,20 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 - **FR-006**: System MUST classify Figma node types into a reduced implementation-relevant type set: `document`, `page`, `frame`, `group`, `component`, `instance`, `variant-set`, `text`, `shape`, `vector`, `image`, `line`, `boolean-operation`, `mask`, `section`, `unknown`.
 
-- **FR-007**: System MUST infer UI semantic roles from node properties (type, name, text content, auto-layout config, dimensions, child structure, component metadata). Role vocabulary: `screen`, `container`, `stack`, `grid`, `card`, `button`, `icon-button`, `label`, `heading`, `body-text`, `input`, `image`, `icon`, `divider`, `badge`, `avatar`, `list`, `list-item`, `modal`, `navigation`, `unknown`. Inference MUST be conservative — prefer `unknown` over overconfident guesses.
+- **FR-007**: System MUST infer UI semantic roles from node properties. Role vocabulary: `screen`, `container`, `stack`, `grid`, `card`, `button`, `icon-button`, `label`, `heading`, `body-text`, `input`, `image`, `icon`, `divider`, `badge`, `avatar`, `list`, `list-item`, `modal`, `navigation`, `unknown`. Inference MUST be conservative — prefer `unknown` over overconfident guesses. Each inference MUST include a confidence indicator and provenance trail (which signals contributed to the decision).
+
+  Required heuristic rules:
+
+  1. **Container detection**: Frame, group, component, or instance with children, nontrivial bounds, and evidence of layout or padding. Distinguishes structural containers from leaf frames.
+  2. **Stack detection**: Auto-layout node with children along one axis and meaningful gap or padding. Signals `stack` (single-axis) or `grid` (multi-axis / wrap).
+  3. **Text semantic inference**: Infer `heading`, `label`, `body`, `caption`, or `button` from font size, weight, text length, node name, and parent context (e.g., large bold short text near top of a container → `heading`).
+  4. **Button-like detection**: Instance, component, or frame with one short text child, fixed or hug sizing, padded auto-layout, visible fill, and button-suggestive naming. Signals `button` or `icon-button` (if icon child present instead of / alongside text).
+  5. **Input-like detection**: Rectangular node with width > height, border or fill, label-adjacent text region, and input-suggestive naming. Signals `input`.
+  6. **Icon detection**: Small vector group with square-ish aspect ratio, no text children, and simple or icon-suggestive naming. Signals `icon`.
+  7. **Export-worthy asset detection**: Nodes with image fills, vector complexity above a threshold, illustration-suggestive naming, or complex boolean operations. Signals `image` role (for raster) or asset classification metadata.
+  8. **Noise reduction**: Collapse invisible nodes (unless structurally important), zero-size nodes, decorative micro-layers, and deeply nested wrappers with no distinct semantics. These nodes SHOULD receive `unknown` role with a diagnostic noting the noise classification.
+
+  Each heuristic MUST be an isolated pure function (NF-003). Heuristics MUST NOT throw — uncertain inference produces `unknown` role with diagnostic warnings.
 
 - **FR-008**: System MUST normalize layout properties into implementation-facing terms: mode (none/horizontal/vertical/absolute), sizing (fixed/fill/hug/unknown per axis), alignment (main/cross), padding, gap, wrap, constraints, position, and clip behavior.
 
