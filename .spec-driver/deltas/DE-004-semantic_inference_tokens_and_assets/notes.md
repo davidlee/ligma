@@ -32,3 +32,17 @@
 - Commits: 65d6872 (types+signals), 68b178a (inference modules+tests), 79645ca (wiring)
 - `mise run` green. `.spec-driver` phase sheet committed earlier (333d5ae). Notes pending commit.
 
+## P04 — Summary and integration (complete)
+- `src/schemas/tokens-used.ts`: 4 Zod schemas — `EncounteredLocationSchema`, `TokenReferenceSchema`, `StyleReferenceSchema`, `TokensUsedSummarySchema`. `scope.isFullInventory` is `z.literal(false)`.
+- `src/summary/tokens-used.ts`: `aggregateTokensUsed(root, fileKey, rootNodeId)` — recursive tree walk, dedup by tokenId, resolvedType conflict resolution (specific wins over unknown, genuine conflict warns and keeps first), supplemental paint tokenRef collection from `appearance.fills/strokes`.
+- Paint-level `tokenRef`: currently always `null` in `extractAppearance()` (hardcoded line 75). Supplemental collection path is implemented but effectively a no-op in DE-004. Variables `boundVariables` already captures paint-bound tokens at the node level. Future work could populate `tokenRef` on paints directly.
+- `orchestrate.ts`: calls `aggregateTokensUsed()` after `normalize()`. `OrchestrateResult` gained `tokensUsed: TokensUsedSummary`. Manifest outputs now includes `tokensUsedJson: 'tokens/tokens-used.json'`.
+- `output/write.ts`: `OutputArtifacts` gained optional `tokensUsed`. `writeOutput()` writes `tokens/tokens-used.json`.
+- `output/manifest.ts`: `ManifestInput.outputs` extended with `tokensUsedJson`. `buildOutputs()` passes it through.
+- `styles` array: always `[]`. Schema only — forward-compatibility placeholder per DR-004 §5.10.
+- `counts.typography`: always 0. No `resolvedType` maps to typography in DE-004. Reserved for future style extraction.
+- Lint: `unicorn/prevent-abbreviations` caught `acc` → `accumulator`, `Ref` → `Reference`, `Refs` → `References`, `i` → `index`. `@typescript-eslint/switch-exhaustiveness-check` required explicit cases for `string`/`boolean`/`unknown` in countByType switch. `import/order` caught test import ordering.
+- NF-001: 1.36x (unchanged from P03 — tokens-used.json is separate artifact, not in normalized tree).
+- 571 tests (up from 548 — added 23: VT-022 21, orchestrate 2). 31 test files.
+- Commits: 81758c8 (phase sheet), e84331b (implementation + tests)
+- `mise run` green. Phase sheet and notes pending commit together.

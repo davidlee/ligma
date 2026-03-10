@@ -84,15 +84,15 @@ Build the tokens-used summary reducer (`aggregateTokensUsed`) and its schema (`T
 - [x] DR-004 §5.10 design stable (no open questions)
 
 ## 4. Exit Criteria / Done When
-- [ ] `src/schemas/tokens-used.ts` — `EncounteredLocationSchema`, `TokenReferenceSchema`, `StyleReferenceSchema`, `TokensUsedSummarySchema` + inferred types
-- [ ] `src/summary/tokens-used.ts` — `aggregateTokensUsed(root, fileKey, rootNodeId)` with tree walk, dedup, conflict resolution, paint supplemental, counts
-- [ ] `src/orchestrate.ts` — calls `aggregateTokensUsed()` after `normalize()`, includes `tokensUsed` in `OrchestrateResult`
-- [ ] `src/output/write.ts` — `OutputArtifacts` extended, writes `tokens/tokens-used.json`
-- [ ] VT-022 passing (tokens-used summary unit tests)
-- [ ] VT-023 passing (integration tests with DE-004 fields)
-- [ ] NF-001 2.0x ceiling verified
-- [ ] All existing tests still passing
-- [ ] `mise run` green
+- [x] `src/schemas/tokens-used.ts` — `EncounteredLocationSchema`, `TokenReferenceSchema`, `StyleReferenceSchema`, `TokensUsedSummarySchema` + inferred types
+- [x] `src/summary/tokens-used.ts` — `aggregateTokensUsed(root, fileKey, rootNodeId)` with tree walk, dedup, conflict resolution, paint supplemental, counts
+- [x] `src/orchestrate.ts` — calls `aggregateTokensUsed()` after `normalize()`, includes `tokensUsed` in `OrchestrateResult`
+- [x] `src/output/write.ts` — `OutputArtifacts` extended, writes `tokens/tokens-used.json`
+- [x] VT-022 passing (tokens-used summary unit tests) — 21 tests
+- [x] VT-023 passing (integration tests with DE-004 fields) — 2 new orchestrate tests
+- [x] NF-001 2.0x ceiling verified — 1.36x (unchanged, separate artifact)
+- [x] All existing tests still passing — 571 total
+- [x] `mise run` green
 
 ## 5. Verification
 - VT-022: `tests/summary/tokens-used.test.ts` — single node, tree dedup, resolvedType conflict (prefer specific over unknown), paint tokenRef supplemental, counts by resolvedType, scope passthrough, empty tree, styles always empty
@@ -117,10 +117,10 @@ Build the tokens-used summary reducer (`aggregateTokensUsed`) and its schema (`T
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 4.1 | Create `TokensUsedSummary` schemas in `src/schemas/tokens-used.ts` | | |
-| [ ] | 4.2 | Implement `aggregateTokensUsed()` + write VT-022 | | Depends on 4.1 |
-| [ ] | 4.3 | Wire into `orchestrate.ts` + extend `OrchestrateResult`/`OutputArtifacts` | | Depends on 4.2 |
-| [ ] | 4.4 | Extend VT-023 integration tests + verify NF-001 + run full suite | | Depends on 4.3 |
+| [x] | 4.1 | Create `TokensUsedSummary` schemas in `src/schemas/tokens-used.ts` | | e84331b |
+| [x] | 4.2 | Implement `aggregateTokensUsed()` + write VT-022 | | e84331b — 21 tests |
+| [x] | 4.3 | Wire into `orchestrate.ts` + extend `OrchestrateResult`/`OutputArtifacts` | | e84331b |
+| [x] | 4.4 | Extend VT-023 integration tests + verify NF-001 + run full suite | | e84331b — 571 total |
 
 ### Task Details
 
@@ -153,11 +153,16 @@ Build the tokens-used summary reducer (`aggregateTokensUsed`) and its schema (`T
 | Manifest outputs schema may need extending | Check if `ManifestOutputsSchema` allows additional fields; if not, extend | open |
 
 ## 9. Decisions & Outcomes
+- 2026-03-11 — Paint-level `tokenRef` is always null in current `extractAppearance()`. Supplemental collection implemented for correctness but effectively no-op. Variables `boundVariables` is the canonical source for paint-bound tokens.
+- 2026-03-11 — `ManifestInput.outputs` extended with `tokensUsedJson` field + `buildOutputs()` passthrough. `ManifestOutputsSchema` already had the field.
 
 ## 10. Findings / Research Notes
+- `unicorn/prevent-abbreviations`: `acc` → `accumulator`, `Ref` → `Reference`, `i` → `index`. Same pattern as P02/P03.
+- `@typescript-eslint/switch-exhaustiveness-check`: default case in switch on enum union is rejected — must enumerate all cases explicitly.
+- `ManifestOutputsSchema` already had `tokensUsedJson` as optional — no schema change needed, only `ManifestInput` and `buildOutputs()` needed extending.
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
+- [x] Exit criteria satisfied — all 9 criteria met, 571 tests, mise run green
+- [x] Verification evidence stored — commit e84331b
 - [ ] Spec/Delta/Plan updated with lessons
 - [ ] Hand-off notes to next phase (if any)
