@@ -62,6 +62,7 @@ function makeNode(overrides: Partial<NormalizedNode> = {}): NormalizedNode {
     component: null,
     variables: null,
     asset: null,
+    interactions: null,
     semantics: {
       likelyInteractive: false,
       likelyTextInput: false,

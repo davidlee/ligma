@@ -3,6 +3,7 @@ import { extractAsset } from './assets.js'
 import { extractBounds } from './bounds.js'
 import { classify } from './classify.js'
 import { extractComponent } from './components.js'
+import { extractInteractions } from './interactions.js'
 import { extractLayout } from './layout.js'
 import { getRawBoolean } from './raw-helpers.js'
 import { extractText } from './text.js'
@@ -90,6 +91,7 @@ interface ExtractionResults {
   component: ExtractorResult<NormalizedNode['component']>
   variables: ExtractorResult<NormalizedNode['variables']>
   asset: ExtractorResult<NormalizedNode['asset']>
+  interactions: ExtractorResult<NormalizedNode['interactions']>
   all: ExtractorResult<unknown>[]
 }
 
@@ -101,18 +103,19 @@ function runCoreExtractors(raw: FigmaNode): Omit<ExtractionResults, 'text' | 'al
     component: extractComponent(raw),
     variables: extractVariables(raw),
     asset: extractAsset(raw),
+    interactions: extractInteractions(raw),
   }
 }
 
 function runExtractors(raw: FigmaNode, type: string): ExtractionResults {
   const skip = SKIP_EXTRACTORS.has(type)
   const core = skip
-    ? { bounds: EMPTY_RESULT, layout: EMPTY_RESULT, appearance: EMPTY_RESULT, component: EMPTY_RESULT, variables: EMPTY_RESULT, asset: EMPTY_RESULT }
+    ? { bounds: EMPTY_RESULT, layout: EMPTY_RESULT, appearance: EMPTY_RESULT, component: EMPTY_RESULT, variables: EMPTY_RESULT, asset: EMPTY_RESULT, interactions: EMPTY_RESULT }
     : runCoreExtractors(raw)
   const text = type === 'text' ? extractText(raw) : null
   const all: ExtractorResult<unknown>[] = [
     core.bounds, core.layout, core.appearance,
-    core.component, core.variables, core.asset,
+    core.component, core.variables, core.asset, core.interactions,
   ]
   if (text !== null) {
     all.push(text)
@@ -151,6 +154,7 @@ export function normalizeNode(raw: FigmaNode, context: NormalizeContext): Normal
     component: extracted.component.value,
     variables: extracted.variables.value,
     asset: extracted.asset.value,
+    interactions: extracted.interactions.value,
     semantics: DEFAULT_SEMANTICS,
     children: (raw.children ?? []).map((child) => normalizeNode(child, childContext)),
     diagnostics: {

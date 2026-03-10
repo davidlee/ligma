@@ -238,7 +238,7 @@ describe('inferRole (VT-017)', () => {
         name: 'Box',
         bounds: { x: 0, y: 0, width: 300, height: 40 },
         appearance: makeAppearance({
-          strokes: [{ ...VISIBLE_FILL, weight: 1, align: 'inside' }],
+          strokes: [{ ...VISIBLE_FILL, weight: { uniform: true, value: 1 }, align: 'inside' }],
         }),
       }))
       expect(result.value).toBe('input')

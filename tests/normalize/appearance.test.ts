@@ -96,7 +96,7 @@ describe('extractAppearance (VT-010)', () => {
   })
 
   describe('strokes', () => {
-    it('normalizes stroke with weight and align', () => {
+    it('normalizes stroke with scalar weight and align', () => {
       const node = makeNode({
         strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0, a: 1 } }],
         strokeWeight: 2,
@@ -104,16 +104,79 @@ describe('extractAppearance (VT-010)', () => {
       })
       const stroke = extractAppearance(node).value.strokes[0]
       expect(stroke?.kind).toBe('solid')
-      expect(stroke?.weight).toBe(2)
+      expect(stroke?.weight).toEqual({ uniform: true, value: 2 })
       expect(stroke?.align).toBe('inside')
     })
 
-    it('returns null weight when strokeWeight is 0', () => {
+    it('treats scalar strokeWeight 0 as valid uniform weight', () => {
       const node = makeNode({
         strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
         strokeWeight: 0,
       })
+      expect(extractAppearance(node).value.strokes[0]?.weight).toEqual(
+        { uniform: true, value: 0 },
+      )
+    })
+
+    it('returns null weight when no stroke weight fields present', () => {
+      const node = makeNode({
+        strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+      })
       expect(extractAppearance(node).value.strokes[0]?.weight).toBeNull()
+    })
+
+    it('extracts per-side individualStrokeWeights', () => {
+      const node = makeNode({
+        strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        individualStrokeWeights: { top: 0, right: 0, bottom: 2, left: 0 },
+      })
+      expect(extractAppearance(node).value.strokes[0]?.weight).toEqual(
+        { uniform: false, top: 0, right: 0, bottom: 2, left: 0 },
+      )
+    })
+
+    it('collapses equal individualStrokeWeights to uniform', () => {
+      const node = makeNode({
+        strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        individualStrokeWeights: { top: 2, right: 2, bottom: 2, left: 2 },
+      })
+      expect(extractAppearance(node).value.strokes[0]?.weight).toEqual(
+        { uniform: true, value: 2 },
+      )
+    })
+
+    it('collapses all-zero individualStrokeWeights to uniform zero', () => {
+      const node = makeNode({
+        strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        individualStrokeWeights: { top: 0, right: 0, bottom: 0, left: 0 },
+      })
+      expect(extractAppearance(node).value.strokes[0]?.weight).toEqual(
+        { uniform: true, value: 0 },
+      )
+    })
+
+    it('prefers individualStrokeWeights over scalar strokeWeight', () => {
+      const node = makeNode({
+        strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        strokeWeight: 1,
+        individualStrokeWeights: { top: 0, right: 0, bottom: 3, left: 0 },
+      })
+      expect(extractAppearance(node).value.strokes[0]?.weight).toEqual(
+        { uniform: false, top: 0, right: 0, bottom: 3, left: 0 },
+      )
+    })
+
+    it('falls back to scalar on malformed individualStrokeWeights', () => {
+      const node = makeNode({
+        strokes: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        strokeWeight: 5,
+        individualStrokeWeights: { top: 1, right: 'bad' },
+      })
+      const result = extractAppearance(node)
+      expect(result.value.strokes[0]?.weight).toEqual({ uniform: true, value: 5 })
+      expect(result.warnings).toContain(
+        'Malformed individualStrokeWeights — falling back to scalar strokeWeight',
+      )
     })
   })
 

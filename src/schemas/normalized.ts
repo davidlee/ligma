@@ -133,8 +133,17 @@ export const NormalizedPaintSchema = z.object({
 })
 export type NormalizedPaint = z.infer<typeof NormalizedPaintSchema>
 
+export const StrokeWeightSchema = z.discriminatedUnion('uniform', [
+  z.object({ uniform: z.literal(true), value: z.number() }),
+  z.object({
+    uniform: z.literal(false),
+    top: z.number(), right: z.number(), bottom: z.number(), left: z.number(),
+  }),
+])
+export type StrokeWeight = z.infer<typeof StrokeWeightSchema>
+
 export const NormalizedStrokeSchema = NormalizedPaintSchema.extend({
-  weight: z.number().nullable(),
+  weight: StrokeWeightSchema.nullable(),
   align: StrokeAlignSchema.nullable(),
 })
 export type NormalizedStroke = z.infer<typeof NormalizedStrokeSchema>
@@ -231,6 +240,36 @@ export const NormalizedAssetInfoSchema = z.object({
 })
 export type NormalizedAssetInfo = z.infer<typeof NormalizedAssetInfoSchema>
 
+// --- Interactions ---
+
+export const InteractionTriggerSchema = z.enum([
+  'hover', 'click', 'press', 'drag',
+  'key-down', 'mouse-enter', 'mouse-leave',
+  'mouse-up', 'mouse-down', 'after-timeout',
+  'unknown',
+])
+export type InteractionTrigger = z.infer<typeof InteractionTriggerSchema>
+
+export const InteractionActionKindSchema = z.enum([
+  'navigate', 'change-to', 'overlay', 'swap-overlay', 'scroll-to',
+  'back', 'close', 'url',
+  'unknown',
+])
+export type InteractionActionKind = z.infer<typeof InteractionActionKindSchema>
+
+export const NormalizedActionSchema = z.object({
+  kind: InteractionActionKindSchema,
+  destinationId: z.string().nullable(),
+  url: z.string().nullable(),
+})
+export type NormalizedAction = z.infer<typeof NormalizedActionSchema>
+
+export const NormalizedInteractionSchema = z.object({
+  trigger: InteractionTriggerSchema,
+  actions: z.array(NormalizedActionSchema),
+})
+export type NormalizedInteraction = z.infer<typeof NormalizedInteractionSchema>
+
 // --- Semantics ---
 
 export const SemanticsSchema = z.object({
@@ -276,6 +315,7 @@ export const NormalizedNodeSchema: z.ZodType<NormalizedNode> = z.lazy(() =>
     component: NormalizedComponentInfoSchema.nullable(),
     variables: NormalizedVariableBindingsSchema.nullable(),
     asset: NormalizedAssetInfoSchema.nullable(),
+    interactions: z.array(NormalizedInteractionSchema).nullable(),
     semantics: SemanticsSchema,
     children: z.array(NormalizedNodeSchema),
     diagnostics: DiagnosticsSchema,
@@ -302,6 +342,7 @@ export interface NormalizedNode {
   component: NormalizedComponentInfo | null
   variables: NormalizedVariableBindings | null
   asset: NormalizedAssetInfo | null
+  interactions: NormalizedInteraction[] | null
   semantics: Semantics
   children: NormalizedNode[]
   diagnostics: Diagnostics

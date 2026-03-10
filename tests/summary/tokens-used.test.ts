@@ -21,6 +21,7 @@ function makeNode(overrides: Partial<NormalizedNode> = {}): NormalizedNode {
     component: null,
     variables: null,
     asset: null,
+    interactions: null,
     semantics: {
       likelyInteractive: false,
       likelyTextInput: false,
@@ -327,7 +328,7 @@ describe('aggregateTokensUsed (VT-022)', () => {
         appearance: {
           fills: [],
           strokes: [
-            { kind: 'solid', visible: true, color: '#000', opacity: 1, gradientStops: null, tokenRef: 'VariableID:stroke-1', imageRef: null, weight: 1, align: 'inside' },
+            { kind: 'solid', visible: true, color: '#000', opacity: 1, gradientStops: null, tokenRef: 'VariableID:stroke-1', imageRef: null, weight: { uniform: true, value: 1 }, align: 'inside' },
           ],
           cornerRadius: null,
           effects: [],

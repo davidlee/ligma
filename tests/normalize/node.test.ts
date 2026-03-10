@@ -272,7 +272,7 @@ describe('inference wiring via normalize()', () => {
 })
 
 describe('representation efficiency (VT-013, RE-002)', () => {
-  const NORMALIZED_TOP_LEVEL_FIELDS = 17 // fixed schema surface
+  const NORMALIZED_TOP_LEVEL_FIELDS = 18 // fixed schema surface (DE-008: +interactions)
 
   const raw = FigmaNodeSchema.parse({
     id: '0:1', name: 'Frame', type: 'FRAME',

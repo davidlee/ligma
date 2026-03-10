@@ -1,7 +1,7 @@
 import {
   colorToHex,
   getRawArray,
-  getRawNumber,
+  getRawRecord,
   getRawString,
   isRecord,
 } from './raw-helpers.js'
@@ -16,6 +16,7 @@ import type {
   NormalizedStroke,
   PaintKind,
   StrokeAlign,
+  StrokeWeight,
 } from '../schemas/normalized.js'
 
 const PAINT_KIND_MAP: ReadonlyMap<string, PaintKind> = new Map([
@@ -78,7 +79,7 @@ function normalizePaint(raw: unknown, warnings: string[]): NormalizedPaint | nul
 }
 
 function normalizeStroke(
-  raw: unknown, weight: number | null, align: StrokeAlign | null, warnings: string[],
+  raw: unknown, weight: StrokeWeight | null, align: StrokeAlign | null, warnings: string[],
 ): NormalizedStroke | null {
   const paint = normalizePaint(raw, warnings)
   if (paint === null) {
@@ -198,12 +199,44 @@ function collectFills(node: FigmaNode, warnings: string[]): NormalizedPaint[] {
   return fills
 }
 
+function parseIndividualWeights(record: Record<string, unknown>): StrokeWeight | null {
+  const { top, right, bottom, left } = record
+  if (
+    typeof top !== 'number' || typeof right !== 'number'
+    || typeof bottom !== 'number' || typeof left !== 'number'
+  ) {
+    return null
+  }
+  if (top === right && right === bottom && bottom === left) {
+    return { uniform: true, value: top }
+  }
+  return { uniform: false, top, right, bottom, left }
+}
+
+function resolveStrokeWeight(node: FigmaNode, warnings: string[]): StrokeWeight | null {
+  const individual = getRawRecord(node, 'individualStrokeWeights')
+  if (individual !== undefined) {
+    const parsed = parseIndividualWeights(individual)
+    if (parsed !== null) {
+      return parsed
+    }
+    warnings.push('Malformed individualStrokeWeights — falling back to scalar strokeWeight')
+  }
+
+  const scalar = node.strokeWeight
+  if (typeof scalar === 'number') {
+    return { uniform: true, value: scalar }
+  }
+
+  return null
+}
+
 function collectStrokes(node: FigmaNode, warnings: string[]): NormalizedStroke[] {
-  const weight = getRawNumber(node, 'strokeWeight', 0)
+  const weight = resolveStrokeWeight(node, warnings)
   const align = mapStrokeAlign(getRawString(node, 'strokeAlign', ''))
   const strokes: NormalizedStroke[] = []
   for (const raw of getRawArray(node, 'strokes')) {
-    const stroke = normalizeStroke(raw, weight > 0 ? weight : null, align, warnings)
+    const stroke = normalizeStroke(raw, weight, align, warnings)
     if (stroke !== null) {
       strokes.push(stroke)
     }

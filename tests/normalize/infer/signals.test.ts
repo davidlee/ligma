@@ -179,7 +179,7 @@ describe('signal helpers (VT-021)', () => {
   describe('hasVisibleStroke', () => {
     it('true with visible stroke', () => {
       const appearance = makeAppearance({
-        strokes: [{ kind: 'solid', visible: true, color: '#000', opacity: 1, gradientStops: null, tokenRef: null, imageRef: null, weight: 1, align: 'inside' }],
+        strokes: [{ kind: 'solid', visible: true, color: '#000', opacity: 1, gradientStops: null, tokenRef: null, imageRef: null, weight: { uniform: true, value: 1 }, align: 'inside' }],
       })
       expect(hasVisibleStroke(appearance)).toBe(true)
     })
@@ -353,7 +353,7 @@ describe('signal helpers (VT-021)', () => {
           name: 'Box',
           bounds: makeBounds(300, 40),
           appearance: makeAppearance({
-            strokes: [{ kind: 'solid', visible: true, color: '#ccc', opacity: 1, gradientStops: null, tokenRef: null, imageRef: null, weight: 1, align: 'inside' }],
+            strokes: [{ kind: 'solid', visible: true, color: '#ccc', opacity: 1, gradientStops: null, tokenRef: null, imageRef: null, weight: { uniform: true, value: 1 }, align: 'inside' }],
           }),
         }),
       ]
