@@ -12,7 +12,11 @@ run = "pnpm lint"
 
 [tasks.test]
 description = "test. TDD."
-run = "pnpx vitest run"
+run = "pnpm exec vitest run"
+
+[tasks.format]
+description = "format."
+run = "pnpm exec prettier . --write"
 
 [tasks.typecheck]
 description = "typecheck"
