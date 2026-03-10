@@ -304,6 +304,21 @@ entries:
     requirement: PROD-001.NF-003
     status: verified
     notes: Pure function heuristics — all extractors isolated and tested independently. 95 tests across layout/appearance/text suites (DE-003)
+  - artefact: VT-017
+    kind: VT
+    requirement: PROD-001.FR-007
+    status: verified
+    notes: Role inference — 13-rule priority chain. 39 tests in tests/normalize/infer/role.test.ts (DE-004)
+  - artefact: VT-015
+    kind: VT
+    requirement: PROD-001.FR-010
+    status: verified
+    notes: Per-node variable/token binding extraction — 27 tests in tests/normalize/variables.test.ts (DE-004)
+  - artefact: VT-022
+    kind: VT
+    requirement: PROD-001.FR-016
+    status: verified
+    notes: Used-token summary aggregation — 21 tests in tests/summary/tokens-used.test.ts (DE-004)
 ```
 
 ## 1. Intent & Summary
