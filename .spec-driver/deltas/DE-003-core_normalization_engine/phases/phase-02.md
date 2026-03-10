@@ -3,8 +3,8 @@ id: IP-003.PHASE-02
 slug: 003-core_normalization_engine-phase-02
 name: Layout + appearance + text extractors
 created: '2026-03-10'
-updated: '2026-03-10'
-status: in-progress
+updated: '2026-03-11'
+status: complete
 kind: phase
 ---
 
@@ -55,23 +55,25 @@ Implement the three complex extractors per DR-003 §4. Each is a pure function: 
 - [x] Phase 1 complete
 
 ## 4. Exit Criteria / Done When
-- [ ] VT-009: layout extraction tested
-- [ ] VT-010: appearance extraction tested
-- [ ] VT-011: text extraction tested
-- [ ] Zero lint warnings, tsc clean
+- [x] VT-009: layout extraction tested (36 tests)
+- [x] VT-010: appearance extraction tested (30 tests)
+- [x] VT-011: text extraction tested (29 tests)
+- [x] Zero lint warnings, tsc clean
 
 ## 7. Tasks & Progress
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 2.1 | Layout extractor | Yes | mode/sizing/align/padding/gap/wrap/grid/constraints/position |
-| [ ] | 2.2 | Appearance extractor | Yes | paints/strokes/effects/cornerRadius/opacity/blendMode |
-| [ ] | 2.3 | Text extractor | Yes | content/style/DimensionValue/color/truncation |
+| [x] | 2.1 | Layout extractor | Yes | mode/sizing/align/padding/gap/wrap/grid/constraints/position — 36 tests |
+| [x] | 2.2 | Appearance extractor | Yes | paints/strokes/effects/cornerRadius/opacity/blendMode — 30 tests |
+| [x] | 2.3 | Text extractor | Yes | content/style/DimensionValue/color/truncation — 29 tests |
 
 ## 9. Decisions & Outcomes
-- (to be filled)
+- `colorToHex()` duplicated in appearance.ts and text.ts — follow-up to extract to shared utility.
+- DimensionValue used for lineHeight/letterSpacing to preserve unit information (px vs percent vs auto).
+- `complexity: 8` lint limit forced extraction of helpers (`parsePerCornerRadii`, `collectFills`).
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
-- [ ] Hand-off notes to next phase
+- [x] Exit criteria satisfied
+- [x] Verification evidence stored (95 new tests, committed `2a6a131`)
+- [x] Hand-off notes: Phase 3 can proceed — all extractors proven. Node compositor assembles them.
