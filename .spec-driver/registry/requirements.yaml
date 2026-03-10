@@ -669,7 +669,8 @@ requirements:
     status: active
     tags: []
     introduced: null
-    implemented_by: []
+    implemented_by:
+    - DE-008
     verified_by: []
     coverage_evidence:
     - VT-010
