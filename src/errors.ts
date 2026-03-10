@@ -19,7 +19,7 @@ export class FigmaAuthError extends FigmaError {}
 export class FigmaNotFoundError extends FigmaError {}
 
 export interface FigmaRateLimitErrorOptions extends FigmaErrorOptions {
-  retryAfter?: number
+  retryAfter?: number | undefined
 }
 
 export class FigmaRateLimitError extends FigmaError {

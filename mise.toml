@@ -4,7 +4,7 @@ run = "mise check"
 
 [tasks.check]
 description = "pre-commit check."
-run = "mise run typecheck && mise run test && mise run lint"
+run = "mise run typecheck && mise run test && mise run lint && echo 'OK: all checks passed.'"
 
 [tasks.lint]
 description = "lint. zero warnings."

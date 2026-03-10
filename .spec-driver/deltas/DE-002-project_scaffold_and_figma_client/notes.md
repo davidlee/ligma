@@ -88,6 +88,54 @@
 ### Next step
 - `/execute-phase` for IP-002.PHASE-02 (auth, HTTP client, node fetch, image export)
 
+## Session 3: IP-002.PHASE-02 implementation (2026-03-10)
+
+### What's done
+- DR-002 patched: "POST render request" → "GET /v1/images/:key" (verified against Figma API docs)
+- Phase-02 sheet created via spec-driver
+- All 7 tasks implemented with TDD:
+  1. **Auth module** (`src/figma/auth.ts`): `createAuth(token)` → `FigmaAuth` with `header()`. 6 tests.
+  2. **Endpoint builders** (`src/figma/endpoints.ts`): `buildNodesEndpoint`, `buildImagesEndpoint`. 15 tests.
+  3. **Retry utility** (`src/util/retry.ts`): `withRetry()` with exponential backoff, configurable maxRetries/baseDelay, `shouldRetry` callback with optional delay override. 9 tests.
+  4. **Raw types + Zod schemas** (`src/figma/types-raw.ts`, `src/schemas/raw.ts`): Recursive `FigmaNodeSchema` via `z.lazy()` + `.passthrough()`, `FigmaNodesResponseSchema`, `FigmaImagesResponseSchema`. 16 tests.
+  5. **HTTP client** (`src/figma/client.ts`): `createClient()` with p-limit concurrency, status→error mapping (403→AuthError, 404→NotFoundError, 429→RateLimitError, 500+→FigmaError). 9 tests.
+  6. **Node fetch** (`src/figma/fetch-node.ts`): `fetchNode()` with retry, Zod validation, options forwarding. 9 tests.
+  7. **Image export** (`src/figma/fetch-image.ts`): Two-step GET→download. `fetchImage()` with retry on API call, direct `fetch()` for presigned URL download (no auth headers). 9 tests.
+- All 118 tests pass, lint clean, typecheck clean. `mise run` passes.
+- VT-002, VT-003, VT-004 verified.
+
+### Adaptations
+- **`exactOptionalPropertyTypes`** required `retryAfter?: number | undefined` on `FigmaRateLimitErrorOptions` (not just `number`).
+- **No `as` assertions** (ADR-001): `JSON.parse` returns `any`, so a `parseJson` helper with a single eslint-disable wraps it. All other code uses Zod for type narrowing instead of casts.
+- **Retry in tests**: `mockRejectedValue` / `Promise.reject` cause unhandled rejection warnings with fake timers. Solution: use a `rejectWith()` helper and `.catch()` early on the promise.
+- **Retry policy**: `isRetriable` checks for `context.status >= 500`, not just `instanceof FigmaError`. This prevents Zod validation errors from being retried.
+- **`FigmaNodesResponseSchema`** added to `schemas/raw.ts` — validates the full nodes endpoint envelope (`{ nodes: { [id]: { document, ... } }, name, lastModified, version }`), not just the inner `FigmaFileResponse`.
+- **Client design**: `createClient` returns `{ request(url): Promise<unknown> }`. Callers (`fetchNode`, `fetchImage`) own retry policy and response validation. Client only handles auth injection, concurrency limiting, and status→error mapping.
+
+### Rough edges / follow-up
+- `isRetriable` + `retryDecision` logic is duplicated between `fetch-node.ts` and `fetch-image.ts`. Could extract to a shared `figma/retry-policy.ts` but not worth it yet (3 similar lines).
+- `FigmaAuthError` on empty token in `createAuth` — no test for whitespace-only tokens (spaces pass through). Intentional per spec (token trimming is caller's concern).
+- `concurrency` test uses real timers with `setTimeout(resolve, 10)` — fast but nondeterministic in theory. Acceptable for a concurrency check.
+
+### Commits
+- Uncommitted. All changes pending commit.
+
+### Spec-driver state
+- Phase-02 sheet created, tasks filled out
+- DR-002 patched (POST→GET)
+- IP-002 verification coverage not yet updated (VT-002/003/004 still show `planned`)
+- `.spec-driver` changes pending commit with code
+
+### Verification
+- `mise run` passes (typecheck + test + lint)
+- 118 tests total: 45 from Phase 1 + 73 from Phase 2
+
+### Next step
+- Commit Phase 2 work
+- Update IP-002 verification tracking (VT-002/003/004 → verified)
+- Update phase-02 status → complete
+- Proceed to Phase 3 (output pipeline + CLI integration)
+
 ## New Agent Instructions
 
 ### Task card
