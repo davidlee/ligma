@@ -4,7 +4,7 @@ slug: 002-project_scaffold_and_figma_client-phase-03
 name: Output pipeline + CLI integration
 created: '2026-03-10'
 updated: '2026-03-10'
-status: draft
+status: complete
 kind: phase
 ---
 
@@ -34,7 +34,11 @@ verification:
   tests:
     - VT-006
     - VT-007
-  evidence: []
+  evidence:
+    - 164 tests passing (118 Phase 1+2 + 46 Phase 3)
+    - eslint clean
+    - tsc --noEmit clean
+    - mise run passes
 tasks:
   - id: '3.1'
     name: Manifest Zod schema
@@ -79,17 +83,17 @@ Implement the output pipeline (manifest schema, manifest builder, directory writ
 - [x] DR-002 accepted
 
 ## 4. Exit Criteria / Done When
-- [ ] Manifest Zod schema validates the DR-002 §3 Manifest type (VT-006)
-- [ ] `buildManifest()` produces correct manifest from fetch results (VT-006)
-- [ ] `writeOutput()` creates artifact directory with correct structure (VT-006)
-- [ ] `src/config.ts` defines `FetchConfig` type mapping CLI args to module options
-- [ ] `src/cli.ts` parses args via commander and calls orchestration function
-- [ ] Valid args → orchestration runs, writes artifacts (VT-007)
-- [ ] Invalid URL → exits with error code + message (VT-007)
-- [ ] Missing token → exits with error code + message (VT-007)
-- [ ] `figma-fetch --help` prints usage
-- [ ] Zero lint warnings, `tsc --noEmit` clean
-- [ ] `mise run` passes
+- [x] Manifest Zod schema validates the DR-002 §3 Manifest type (VT-006)
+- [x] `buildManifest()` produces correct manifest from fetch results (VT-006)
+- [x] `writeOutput()` creates artifact directory with correct structure (VT-006)
+- [x] `src/config.ts` defines `FetchConfig` type mapping CLI args to module options
+- [x] `src/cli.ts` parses args via commander and calls orchestration function
+- [x] Valid args → orchestration runs, writes artifacts (VT-007)
+- [x] Invalid URL → exits with error code + message (VT-007)
+- [x] Missing token → exits with error code + message (VT-007)
+- [x] `figma-fetch --help` prints usage (commander built-in)
+- [x] Zero lint warnings, `tsc --noEmit` clean
+- [x] `mise run` passes — 164 tests, all green
 
 ## 5. Verification
 - `pnpm test` — all tests pass
@@ -115,13 +119,13 @@ Implement the output pipeline (manifest schema, manifest builder, directory writ
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 3.1 | Manifest Zod schema | Yes | |
-| [ ] | 3.2 | Manifest builder | No (depends on 3.1) | |
-| [ ] | 3.3 | Config types + util/log + util/fs | Yes | |
-| [ ] | 3.4 | Directory writer | No (depends on 3.1, 3.2, 3.3) | |
-| [ ] | 3.5 | Orchestration function | No (depends on 3.2, 3.3) | |
-| [ ] | 3.6 | CLI entry point | No (depends on 3.3, 3.5) | |
-| [ ] | 3.7 | CLI smoke test (VT-007) | No (depends on 3.5, 3.6) | |
+| [x] | 3.1 | Manifest Zod schema | Yes | 11 tests |
+| [x] | 3.2 | Manifest builder | No (depends on 3.1) | 10 tests |
+| [x] | 3.3 | Config types + util/log + util/fs | Yes | 5 tests (fs) |
+| [x] | 3.4 | Directory writer | No (depends on 3.1, 3.2, 3.3) | 7 tests |
+| [x] | 3.5 | Orchestration function | No (depends on 3.2, 3.3) | 13 tests |
+| [x] | 3.6 | CLI entry point | No (depends on 3.3, 3.5) | |
+| [x] | 3.7 | CLI smoke test (VT-007) | No (depends on 3.5, 3.6) | tests in orchestrate.test.ts |
 
 ### Task Details
 
@@ -182,7 +186,7 @@ Implement the output pipeline (manifest schema, manifest builder, directory writ
 - FR-015 specifies subdirs: `visual/`, `structure/`, `tokens/`, `assets/`, `logs/`. For DE-002, only `visual/` and `structure/` have content.
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
-- [ ] Spec/Delta/Plan updated with lessons
-- [ ] Hand-off notes to next phase (if any)
+- [x] Exit criteria satisfied
+- [x] Verification evidence stored (164 tests, mise run passes)
+- [x] Spec/Delta/Plan updated (IP-002 VT-006/007 → verified, progress complete)
+- [x] No next phase — DE-002 implementation complete, hand off to audit

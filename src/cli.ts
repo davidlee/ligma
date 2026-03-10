@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+
+import { Command } from 'commander'
+
+import { resolveConfig } from './config.js'
+import { FigmaError } from './errors.js'
+import { orchestrate } from './orchestrate.js'
+import { writeOutput } from './output/write.js'
+import { log } from './util/log.js'
+
+import type { ErrorContext } from './errors.js'
+
+function formatContext(context: ErrorContext): string {
+  return JSON.stringify(context, null, 2)
+}
+
+function handleError(error: unknown): never {
+  if (error instanceof FigmaError) {
+    log.error(error.message)
+    if (error.context !== undefined) {
+      log.error(formatContext(error.context))
+    }
+  } else if (error instanceof Error) {
+    log.error(error.message)
+  } else {
+    log.error('An unexpected error occurred')
+  }
+  process.exit(1)
+}
+
+const program = new Command()
+  .name('figma-fetch')
+  .description('Fetch a Figma node and export artifacts')
+  .argument('<url>', 'Figma URL with node-id query parameter')
+  .requiredOption('-t, --token <token>', 'Figma personal access token')
+  .option('-o, --out <dir>', 'Output directory', './artifacts')
+  .option('-f, --format <format>', 'Image format (png or svg)', 'png')
+  .option('-s, --scale <number>', 'Image scale (0.01-4.0)', '2')
+  .option('-d, --depth <number>', 'Node tree depth', '2')
+  .action(async (url: string, options: Record<string, string>) => {
+    const token = options.token ?? ''
+    const config = resolveConfig({
+      url,
+      token,
+      outputDir: options.out ?? './artifacts',
+      format: options.format === 'svg' ? 'svg' : 'png',
+      scale: Number(options.scale ?? '2'),
+      depth: Number(options.depth ?? '2'),
+    })
+    const result = await orchestrate(config)
+    await writeOutput(config.outputDir, result)
+    log.info(`Artifacts written to ${config.outputDir}`)
+  })
+
+program.parseAsync(process.argv).catch(handleError)

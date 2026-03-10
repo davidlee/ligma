@@ -2,6 +2,7 @@
 .direnv/
 .spec-driver/run/
 .claude/settings.local.json
+/artifacts
 
 node_modules/
 dist/

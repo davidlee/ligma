@@ -136,6 +136,41 @@
 - Update phase-02 status → complete
 - Proceed to Phase 3 (output pipeline + CLI integration)
 
+## Session 4: IP-002.PHASE-03 implementation (2026-03-10)
+
+### What's done
+- DR-002 patched with Phase 3 type contracts (FetchConfig, orchestrate, buildManifest, writeOutput, util/log, util/fs)
+- DEC-005 (--out is bundle root, caller owns naming) and DEC-006 (orchestrate/writeOutput separation) added
+- Adversarial review via PAL: 2 medium findings fixed (orchestrate moved to src/orchestrate.ts, writeOutput nodeId coupling documented), 5 low findings addressed
+- Phase-03 sheet created via spec-driver
+- All 7 tasks implemented with TDD:
+  1. **Manifest Zod schema** (`src/schemas/manifest.ts`): ManifestErrorSchema, ManifestSchema, full output field set. 11 tests.
+  2. **Manifest builder** (`src/output/manifest.ts`): `buildManifest(input)` pure function, omits undefined optional fields. 10 tests.
+  3. **Config + utils**: `src/config.ts` (FetchConfig + resolveConfig), `src/util/log.ts` (info/error), `src/util/fs.ts` (ensureDirectory, writeJsonFile, writeBinaryFile). 5 tests.
+  4. **Directory writer** (`src/output/write.ts`): Creates visual/, structure/, tokens/, assets/, logs/, writes manifest.json + raw-node.json + image. 7 tests.
+  5. **Orchestration** (`src/orchestrate.ts`): parseFigmaUrl → createAuth → createClient → Promise.allSettled → buildManifest. Image failure non-fatal. 13 tests.
+  6. **CLI entry** (`src/cli.ts`): Commander wrapper, error presentation with context JSON.
+  7. **VT-007 smoke test**: orchestrate + writeOutput integration tested in tests/orchestrate.test.ts.
+- All 164 tests pass, lint clean, typecheck clean. `mise run` passes.
+- VT-006 and VT-007 verified.
+
+### Adaptations
+- **`orchestrate()` in `src/orchestrate.ts`** not `src/cli.ts` — adversarial review caught DEC-006 violation (importing orchestrate from cli.ts would pull in commander).
+- **`unicorn/prevent-abbreviations`** renamed `outputDir` → `outputDirectory`, `dirStat` → `directoryStat`, `testDir` → `testDirectory` throughout.
+- **`no-console`** only allows `warn` and `error` — `log.info()` uses `process.stdout.write` instead of `console.log`.
+- **`noUncheckedIndexedAccess`** — commander options `Record<string, string>` returns `string | undefined`, needed `?? ''` fallbacks.
+- **`restrict-template-expressions`** — `Date.now()` in template literals needs `String()` wrapper.
+- **`writeJsonFile`** appends trailing newline (`${json}\n`) for POSIX compliance.
+
+### Verification
+- `mise run` passes (typecheck + test + lint)
+- 164 tests total: 45 Phase 1 + 73 Phase 2 + 46 Phase 3
+- VT-001 through VT-007 all verified
+
+### Next step
+- Commit Phase 3 work
+- `/audit-change` for DE-002 closure
+
 ## New Agent Instructions
 
 ### Task card
