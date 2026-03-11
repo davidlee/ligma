@@ -325,6 +325,21 @@ entries:
     requirement: SPEC-001.FR-018
     status: verified
     notes: Interaction extraction — 30 tests (DE-008)
+  - artefact: VT-025
+    kind: VT
+    requirement: SPEC-001.FR-013
+    status: verified
+    notes: Outline JSON + XML generation — 32 tests across outline.test.ts + outline-xml.test.ts (DE-005)
+  - artefact: VT-026
+    kind: VT
+    requirement: SPEC-001.FR-014
+    status: verified
+    notes: context.md generation — 36 tests in tests/output/context-md.test.ts (DE-005)
+  - artefact: VT-027
+    kind: VT
+    requirement: SPEC-001.NF-003
+    status: verified
+    notes: Determinism — 5 tests in tests/output/context-md-determinism.test.ts (DE-005)
 ```
 
 ## 1. Intent & Summary

@@ -66,16 +66,19 @@ describe('outlineToXml (VT-019)', () => {
       expect(outlineToXml(outline)).toMatch(/^<frame /)
     })
 
-    it('maps all node types to element names', () => {
-      const types = [
-        'document', 'page', 'frame', 'group', 'component', 'instance',
-        'variant-set', 'text', 'shape', 'vector', 'image', 'line',
-        'boolean-operation', 'mask', 'section', 'unknown',
-      ] as const
-      for (const type of types) {
+    it('maps all node types to element names per SPEC-001.FR-013', () => {
+      const mappings: [string, string][] = [
+        ['document', 'document'], ['page', 'page'], ['frame', 'frame'],
+        ['group', 'group'], ['component', 'component'], ['instance', 'instance'],
+        ['variant-set', 'variant-set'], ['text', 'text'], ['shape', 'shape'],
+        ['vector', 'vector'], ['image', 'image'], ['line', 'line'],
+        ['boolean-operation', 'boolean-op'], ['mask', 'mask'],
+        ['section', 'section'], ['unknown', 'node'],
+      ]
+      for (const [type, element] of mappings) {
         const outline = makeOutlineNode({ type })
         const xml = outlineToXml(outline)
-        expect(xml).toMatch(new RegExp(`^<${type} `))
+        expect(xml).toMatch(new RegExp(`^<${element} `))
       }
     })
   })

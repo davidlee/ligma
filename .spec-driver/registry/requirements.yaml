@@ -118,6 +118,9 @@ requirements:
     - artefact: VT-012
       status: verified
       kind: VT
+    - artefact: VT-012
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-006:
     label: FR-006
@@ -254,14 +257,28 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-005
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-018
+    - VT-019
+    coverage_entries:
+    - artefact: VT-018
+      status: verified
+      kind: VT
+    - artefact: VT-019
+      status: verified
+      kind: VT
+    - artefact: VT-018
+      status: verified
+      kind: VT
+    - artefact: VT-019
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-012:
     label: FR-012
@@ -273,14 +290,21 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-005
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-020
+    coverage_entries:
+    - artefact: VT-020
+      status: verified
+      kind: VT
+    - artefact: VT-020
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-013:
     label: FR-013
@@ -302,6 +326,9 @@ requirements:
     coverage_evidence:
     - VT-006
     coverage_entries:
+    - artefact: VT-006
+      status: verified
+      kind: VT
     - artefact: VT-006
       status: verified
       kind: VT
@@ -442,14 +469,21 @@ requirements:
     primary_spec: PROD-001
     kind: non-functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-005
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-021
+    coverage_entries:
+    - artefact: VT-021
+      status: verified
+      kind: VT
+    - artefact: VT-021
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.NF-003:
     label: NF-003
@@ -689,9 +723,6 @@ requirements:
     - artefact: VT-010
       status: verified
       kind: VT
-    - artefact: VT-010
-      status: verified
-      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-007:
     label: FR-007
@@ -859,13 +890,17 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-025
+    coverage_entries:
+    - artefact: VT-025
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-014:
     label: FR-014
@@ -877,13 +912,17 @@ requirements:
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-026
+    coverage_entries:
+    - artefact: VT-026
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-015:
     label: FR-015
@@ -1042,13 +1081,17 @@ requirements:
     primary_spec: SPEC-001
     kind: non-functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-027
+    coverage_entries:
+    - artefact: VT-027
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.NF-004:
     label: NF-004

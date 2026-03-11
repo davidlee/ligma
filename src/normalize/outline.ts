@@ -65,10 +65,10 @@ const XML_ELEMENT_NAMES = new Map<string, string>([
   ['vector', 'vector'],
   ['image', 'image'],
   ['line', 'line'],
-  ['boolean-operation', 'boolean-operation'],
+  ['boolean-operation', 'boolean-op'],
   ['mask', 'mask'],
   ['section', 'section'],
-  ['unknown', 'unknown'],
+  ['unknown', 'node'],
 ])
 
 function escapeXml(value: string): string {

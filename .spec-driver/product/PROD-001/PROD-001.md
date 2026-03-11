@@ -319,6 +319,26 @@ entries:
     requirement: PROD-001.FR-016
     status: verified
     notes: Used-token summary aggregation — 21 tests in tests/summary/tokens-used.test.ts (DE-004)
+  - artefact: VT-018
+    kind: VT
+    requirement: PROD-001.FR-011
+    status: verified
+    notes: Outline projection — 15 tests in tests/normalize/outline.test.ts (DE-005)
+  - artefact: VT-019
+    kind: VT
+    requirement: PROD-001.FR-011
+    status: verified
+    notes: Outline XML — 17 tests in tests/normalize/outline-xml.test.ts (DE-005)
+  - artefact: VT-020
+    kind: VT
+    requirement: PROD-001.FR-012
+    status: verified
+    notes: context.md generation — 36 tests in tests/output/context-md.test.ts (DE-005)
+  - artefact: VT-021
+    kind: VT
+    requirement: PROD-001.NF-002
+    status: verified
+    notes: Determinism — 5 tests in tests/output/context-md-determinism.test.ts (DE-005)
 ```
 
 ## 1. Intent & Summary
