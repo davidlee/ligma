@@ -11,6 +11,8 @@ export interface FetchConfig {
   readonly expansionDepth: number
   readonly cacheEnabled: boolean
   readonly cacheDirectory: string
+  readonly maxAssets: number
+  readonly assetFormat: 'png' | 'svg' | 'auto'
 }
 
 type RequiredConfigFields = Pick<FetchConfig, 'url' | 'token'>
@@ -27,6 +29,8 @@ const DEFAULTS: Omit<FetchConfig, 'url' | 'token'> = {
   expansionDepth: 2,
   cacheEnabled: true,
   cacheDirectory: '.cache/figma-fetch',
+  maxAssets: 20,
+  assetFormat: 'auto',
 }
 
 function validateConfig(config: FetchConfig): void {
@@ -41,6 +45,9 @@ function validateConfig(config: FetchConfig): void {
   }
   if (config.scale <= 0) {
     throw new Error('scale must be > 0')
+  }
+  if (config.maxAssets < 0) {
+    throw new Error('maxAssets must be >= 0')
   }
 }
 

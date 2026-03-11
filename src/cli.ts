@@ -40,6 +40,8 @@ interface CliOptions {
   expandDepth: string
   noCache: boolean
   cacheDirectory: string
+  maxAssets: string
+  assetFormat: string
 }
 
 const program = new Command()
@@ -57,6 +59,8 @@ const program = new Command()
   .option('--expand-depth <number>', 'Depth for expansion refetches', '2')
   .option('--no-cache', 'Disable fetch caching')
   .option('--cache-directory <path>', 'Cache directory path', '.cache/figma-fetch')
+  .option('--max-assets <number>', 'Maximum assets to export', '20')
+  .option('--asset-format <format>', 'Asset export format: auto, png, svg', 'auto')
   .action(async (url: string, options: CliOptions) => {
     const token = options.token !== undefined && options.token !== ''
       ? options.token
@@ -78,10 +82,20 @@ const program = new Command()
       expansionDepth: Number(options.expandDepth),
       cacheEnabled: !options.noCache,
       cacheDirectory: options.cacheDirectory,
+      maxAssets: Number(options.maxAssets),
+      assetFormat: parseAssetFormat(options.assetFormat),
     })
     const result = await orchestrate(config)
     await writeOutput(config.outputDir, result)
     log.info(`Artifacts written to ${config.outputDir}`)
   })
+
+function parseAssetFormat(value: string): 'auto' | 'png' | 'svg' {
+  if (value === 'auto' || value === 'png' || value === 'svg') {
+    return value
+  }
+  log.error(`Invalid asset format "${value}". Must be auto, png, or svg.`)
+  process.exit(1)
+}
 
 program.parseAsync(process.argv).catch(handleError)

@@ -18,6 +18,12 @@ describe('resolveConfig defaults', () => {
     expect(config.cacheDirectory).toBe('.cache/figma-fetch')
   })
 
+  it('applies asset defaults', () => {
+    const config = resolveConfig(base)
+    expect(config.maxAssets).toBe(20)
+    expect(config.assetFormat).toBe('auto')
+  })
+
   it('allows overriding expansion fields', () => {
     const config = resolveConfig({
       ...base,
@@ -60,10 +66,15 @@ describe('resolveConfig validation (VT-038)', () => {
     expect(() => resolveConfig({ ...base, scale: 0 })).toThrow('scale')
   })
 
+  it('throws when maxAssets < 0', () => {
+    expect(() => resolveConfig({ ...base, maxAssets: -1 })).toThrow('maxAssets')
+  })
+
   it('accepts boundary values', () => {
     expect(() => resolveConfig({ ...base, depth: 1 })).not.toThrow()
     expect(() => resolveConfig({ ...base, expansionDepth: 1 })).not.toThrow()
     expect(() => resolveConfig({ ...base, maxExpansionTargets: 0 })).not.toThrow()
     expect(() => resolveConfig({ ...base, scale: 0.01 })).not.toThrow()
+    expect(() => resolveConfig({ ...base, maxAssets: 0 })).not.toThrow()
   })
 })
