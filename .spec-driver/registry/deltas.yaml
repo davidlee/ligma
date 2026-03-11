@@ -1118,3 +1118,159 @@ deltas:
         risks:
         - description: Raw action field names differ from docs
           mitigation: Verify against REST fixtures
+  DE-009:
+    kind: delta
+    status: completed
+    name: "Delta - Asset export pipeline \u2014 fetch and write detected assets to\
+      \ disk"
+    slug: asset_export_pipeline_fetch_and_write_detected_assets_to_disk
+    updated: '2026-03-12'
+    path: .spec-driver/deltas/DE-009-asset_export_pipeline_fetch_and_write_detected_assets_to_disk/DE-009.md
+    applies_to:
+      specs:
+      - SPEC-001
+      requirements:
+      - SPEC-001.FR-004
+      - SPEC-001.FR-011
+      - SPEC-001.FR-015
+    relations:
+    - type: relates_to
+      target: IMPR-005
+      attributes: {}
+    plan:
+      id: IP-009
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-009
+        delta: DE-009
+        revision_links:
+          aligns_with:
+          - DR-009
+        specs:
+          primary:
+          - SPEC-001
+          collaborators: []
+        requirements:
+          targets:
+          - SPEC-001.FR-004
+          - SPEC-001.FR-011
+          - SPEC-001.FR-015
+          dependencies: []
+        phases:
+        - id: IP-009.PHASE-01
+        - id: IP-009.PHASE-02
+        - id: IP-009.PHASE-02
+      phases:
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-009.PHASE-01
+        plan: IP-009
+        delta: DE-009
+        objective: Implement core asset collection, fetching, and filename generation
+          modules. Extend config and CLI with maxAssets and assetFormat. All with
+          tests.
+        entrance_criteria:
+        - DR-009 approved
+        exit_criteria:
+        - src/assets/collect.ts implemented with tests
+        - src/assets/fetch.ts implemented with tests
+        - config.ts extended with maxAssets and assetFormat
+        - cli.ts extended with --max-assets and --asset-format flags
+        - quickcheck passes
+        verification:
+          tests:
+          - tests/assets/collect.test.ts
+          - tests/assets/fetch.test.ts
+          - tests/config.test.ts
+          evidence: []
+        tasks:
+        - id: '1.1'
+          description: Create src/assets/collect.ts with ExportTarget type and collectExportTargets
+            function
+        - id: '1.2'
+          description: Create tests/assets/collect.test.ts
+        - id: '1.3'
+          description: Create src/assets/fetch.ts with FetchedAsset type and fetchAssets
+            function
+        - id: '1.4'
+          description: Create tests/assets/fetch.test.ts
+        - id: '1.5'
+          description: Extend config.ts with maxAssets and assetFormat fields
+        - id: '1.6'
+          description: Extend cli.ts with --max-assets and --asset-format flags
+        - id: '1.7'
+          description: Extend tests/config.test.ts with new field validation
+        risks: []
+      - schema: supekku.phase.overview
+        version: 1
+        phase: IP-009.PHASE-02
+        plan: IP-009
+        delta: DE-009
+        objective: Wire P01 modules into orchestrate and write pipeline. Extend tests.
+          Rebuild, install, smoke test on real document.
+        entrance_criteria:
+        - P01 complete
+        exit_criteria:
+        - "orchestrate.ts wires collect \u2192 fetch \u2192 manifest \u2192 write"
+        - output/write.ts writes assets to disk
+        - OrchestrateResult includes fetched assets
+        - manifest.outputs.assets populated with real paths
+        - orchestrate and write tests extended
+        - mise run check passes
+        - smoke test on real document shows assets in artifacts/assets/
+        verification:
+          tests:
+          - tests/orchestrate.test.ts
+          - tests/output/write.test.ts
+          evidence: []
+        tasks:
+        - id: '2.1'
+          description: "Extend output/write.ts \u2014 add assets to OutputArtifacts,\
+            \ add writeAssets()"
+        - id: '2.2'
+          description: "Wire orchestrate.ts \u2014 collect, fetch, pass to manifest\
+            \ + result"
+        - id: '2.3'
+          description: Extend tests/output/write.test.ts with asset writing tests
+        - id: '2.4'
+          description: Extend tests/orchestrate.test.ts with asset pipeline tests
+        - id: '2.5'
+          description: "Run mise run check \u2014 all tests pass, zero lint"
+        - id: '2.6'
+          description: Rebuild + install + smoke test on real document
+        risks: []
+  DE-010:
+    kind: delta
+    status: draft
+    name: Delta - Minimal MCP transport layer
+    slug: minimal_mcp_transport_layer
+    updated: '2026-03-12'
+    path: .spec-driver/deltas/DE-010-minimal_mcp_transport_layer/DE-010.md
+    applies_to:
+      specs:
+      - PROD-001
+      requirements:
+      - PROD-001.NF-005
+    plan:
+      id: IP-010
+      overview:
+        schema: supekku.plan.overview
+        version: 1
+        plan: IP-010
+        delta: DE-010
+        revision_links:
+          aligns_with: []
+        specs:
+          primary:
+          - PROD-001
+          collaborators: []
+        requirements:
+          targets:
+          - PROD-001.NF-005
+          dependencies: []
+        phases:
+        - id: IP-010-P01
+      phases:
+      - id: IP-010-P01
+        phase: IP-010-P01

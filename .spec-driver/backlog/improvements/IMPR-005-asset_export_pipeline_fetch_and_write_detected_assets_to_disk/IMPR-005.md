@@ -3,7 +3,7 @@ id: IMPR-005
 name: "Asset export pipeline \u2014 fetch and write detected assets to disk"
 created: '2026-03-12'
 updated: '2026-03-12'
-status: idea
+status: done
 kind: improvement
 ---
 
@@ -36,3 +36,7 @@ written to disk.
 - `asset.exportNodeIds` already carries the IDs needed for the export call
 - `fetchImageCached` exists for the primary render — could be generalised
 - Bitmap vs SVG assets may want different export formats
+
+## Resolution
+
+Implemented by DE-009 (P01 + P02). Audited in AUD-007. Spec patches applied to FR-011 and FR-015.

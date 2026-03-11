@@ -553,6 +553,7 @@ requirements:
     introduced: null
     implemented_by:
     - DE-002
+    - DE-010
     verified_by: []
     coverage_evidence:
     - VT-007
@@ -665,12 +666,17 @@ requirements:
     status: active
     tags: []
     introduced: null
-    implemented_by: []
+    implemented_by:
+    - DE-009
     verified_by: []
     coverage_evidence:
     - VT-004
+    - tests/assets/fetch.test.ts
     coverage_entries:
     - artefact: VT-004
+      status: verified
+      kind: VT
+    - artefact: tests/assets/fetch.test.ts
       status: verified
       kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
@@ -850,9 +856,15 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-011:
     label: FR-011
-    title: '`normalize/assets.ts` MUST classify nodes as likely assets based on: image
-      fills, vector complexity, naming patterns, boolean operations. MUST produce
-      export suggestions with reason strings.'
+    title: "`normalize/assets.ts` MUST classify nodes as likely assets based on: image\
+      \ fills, vector complexity, naming patterns, boolean operations. MUST produce\
+      \ export suggestions with reason strings. `src/assets/collect.ts` MUST walk\
+      \ the normalized tree to collect export-suggested nodes, prioritised by kind\
+      \ (bitmap first), capped by `maxAssets`. `src/assets/fetch.ts` MUST batch-fetch\
+      \ collected targets via the image export infrastructure with kind-driven format\
+      \ selection (bitmap\u2192PNG, svg\u2192SVG, mixed\u2192both) and an optional\
+      \ format override. Per-asset fetch failure MUST be non-blocking. *(Updated by\
+      \ AUD-007: added collect/fetch pipeline.)*"
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -861,12 +873,17 @@ requirements:
     status: active
     tags: []
     introduced: null
-    implemented_by: []
+    implemented_by:
+    - DE-009
     verified_by: []
     coverage_evidence:
     - VT-016
+    - tests/assets/collect.test.ts
     coverage_entries:
     - artefact: VT-016
+      status: verified
+      kind: VT
+    - artefact: tests/assets/collect.test.ts
       status: verified
       kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
@@ -945,7 +962,10 @@ requirements:
     title: '`output/write.ts` MUST create the artifact directory structure (`visual/`,
       `structure/`, `tokens/`, `assets/`, `logs/`) and write all artifacts. `output/manifest.ts`
       MUST generate `manifest.json` describing all produced artifacts. The `tokens/`
-      directory contains `tokens-used.json` only.'
+      directory contains `tokens-used.json` only. The `assets/` directory MUST contain
+      fetched asset files named `{sanitized-name}-{node-id}.{ext}`; `manifest.outputs.assets`
+      MUST list relative paths for all written assets. *(Updated by AUD-007: added
+      asset writing behavior.)*'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -954,14 +974,31 @@ requirements:
     status: active
     tags: []
     introduced: null
-    implemented_by: []
+    implemented_by:
+    - DE-009
     verified_by: []
     coverage_evidence:
     - VT-006
+    - smoke-test-2026-03-12
+    - tests/config.test.ts
+    - tests/orchestrate.test.ts
+    - tests/output/write.test.ts
     coverage_entries:
     - artefact: VT-006
       status: verified
       kind: VT
+    - artefact: tests/orchestrate.test.ts
+      status: verified
+      kind: VT
+    - artefact: tests/output/write.test.ts
+      status: verified
+      kind: VT
+    - artefact: tests/config.test.ts
+      status: verified
+      kind: VT
+    - artefact: smoke-test-2026-03-12
+      status: verified
+      kind: VH
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-016:
     label: FR-016
