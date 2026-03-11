@@ -43,6 +43,8 @@ Note: it takes a hot minute and there's no feedback during download. Little spin
 | `--no-expand` | | Disable selective expansion |
 | `--max-expand <n>` | `10` | Maximum expansion targets |
 | `--expand-depth <n>` | `2` | Depth for expansion refetches |
+| `--max-assets <n>` | `20` | Maximum assets to export |
+| `--asset-format <fmt>` | `auto` | Asset export format (`auto`, `png`, `svg`) |
 | `--no-cache` | | Disable fetch caching |
 | `--cache-directory <path>` | `.cache/figma-fetch` | Cache directory path |
 
