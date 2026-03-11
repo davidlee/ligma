@@ -35,6 +35,11 @@ interface CliOptions {
   scale: string
   depth: string
   includeHidden: boolean
+  noExpand: boolean
+  maxExpand: string
+  expandDepth: string
+  noCache: boolean
+  cacheDirectory: string
 }
 
 const program = new Command()
@@ -47,6 +52,11 @@ const program = new Command()
   .option('-s, --scale <number>', 'Image scale (0.01-4.0)', '2')
   .option('-d, --depth <number>', 'Node tree depth', '2')
   .option('--include-hidden', 'Include hidden nodes in outline JSON/XML and context.md notes', false)
+  .option('--no-expand', 'Disable selective expansion')
+  .option('--max-expand <number>', 'Maximum expansion targets', '10')
+  .option('--expand-depth <number>', 'Depth for expansion refetches', '2')
+  .option('--no-cache', 'Disable fetch caching')
+  .option('--cache-directory <path>', 'Cache directory path', '.cache/figma-fetch')
   .action(async (url: string, options: CliOptions) => {
     const config = resolveConfig({
       url,
@@ -56,6 +66,11 @@ const program = new Command()
       scale: Number(options.scale),
       depth: Number(options.depth),
       includeHidden: options.includeHidden,
+      expansionEnabled: !options.noExpand,
+      maxExpansionTargets: Number(options.maxExpand),
+      expansionDepth: Number(options.expandDepth),
+      cacheEnabled: !options.noCache,
+      cacheDirectory: options.cacheDirectory,
     })
     const result = await orchestrate(config)
     await writeOutput(config.outputDir, result)

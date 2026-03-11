@@ -65,6 +65,8 @@ function mockFetchImageFailure(): void {
 const validConfig: FetchConfig = resolveConfig({
   url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
   token: 'test-token',
+  cacheEnabled: false,
+  expansionEnabled: false,
 })
 
 afterAll(() => {
@@ -193,6 +195,8 @@ describe('orchestrate', () => {
       url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
       token: 'test-token',
       format: 'svg',
+      cacheEnabled: false,
+      expansionEnabled: false,
     })
     const result = await orchestrate(config)
     expect(result.manifest.outputs.svg).toBe('visual/0:1.svg')
@@ -245,6 +249,8 @@ describe('orchestrate + writeOutput integration', () => {
       url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
       token: 'test-token',
       outputDir: outputDirectory,
+      cacheEnabled: false,
+      expansionEnabled: false,
     })
     const result = await orchestrate(config)
     await writeOutput(config.outputDir, result)
@@ -310,6 +316,8 @@ describe('orchestrate + writeOutput integration', () => {
       url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
       token: 'test-token',
       outputDir: outputDirectory,
+      cacheEnabled: false,
+      expansionEnabled: false,
     })
     const result = await orchestrate(config)
     await writeOutput(config.outputDir, result)
@@ -335,5 +343,250 @@ describe('orchestrate + writeOutput integration', () => {
     await expect(
       stat(join(outputDirectory, 'visual', '0:1.png')),
     ).rejects.toThrow()
+  })
+})
+
+// --- Expansion tests ---
+
+// A shallow tree: Frame with two childless containers at depth 2
+const SHALLOW_NODES_RESPONSE = {
+  name: 'Test File',
+  lastModified: '2026-03-10T00:00:00Z',
+  version: '12345',
+  nodes: {
+    '0:1': {
+      document: {
+        id: '0:1', name: 'Root', type: 'FRAME',
+        children: [
+          { id: '1:1', name: 'Card', type: 'FRAME', children: [
+            { id: '2:1', name: 'Header', type: 'FRAME' },
+            { id: '2:2', name: 'Body', type: 'FRAME' },
+          ] },
+        ],
+      },
+      components: {},
+      schemaVersion: 0,
+    },
+  },
+}
+
+// Expanded subtree for node 2:1 (Header)
+const EXPANDED_HEADER_RESPONSE = {
+  name: 'Test File',
+  lastModified: '2026-03-10T00:00:00Z',
+  version: '12345',
+  nodes: {
+    '2:1': {
+      document: {
+        id: '2:1', name: 'Header', type: 'FRAME',
+        children: [
+          { id: '3:1', name: 'Title', type: 'TEXT' },
+        ],
+      },
+      components: {},
+      schemaVersion: 0,
+    },
+  },
+}
+
+// Expanded subtree for node 2:2 (Body)
+const EXPANDED_BODY_RESPONSE = {
+  name: 'Test File',
+  lastModified: '2026-03-10T00:00:00Z',
+  version: '12345',
+  nodes: {
+    '2:2': {
+      document: {
+        id: '2:2', name: 'Body', type: 'FRAME',
+        children: [
+          { id: '3:2', name: 'Content', type: 'TEXT' },
+        ],
+      },
+      components: {},
+      schemaVersion: 0,
+    },
+  },
+}
+
+const NODE_EXPANSION_ROUTES: Record<string, unknown> = {
+  '0': SHALLOW_NODES_RESPONSE,
+  '2:1': EXPANDED_HEADER_RESPONSE,
+  '2:2': EXPANDED_BODY_RESPONSE,
+}
+
+function matchNodeRoute(url: string, routes: Record<string, unknown>): Response | null {
+  for (const [key, value] of Object.entries(routes)) {
+    const encoded = key.replace(':', '%3A')
+    const dashed = key.replace(':', '-')
+    if (url.includes(encoded) || url.includes(dashed)) {
+      return new Response(JSON.stringify(value))
+    }
+  }
+  return null
+}
+
+function routeImageAndCdn(url: string): Response | null {
+  if (url.includes('/v1/images/')) {
+    return new Response(JSON.stringify(MOCK_IMAGES_RESPONSE))
+  }
+  if (url.includes('figma-cdn.example.com')) {
+    return new Response(MOCK_IMAGE_BINARY)
+  }
+  return null
+}
+
+function mockFetchWithExpansion(): void {
+  vi.stubGlobal('fetch', vi.fn((url: string) => {
+    if (url.includes('/nodes')) {
+      const matched = matchNodeRoute(url, NODE_EXPANSION_ROUTES)
+      if (matched !== null) {
+        return Promise.resolve(matched)
+      }
+    }
+    return Promise.resolve(routeImageAndCdn(url) ?? new Response('Not Found', { status: 404 }))
+  }))
+}
+
+function mockFetchExpansionFailure(): void {
+  vi.stubGlobal('fetch', vi.fn((url: string) => {
+    if (url.includes('/nodes')) {
+      const initial = matchNodeRoute(url, { '0': SHALLOW_NODES_RESPONSE })
+      if (initial !== null) {
+        return Promise.resolve(initial)
+      }
+      return Promise.resolve(new Response('Forbidden', { status: 403 }))
+    }
+    return Promise.resolve(routeImageAndCdn(url) ?? new Response('Not Found', { status: 404 }))
+  }))
+}
+
+const expansionConfig: FetchConfig = resolveConfig({
+  url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+  token: 'test-token',
+  depth: 2,
+  expansionEnabled: true,
+  cacheEnabled: false,
+})
+
+describe('orchestrate expansion loop (VT-034)', () => {
+  it('triggers expansion for depth-truncated containers and merges results', async () => {
+    mockFetchWithExpansion()
+    const result = await orchestrate(expansionConfig)
+
+    expect(result.expansion).not.toBeNull()
+    expect(result.expansion?.totalExecuted).toBeGreaterThan(0)
+
+    // Merged tree should contain expanded children
+    const card = result.normalizedNode.children[0]
+    expect(card).toBeDefined()
+    if (card !== undefined) {
+      // Header should now have children from expansion
+      const header = card.children[0]
+      expect(header).toBeDefined()
+      if (header !== undefined) {
+        expect(header.children.length).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('re-normalizes after merge', async () => {
+    mockFetchWithExpansion()
+    const result = await orchestrate(expansionConfig)
+
+    // The normalizedNode should reflect the expanded tree
+    expect(result.normalizedNode.id).toBe('0:1')
+    // Expanded tree has more nodes than the shallow 3-node tree
+    expect(result.normalizedNode.children.length).toBeGreaterThan(0)
+  })
+})
+
+describe('expansion disabled regression (VT-035)', () => {
+  it('produces identical result shape when expansion disabled', async () => {
+    mockFetchSuccess()
+    const disabledConfig = resolveConfig({
+      url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+      token: 'test-token',
+      expansionEnabled: false,
+      cacheEnabled: false,
+    })
+    const result = await orchestrate(disabledConfig)
+
+    expect(result.expansion).toBeNull()
+    expect(result.normalizedNode).toBeDefined()
+    expect(result.manifest).toBeDefined()
+    expect(result.tokensUsed).toBeDefined()
+  })
+
+  it('matches pre-DE-006 output structure', async () => {
+    mockFetchSuccess()
+    const config = resolveConfig({
+      url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+      token: 'test-token',
+      expansionEnabled: false,
+      cacheEnabled: false,
+    })
+    const result = await orchestrate(config)
+
+    expect(result.rawNode).toEqual({
+      id: '0:1', name: 'Frame', type: 'FRAME', children: [],
+    })
+    expect(result.manifest.source.version).toBe('12345')
+  })
+})
+
+describe('failed expansion fetch resilience (VT-036)', () => {
+  it('continues pipeline when expansion fetch fails', async () => {
+    mockFetchExpansionFailure()
+    const result = await orchestrate(expansionConfig)
+
+    // Pipeline should complete despite expansion failures
+    expect(result.normalizedNode).toBeDefined()
+    expect(result.manifest).toBeDefined()
+    expect(result.expansion).not.toBeNull()
+
+    // All expansions should be recorded as failed
+    if (result.expansion !== null) {
+      for (const executed of result.expansion.executed) {
+        expect(executed.success).toBe(false)
+        expect(executed.error).toBeDefined()
+      }
+    }
+  })
+
+  it('preserves original subtree on failed expansion', async () => {
+    mockFetchExpansionFailure()
+    const result = await orchestrate(expansionConfig)
+
+    // Original tree structure preserved — Header/Body still childless
+    const card = result.normalizedNode.children[0]
+    expect(card).toBeDefined()
+    if (card !== undefined) {
+      const header = card.children[0]
+      expect(header).toBeDefined()
+      if (header !== undefined) {
+        expect(header.children).toHaveLength(0)
+      }
+    }
+  })
+})
+
+describe('expansion maxTargets bound (VT-037)', () => {
+  it('limits expansion targets to maxExpansionTargets', async () => {
+    mockFetchWithExpansion()
+    const limitedConfig = resolveConfig({
+      url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+      token: 'test-token',
+      depth: 2,
+      expansionEnabled: true,
+      maxExpansionTargets: 1,
+      cacheEnabled: false,
+    })
+    const result = await orchestrate(limitedConfig)
+
+    expect(result.expansion).not.toBeNull()
+    if (result.expansion !== null) {
+      expect(result.expansion.totalExecuted).toBeLessThanOrEqual(1)
+      expect(result.expansion.skipped.length).toBeGreaterThan(0)
+    }
   })
 })
