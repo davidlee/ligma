@@ -5,8 +5,8 @@ kind: memory
 status: active
 memory_type: fact
 created: '2026-03-10'
-updated: '2026-03-10'
-verified: '2026-03-10'
+updated: '2026-03-11'
+verified: '2026-03-11'
 confidence: high
 tags:
 - lint
@@ -45,3 +45,8 @@ provenance:
   - `unicorn/prevent-abbreviations` — `err` → `error`, etc. (allowList: args, env, params, props, ref, refs)
   - `import/order` with alphabetize + newlines between groups. Within `type` group: sibling (`./`) before parent (`../`). Value imports from parent come before sibling values. Blank line required between value and type import groups.
   - `noUncheckedIndexedAccess: true` in tsconfig — array indexing returns `T | undefined`; use `?? default` or null-check
+  - `no-non-null-assertion: error` — `!` assertions also banned
+- **Combined effect of `noUncheckedIndexedAccess` + no `as` + no `!`**: array element access requires narrowing, not assertions. Patterns:
+  - Source: assign to variable, guard `=== undefined`, then use. See `src/normalize/appearance.ts:getFourNumbers` for canonical example.
+  - Source: use `.map()` instead of index-then-cast for replacing children (see `src/expand/merge.ts:replaceChildAt`).
+  - Tests: write a throwing `child(node, index)` helper that returns `T` after the undefined check, avoiding assertion noise in every test line.
