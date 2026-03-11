@@ -3,6 +3,8 @@
 CLI alternative to the Figma MCP. Fetches a Figma node and emits a
 deterministic, token-efficient artifact bundle optimized for code agents.
 
+Made with [spec-driver](https://github.com/davidlee/spec-driver).
+
 ## Install
 
 ```sh
