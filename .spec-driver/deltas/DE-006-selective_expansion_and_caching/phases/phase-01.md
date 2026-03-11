@@ -102,11 +102,11 @@ Commands: `mise run check`
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 1.1 | Cache types (`src/cache/types.ts`) | [P] | Pure types, no deps |
-| [ ] | 1.2 | Cache key derivation (`src/cache/keys.ts`) + VT-023, VT-027 | [P] | Pure functions, no I/O |
-| [ ] | 1.3 | Cache store (`src/cache/store.ts`) + VT-024, VT-026 | | Depends on 1.1 for types, 1.2 for key paths |
-| [ ] | 1.4 | Cache-aware fetch helpers (`src/cache/index.ts`) + VT-025, VT-028 | | Depends on 1.1, 1.2, 1.3 |
-| [ ] | 1.5 | NoopCache implementation (`src/cache/index.ts`) | [P] | Trivial, can be done with 1.1 |
+| [x] | 1.1 | Cache types (`src/cache/types.ts`) | [P] | Pure types, no deps |
+| [x] | 1.2 | Cache key derivation (`src/cache/keys.ts`) + VT-023, VT-027 | [P] | 16 tests |
+| [x] | 1.3 | Cache store (`src/cache/store.ts`) + VT-024, VT-026 | | 15 tests |
+| [x] | 1.4 | Cache-aware fetch helpers (`src/cache/index.ts`) + VT-025, VT-028 | | 10 tests |
+| [x] | 1.5 | NoopCache implementation (`src/cache/index.ts`) | [P] | Covered in 1.4 tests |
 
 ### Task Details
 
@@ -149,7 +149,7 @@ Commands: `mise run check`
 - (populated during execution)
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
-- [ ] Phase tracking updated
+- [x] Exit criteria satisfied — 41 tests, `mise run check` green (730 total)
+- [x] Verification evidence stored — commit `e6b9f62`
+- [x] Phase tracking updated
 - [ ] Hand-off notes to Phase 02
