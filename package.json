@@ -1,9 +1,24 @@
 {
   "name": "ligma",
   "version": "0.1.0",
+  "description": "CLI alternative to the Figma MCP — fetch a Figma node and emit agent-friendly artifacts",
   "type": "module",
   "bin": {
     "ligma": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "figma",
+    "cli",
+    "design-tokens",
+    "code-agents"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidlee/ligma.git"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
