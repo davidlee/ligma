@@ -29,7 +29,7 @@ function handleError(error: unknown): never {
 }
 
 interface CliOptions {
-  token: string
+  token?: string
   out: string
   format: string
   scale: string
@@ -43,10 +43,10 @@ interface CliOptions {
 }
 
 const program = new Command()
-  .name('figma-fetch')
+  .name('ligma')
   .description('Fetch a Figma node and export artifacts')
   .argument('<url>', 'Figma URL with node-id query parameter')
-  .requiredOption('-t, --token <token>', 'Figma personal access token')
+  .option('-t, --token <token>', 'Figma personal access token (or set FIGMA_TOKEN)')
   .option('-o, --out <dir>', 'Output directory', './artifacts')
   .option('-f, --format <format>', 'Image format (png or svg)', 'png')
   .option('-s, --scale <number>', 'Image scale (0.01-4.0)', '2')
@@ -58,9 +58,16 @@ const program = new Command()
   .option('--no-cache', 'Disable fetch caching')
   .option('--cache-directory <path>', 'Cache directory path', '.cache/figma-fetch')
   .action(async (url: string, options: CliOptions) => {
+    const token = options.token !== undefined && options.token !== ''
+      ? options.token
+      : process.env.FIGMA_TOKEN
+    if (token === undefined || token === '') {
+      log.error('Missing Figma token. Pass --token or set FIGMA_TOKEN.')
+      process.exit(1)
+    }
     const config = resolveConfig({
       url,
-      token: options.token,
+      token,
       outputDir: options.out,
       format: options.format === 'svg' ? 'svg' : 'png',
       scale: Number(options.scale),

@@ -26,6 +26,14 @@ run = "pnpm exec prettier . --write"
 description = "typecheck"
 run = "tsc --noEmit"
 
+[tasks.build]
+description = "compile TypeScript"
+run = "pnpm build"
+
+[tasks.install]
+description = "build and link globally"
+run = "pnpm build && pnpm link --global"
+
 [tasks.contracts]
 description = "typecheck"
 run = "uv run spec-driver sync --contracts"
