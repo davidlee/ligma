@@ -73,11 +73,11 @@ Implement the expansion engine module (`src/expand/`): type definitions, individ
 - [x] DR-006 §§5–7 reviewed
 
 ## 4. Exit Criteria / Done When
-- [ ] `src/expand/types.ts` — all expansion type definitions
-- [ ] `src/expand/triggers.ts` — depthTruncatedContainer, geometryNeeded, evaluateExpansionTriggers
-- [ ] `src/expand/merge.ts` — findRawNodeById, mergeExpansions
-- [ ] VT-029 through VT-033 all pass
-- [ ] `mise run check` green
+- [x] `src/expand/types.ts` — all expansion type definitions
+- [x] `src/expand/triggers.ts` — depthTruncatedContainer, geometryNeeded, evaluateExpansionTriggers
+- [x] `src/expand/merge.ts` — findRawNodeById, mergeExpansions
+- [x] VT-029 through VT-033 all pass
+- [x] `mise run check` green
 
 ## 5. Verification
 
@@ -99,11 +99,11 @@ Commands: `mise run check`
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 2.1 | Expansion types (`src/expand/types.ts`) | [P] | Pure types, no deps |
-| [ ] | 2.2 | depthTruncatedContainer trigger + VT-029 | | Depends on 2.1 |
-| [ ] | 2.3 | geometryNeeded trigger + VT-030 | | Depends on 2.1 |
-| [ ] | 2.4 | evaluateExpansionTriggers pipeline + VT-031 | | Depends on 2.2, 2.3 |
-| [ ] | 2.5 | Raw tree merge (`src/expand/merge.ts`) + VT-032, VT-033 | [P] | Independent of triggers |
+| [x] | 2.1 | Expansion types (`src/expand/types.ts`) | [P] | 12 type definitions |
+| [x] | 2.2 | depthTruncatedContainer trigger + VT-029 | | 8 tests |
+| [x] | 2.3 | geometryNeeded trigger + VT-030 | | 7 tests |
+| [x] | 2.4 | evaluateExpansionTriggers pipeline + VT-031 | | 8 tests |
+| [x] | 2.5 | Raw tree merge (`src/expand/merge.ts`) + VT-032, VT-033 | [P] | 13 tests |
 
 ### Task Details
 
@@ -148,7 +148,7 @@ Commands: `mise run check`
 - (populated during execution)
 
 ## 11. Wrap-up Checklist
-- [ ] Exit criteria satisfied
-- [ ] Verification evidence stored
-- [ ] Phase tracking updated
+- [x] Exit criteria satisfied — 36 tests, `mise run check` green (766 total)
+- [x] Verification evidence stored — commit `bc084cf`
+- [x] Phase tracking updated
 - [ ] Hand-off notes to Phase 03
