@@ -12,6 +12,13 @@ export async function writeJsonFile(
   await writeFile(path, `${json}\n`, 'utf-8')
 }
 
+export async function writeTextFile(
+  path: string,
+  content: string,
+): Promise<void> {
+  await writeFile(path, content, 'utf-8')
+}
+
 export async function writeBinaryFile(
   path: string,
   buffer: Buffer,

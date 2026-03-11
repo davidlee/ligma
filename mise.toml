@@ -6,6 +6,10 @@ run = "mise check"
 description = "pre-commit check."
 run = "mise run typecheck && mise run test && mise run lint && echo 'OK: all checks passed.'"
 
+[tasks.quickcheck]
+description = "typecheck + lint"
+run = "mise run typecheck && mise run lint && echo 'OK: quickcheck passed.'"
+
 [tasks.lint]
 description = "lint. zero warnings."
 run = "pnpm lint"
@@ -21,3 +25,7 @@ run = "pnpm exec prettier . --write"
 [tasks.typecheck]
 description = "typecheck"
 run = "tsc --noEmit"
+
+[tasks.contracts]
+description = "typecheck"
+run = "uv run spec-driver sync --contracts"

@@ -5,6 +5,7 @@ export interface FetchConfig {
   readonly format: 'png' | 'svg'
   readonly scale: number
   readonly depth: number
+  readonly includeHidden: boolean
 }
 
 type RequiredConfigFields = Pick<FetchConfig, 'url' | 'token'>
@@ -15,6 +16,7 @@ const DEFAULTS: Omit<FetchConfig, 'url' | 'token'> = {
   format: 'png',
   scale: 2,
   depth: 2,
+  includeHidden: false,
 }
 
 export function resolveConfig(

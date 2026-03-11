@@ -9,6 +9,7 @@ import { FigmaAuthError, FigmaUrlParseError } from '../src/errors.js'
 import { orchestrate } from '../src/orchestrate.js'
 import { writeOutput } from '../src/output/write.js'
 import { ManifestSchema } from '../src/schemas/manifest.js'
+import { OutlineNodeSchema } from '../src/schemas/outline.js'
 import { TokensUsedSummarySchema } from '../src/schemas/tokens-used.js'
 
 import type { FetchConfig } from '../src/config.js'
@@ -178,6 +179,10 @@ describe('orchestrate', () => {
     const result = await orchestrate(validConfig)
 
     expect(result.manifest.outputs.rawNodeJson).toBe('structure/raw-node.json')
+    expect(result.manifest.outputs.normalizedNodeJson).toBe('structure/normalized-node.json')
+    expect(result.manifest.outputs.outlineJson).toBe('structure/outline.json')
+    expect(result.manifest.outputs.outlineXml).toBe('structure/outline.xml')
+    expect(result.manifest.outputs.contextMd).toBe('context.md')
     expect(result.manifest.outputs.tokensUsedJson).toBe('tokens/tokens-used.json')
     expect(result.manifest.outputs.png).toBe('visual/0:1.png')
   })
@@ -192,6 +197,31 @@ describe('orchestrate', () => {
     const result = await orchestrate(config)
     expect(result.manifest.outputs.svg).toBe('visual/0:1.svg')
     expect(result.manifest.outputs.png).toBeUndefined()
+  })
+
+  it('returns outlineJson as valid OutlineNode', async () => {
+    mockFetchSuccess()
+    const result = await orchestrate(validConfig)
+
+    expect(result.outlineJson).toBeDefined()
+    const parsed = OutlineNodeSchema.safeParse(result.outlineJson)
+    expect(parsed.success).toBe(true)
+  })
+
+  it('returns outlineXml as string', async () => {
+    mockFetchSuccess()
+    const result = await orchestrate(validConfig)
+
+    expect(typeof result.outlineXml).toBe('string')
+    expect(result.outlineXml).toContain('<frame')
+  })
+
+  it('returns contextMd as string', async () => {
+    mockFetchSuccess()
+    const result = await orchestrate(validConfig)
+
+    expect(typeof result.contextMd).toBe('string')
+    expect(result.contextMd).toContain('## Source')
   })
 })
 
@@ -232,6 +262,28 @@ describe('orchestrate + writeOutput integration', () => {
       join(outputDirectory, 'structure', 'raw-node.json'),
     )
     expect(rawNodeStat.isFile()).toBe(true)
+
+    // normalized-node.json exists
+    const normStat = await stat(
+      join(outputDirectory, 'structure', 'normalized-node.json'),
+    )
+    expect(normStat.isFile()).toBe(true)
+
+    // outline.json exists
+    const outlineJsonStat = await stat(
+      join(outputDirectory, 'structure', 'outline.json'),
+    )
+    expect(outlineJsonStat.isFile()).toBe(true)
+
+    // outline.xml exists
+    const outlineXmlStat = await stat(
+      join(outputDirectory, 'structure', 'outline.xml'),
+    )
+    expect(outlineXmlStat.isFile()).toBe(true)
+
+    // context.md exists
+    const contextMdStat = await stat(join(outputDirectory, 'context.md'))
+    expect(contextMdStat.isFile()).toBe(true)
 
     // image file exists
     const imageStat = await stat(join(outputDirectory, 'visual', '0:1.png'))

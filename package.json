@@ -1,9 +1,9 @@
 {
-  "name": "figma-fetch",
+  "name": "ligma",
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "figma-fetch": "./dist/cli.js"
+    "ligma": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

@@ -43,6 +43,11 @@ describe('ManifestSchema', () => {
     },
     outputs: {
       rawNodeJson: 'structure/raw-node.json',
+      normalizedNodeJson: 'structure/normalized-node.json',
+      outlineJson: 'structure/outline.json',
+      outlineXml: 'structure/outline.xml',
+      contextMd: 'context.md',
+      tokensUsedJson: 'tokens/tokens-used.json',
       assets: [],
     },
     errors: [],
@@ -102,10 +107,10 @@ describe('ManifestSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects a manifest missing outputs.rawNodeJson', () => {
+  it('rejects a manifest missing required output fields', () => {
     const result = ManifestSchema.safeParse({
       ...validManifest,
-      outputs: { assets: [] },
+      outputs: { rawNodeJson: 'structure/raw-node.json', assets: [] },
     })
     expect(result.success).toBe(false)
   })

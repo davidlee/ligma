@@ -5,6 +5,15 @@ import { ManifestSchema } from '../../src/schemas/manifest.js'
 
 import type { ManifestInput } from '../../src/output/manifest.js'
 
+const REQUIRED_OUTPUTS = {
+  rawNodeJson: 'structure/raw-node.json',
+  normalizedNodeJson: 'structure/normalized-node.json',
+  outlineJson: 'structure/outline.json',
+  outlineXml: 'structure/outline.xml',
+  contextMd: 'context.md',
+  tokensUsedJson: 'tokens/tokens-used.json',
+}
+
 describe('buildManifest', () => {
   const minimalInput: ManifestInput = {
     source: {
@@ -12,7 +21,7 @@ describe('buildManifest', () => {
       nodeId: '0:1',
     },
     outputs: {
-      rawNodeJson: 'structure/raw-node.json',
+      ...REQUIRED_OUTPUTS,
       assets: [],
     },
     errors: [],
@@ -50,6 +59,16 @@ describe('buildManifest', () => {
     expect(Object.keys(manifest.source)).toEqual(['fileKey', 'nodeId'])
   })
 
+  it('includes all six required output paths', () => {
+    const manifest = buildManifest(minimalInput)
+    expect(manifest.outputs.rawNodeJson).toBe('structure/raw-node.json')
+    expect(manifest.outputs.normalizedNodeJson).toBe('structure/normalized-node.json')
+    expect(manifest.outputs.outlineJson).toBe('structure/outline.json')
+    expect(manifest.outputs.outlineXml).toBe('structure/outline.xml')
+    expect(manifest.outputs.contextMd).toBe('context.md')
+    expect(manifest.outputs.tokensUsedJson).toBe('tokens/tokens-used.json')
+  })
+
   it('includes png output when present', () => {
     const manifest = buildManifest({
       ...minimalInput,
@@ -74,7 +93,8 @@ describe('buildManifest', () => {
 
   it('omits png and svg when absent', () => {
     const manifest = buildManifest(minimalInput)
-    expect(Object.keys(manifest.outputs)).toEqual(['rawNodeJson', 'assets'])
+    expect(manifest.outputs.png).toBeUndefined()
+    expect(manifest.outputs.svg).toBeUndefined()
   })
 
   it('copies errors array', () => {
@@ -84,7 +104,6 @@ describe('buildManifest', () => {
     ]
     const manifest = buildManifest({ ...minimalInput, errors })
     expect(manifest.errors).toEqual(errors)
-    // verify it's a copy, not a reference
     expect(manifest.errors).not.toBe(errors)
   })
 
@@ -108,7 +127,7 @@ describe('buildManifest', () => {
         lastModified: '2026-03-10T00:00:00Z',
       },
       outputs: {
-        rawNodeJson: 'structure/raw-node.json',
+        ...REQUIRED_OUTPUTS,
         png: 'visual/0:1.png',
         assets: ['assets/icon.svg'],
       },

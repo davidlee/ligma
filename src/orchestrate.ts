@@ -5,6 +5,8 @@ import { fetchImage } from './figma/fetch-image.js'
 import { fetchNode } from './figma/fetch-node.js'
 import { parseFigmaUrl } from './figma/url.js'
 import { normalize } from './normalize/index.js'
+import { buildOutline, outlineToXml } from './normalize/outline.js'
+import { generateContextMd } from './output/context-md.js'
 import { buildManifest } from './output/manifest.js'
 import { aggregateTokensUsed } from './summary/tokens-used.js'
 
@@ -12,6 +14,7 @@ import type { FetchConfig } from './config.js'
 import type { FetchImageResult } from './figma/fetch-image.js'
 import type { Manifest, ManifestError } from './schemas/manifest.js'
 import type { NormalizedNode } from './schemas/normalized.js'
+import type { OutlineNode } from './schemas/outline.js'
 import type { TokensUsedSummary } from './schemas/tokens-used.js'
 
 export interface OrchestrateResult {
@@ -19,12 +22,16 @@ export interface OrchestrateResult {
   readonly rawNode: unknown
   readonly normalizedNode: NormalizedNode
   readonly tokensUsed: TokensUsedSummary
+  readonly outlineJson: OutlineNode
+  readonly outlineXml: string
+  readonly contextMd: string
   readonly image?: FetchImageResult | undefined
 }
 
 /**
  * Orchestrates a complete Figma fetch: parse URL, authenticate, fetch node
- * and image in parallel, build manifest. Returns data only — no I/O.
+ * and image in parallel, normalize, generate outline + context.md, build
+ * manifest. Returns data only — no I/O.
  *
  * Image failure is non-fatal (recorded in manifest errors).
  * Node failure is fatal (throws).
@@ -65,6 +72,14 @@ export async function orchestrate(
     ? `visual/${parsed.nodeId}.${image.format}`
     : undefined
 
+  const normalizedNode = normalize(fileResponse.document)
+  const tokensUsed = aggregateTokensUsed(normalizedNode, parsed.fileKey, parsed.nodeId)
+
+  const { outline, hiddenNodesOmitted } = buildOutline(normalizedNode, {
+    includeHidden: config.includeHidden,
+  })
+  const xmlString = outlineToXml(outline)
+
   const manifest = buildManifest({
     source: {
       fileKey: parsed.fileKey,
@@ -75,6 +90,10 @@ export async function orchestrate(
     },
     outputs: {
       rawNodeJson: 'structure/raw-node.json',
+      normalizedNodeJson: 'structure/normalized-node.json',
+      outlineJson: 'structure/outline.json',
+      outlineXml: 'structure/outline.xml',
+      contextMd: 'context.md',
       tokensUsedJson: 'tokens/tokens-used.json',
       ...(config.format === 'png'
         ? { png: imageOutputPath }
@@ -84,9 +103,24 @@ export async function orchestrate(
     errors,
   })
 
-  const normalizedNode = normalize(fileResponse.document)
-  const tokensUsed = aggregateTokensUsed(normalizedNode, parsed.fileKey, parsed.nodeId)
-  return { manifest, rawNode: fileResponse.document, normalizedNode, tokensUsed, image }
+  const contextMd = generateContextMd({
+    node: normalizedNode,
+    manifest,
+    tokensUsed,
+    outline,
+    hiddenNodesOmitted,
+  })
+
+  return {
+    manifest,
+    rawNode: fileResponse.document,
+    normalizedNode,
+    tokensUsed,
+    outlineJson: outline,
+    outlineXml: xmlString,
+    contextMd,
+    image,
+  }
 }
 
 function buildImageError(

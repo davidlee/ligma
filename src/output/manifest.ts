@@ -10,7 +10,11 @@ export interface ManifestInput {
   }
   readonly outputs: {
     readonly rawNodeJson: string
-    readonly tokensUsedJson?: string | undefined
+    readonly normalizedNodeJson: string
+    readonly outlineJson: string
+    readonly outlineXml: string
+    readonly contextMd: string
+    readonly tokensUsedJson: string
     readonly png?: string | undefined
     readonly svg?: string | undefined
     readonly assets: readonly string[]
@@ -20,8 +24,7 @@ export interface ManifestInput {
 
 /**
  * Builds a complete Manifest from core fetch results.
- * Fields not present in ManifestInput (normalizedNodeJson, outlineJson, etc.)
- * are omitted from output. Later deltas extend ManifestInput — not the builder.
+ * All six required output paths are always present.
  */
 export function buildManifest(input: ManifestInput): Manifest {
   return {
@@ -51,10 +54,12 @@ function buildSource(source: ManifestInput['source']): Manifest['source'] {
 function buildOutputs(outputs: ManifestInput['outputs']): Manifest['outputs'] {
   const result: Manifest['outputs'] = {
     rawNodeJson: outputs.rawNodeJson,
+    normalizedNodeJson: outputs.normalizedNodeJson,
+    outlineJson: outputs.outlineJson,
+    outlineXml: outputs.outlineXml,
+    contextMd: outputs.contextMd,
+    tokensUsedJson: outputs.tokensUsedJson,
     assets: [...outputs.assets],
-  }
-  if (outputs.tokensUsedJson !== undefined) {
-    result.tokensUsedJson = outputs.tokensUsedJson
   }
   if (outputs.png !== undefined) {
     result.png = outputs.png

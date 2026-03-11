@@ -102,12 +102,12 @@ Implement all DE-005 modules and wire them into the pipeline. Every new module h
 
 | Status | ID | Description | Parallel? | Notes |
 | --- | --- | --- | --- | --- |
-| [ ] | 1.1 | OutlineNode schema | [P] | Independent |
-| [ ] | 1.2 | Outline generation + tests | | Depends on 1.1 |
-| [ ] | 1.3 | Outline XML serialization + tests | | Depends on 1.2 |
-| [ ] | 1.4 | context.md generation + tests | [P] | Independent of 1.1–1.3 until wiring |
-| [ ] | 1.5 | Manifest schema update + regression fixes | [P] | Independent |
-| [ ] | 1.6 | Pipeline wiring (orchestrate + write + config + CLI) | | Depends on 1.1–1.5 |
+| [x] | 1.1 | OutlineNode schema | [P] | `src/schemas/outline.ts` created |
+| [x] | 1.2 | Outline generation + tests | | 15 tests (VT-018) |
+| [x] | 1.3 | Outline XML serialization + tests | | 17 tests (VT-019) |
+| [x] | 1.4 | context.md generation + tests | [P] | 36 tests (VT-020) |
+| [x] | 1.5 | Manifest schema update + regression fixes | [P] | 5 fields now required; all regression tests updated |
+| [x] | 1.6 | Pipeline wiring (orchestrate + write + config + CLI) | | All files + regression tests updated |
 
 ### Task Details
 
@@ -144,16 +144,32 @@ Implement all DE-005 modules and wire them into the pipeline. Every new module h
 ## 8. Risks & Mitigations
 | Risk | Mitigation | Status |
 | --- | --- | --- |
-| Manifest schema change cascades | Update tests in same task (1.5) | open |
-| context.md golden snapshot fragile | Use synthetic fixture, match key sections not byte-exact | open |
+| Manifest schema change cascades | Update tests in same task (1.5) | resolved — 4 test files updated cleanly |
+| context.md golden snapshot fragile | Use synthetic fixture, match key sections not byte-exact | resolved — golden test uses `toContain` checks, not byte-exact |
 
 ## 9. Decisions & Outcomes
 - 2026-03-11 — Phase structure: 2 phases (core + verification/close). Research complete in preflight/DR.
+- 2026-03-11 — Used `Map<string, string>` for XML element names instead of `Record<NormalizedNodeType, string>` to satisfy `no-unsafe-return` lint rule.
+- 2026-03-11 — Split `buildOutline` into `projectNode` (always returns) + `projectChild` (may return null) to avoid non-null assertion on root.
+- 2026-03-11 — Zod v3 lacks `.nonneg()` — used `.int().min(0)` in OutlineNodeSchema.
 
 ## 10. Findings / Research Notes
 - Role inference confirmed wired in `normalize/index.ts` via `applyInferencesRecursive()`
-- `writeOutput()` currently missing normalized JSON write — closing that gap in 1.6
+- `writeOutput()` now writes normalized JSON (was missing) — closed in 1.6
 - `makeNode()` helpers exist in test files for building NormalizedNode fixtures
+- `assertionStyle: 'never'` in eslint bans `as Type` but exempts `as const`; `[] as string[]` fails — use `Array<string>()` for typed empty arrays in tests
+- `writeTextFile` added to `src/util/fs.ts` for XML and markdown output
+- `tokensUsed` write changed from conditional to unconditional (always produced by pipeline now)
+- Manifest schema cascaded to: `tests/schemas/manifest.test.ts`, `tests/output/manifest.test.ts`, `tests/output/write.test.ts`, `tests/orchestrate.test.ts`
+
+## 12. Implementation Notes
+- **Status**: All tasks complete. `mise run` green (684 tests, 35 files, 0 lint warnings).
+- **Uncommitted**: All work is uncommitted. Ready for commit.
+- **Spec-driver changes**: Phase sheet updated, not yet committed.
+- **New files**: `src/schemas/outline.ts`, `src/normalize/outline.ts`, `src/output/context-md.ts`, `tests/normalize/outline.test.ts`, `tests/normalize/outline-xml.test.ts`, `tests/output/context-md.test.ts`
+- **Modified files**: `src/schemas/manifest.ts`, `src/output/manifest.ts`, `src/output/write.ts`, `src/orchestrate.ts`, `src/config.ts`, `src/cli.ts`, `src/util/fs.ts`, + 4 test files
+- **Rough edges**: VT-021 (determinism) not in phase 1 scope — planned for phase 2. `CliOptions` interface added to cli.ts to avoid type assertions on commander options.
+- **Follow-up**: Phase 2 should add VT-021 determinism tests and run AUD-005.
 
 ## 11. Wrap-up Checklist
 - [ ] Exit criteria satisfied

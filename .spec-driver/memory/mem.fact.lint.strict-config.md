@@ -36,7 +36,7 @@ provenance:
 - [[ADR-001]]: zero warnings — every rule is `error` or `off`
 - Canonical config source: `docs/lint.md`
 - Key strict rules that shape coding style:
-  - `consistent-type-assertions: never` — no `as` casts; use type narrowing
+  - `consistent-type-assertions: never` — no `as` casts; use type narrowing. `as const` IS allowed. For typed empty arrays, use `Array<string>()` instead of `[] as string[]`
   - `strict-boolean-expressions` — no truthy checks on strings/numbers/nullables
   - `explicit-function-return-type` + `explicit-module-boundary-types` — all exports typed
   - `exactOptionalPropertyTypes` in tsconfig — use `T | undefined` not `T?` when assigning undefined

@@ -28,6 +28,15 @@ function handleError(error: unknown): never {
   process.exit(1)
 }
 
+interface CliOptions {
+  token: string
+  out: string
+  format: string
+  scale: string
+  depth: string
+  includeHidden: boolean
+}
+
 const program = new Command()
   .name('figma-fetch')
   .description('Fetch a Figma node and export artifacts')
@@ -37,15 +46,16 @@ const program = new Command()
   .option('-f, --format <format>', 'Image format (png or svg)', 'png')
   .option('-s, --scale <number>', 'Image scale (0.01-4.0)', '2')
   .option('-d, --depth <number>', 'Node tree depth', '2')
-  .action(async (url: string, options: Record<string, string>) => {
-    const token = options.token ?? ''
+  .option('--include-hidden', 'Include hidden nodes in outline JSON/XML and context.md notes', false)
+  .action(async (url: string, options: CliOptions) => {
     const config = resolveConfig({
       url,
-      token,
-      outputDir: options.out ?? './artifacts',
+      token: options.token,
+      outputDir: options.out,
       format: options.format === 'svg' ? 'svg' : 'png',
-      scale: Number(options.scale ?? '2'),
-      depth: Number(options.depth ?? '2'),
+      scale: Number(options.scale),
+      depth: Number(options.depth),
+      includeHidden: options.includeHidden,
     })
     const result = await orchestrate(config)
     await writeOutput(config.outputDir, result)

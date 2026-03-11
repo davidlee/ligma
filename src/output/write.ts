@@ -1,15 +1,21 @@
 import { join } from 'node:path'
 
-import { ensureDirectory, writeBinaryFile, writeJsonFile } from '../util/fs.js'
+import { ensureDirectory, writeBinaryFile, writeJsonFile, writeTextFile } from '../util/fs.js'
 
 import type { FetchImageResult } from '../figma/fetch-image.js'
 import type { Manifest } from '../schemas/manifest.js'
+import type { NormalizedNode } from '../schemas/normalized.js'
+import type { OutlineNode } from '../schemas/outline.js'
 import type { TokensUsedSummary } from '../schemas/tokens-used.js'
 
 export interface OutputArtifacts {
   readonly manifest: Manifest
   readonly rawNode: unknown
-  readonly tokensUsed?: TokensUsedSummary | undefined
+  readonly normalizedNode: NormalizedNode
+  readonly outlineJson: OutlineNode
+  readonly outlineXml: string
+  readonly contextMd: string
+  readonly tokensUsed: TokensUsedSummary
   readonly image?: FetchImageResult | undefined
 }
 
@@ -22,10 +28,11 @@ export async function writeOutput(
   await createDirectoryStructure(outputDirectory)
   await writeManifest(outputDirectory, artifacts.manifest)
   await writeRawNode(outputDirectory, artifacts.rawNode)
-
-  if (artifacts.tokensUsed !== undefined) {
-    await writeTokensUsed(outputDirectory, artifacts.tokensUsed)
-  }
+  await writeNormalizedNode(outputDirectory, artifacts.normalizedNode)
+  await writeOutlineJson(outputDirectory, artifacts.outlineJson)
+  await writeOutlineXml(outputDirectory, artifacts.outlineXml)
+  await writeContextMd(outputDirectory, artifacts.contextMd)
+  await writeTokensUsed(outputDirectory, artifacts.tokensUsed)
 
   if (artifacts.image !== undefined) {
     await writeImage(outputDirectory, artifacts)
@@ -50,6 +57,34 @@ async function writeRawNode(
   rawNode: unknown,
 ): Promise<void> {
   await writeJsonFile(join(outputDirectory, 'structure', 'raw-node.json'), rawNode)
+}
+
+async function writeNormalizedNode(
+  outputDirectory: string,
+  normalizedNode: NormalizedNode,
+): Promise<void> {
+  await writeJsonFile(join(outputDirectory, 'structure', 'normalized-node.json'), normalizedNode)
+}
+
+async function writeOutlineJson(
+  outputDirectory: string,
+  outline: OutlineNode,
+): Promise<void> {
+  await writeJsonFile(join(outputDirectory, 'structure', 'outline.json'), outline)
+}
+
+async function writeOutlineXml(
+  outputDirectory: string,
+  xml: string,
+): Promise<void> {
+  await writeTextFile(join(outputDirectory, 'structure', 'outline.xml'), xml)
+}
+
+async function writeContextMd(
+  outputDirectory: string,
+  contextMd: string,
+): Promise<void> {
+  await writeTextFile(join(outputDirectory, 'context.md'), contextMd)
 }
 
 async function writeTokensUsed(

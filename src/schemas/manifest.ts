@@ -18,13 +18,13 @@ const ManifestSourceSchema = z.object({
 
 const ManifestOutputsSchema = z.object({
   rawNodeJson: z.string(),
+  normalizedNodeJson: z.string(),
+  outlineJson: z.string(),
+  outlineXml: z.string(),
+  contextMd: z.string(),
+  tokensUsedJson: z.string(),
   png: z.string().optional(),
   svg: z.string().optional(),
-  normalizedNodeJson: z.string().optional(),
-  outlineJson: z.string().optional(),
-  outlineXml: z.string().optional(),
-  contextMd: z.string().optional(),
-  tokensUsedJson: z.string().optional(),
   assets: z.array(z.string()),
 })
 
