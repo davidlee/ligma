@@ -183,7 +183,7 @@ Depth: null (use config default)
 RequireGeometry: false
 ```
 
-Strongest signal: hierarchy.childCount > 0 with empty children at exact depth boundary means the subtree was cut off.
+A container-type node with no children at the exact depth boundary is the truncation signal. Genuinely childless containers at the boundary are harmless false positives — refetch confirms they have no children.
 
 ### `geometryNeeded` (priority 3)
 
@@ -206,11 +206,10 @@ Payload-shape expansion, not depth expansion. Fires only when geometry wasn't al
 2. For each node, run all triggers
 3. Collect non-null results
 4. Group by nodeId
-5. Merge duplicates: lowest priority, OR requireGeometry, max non-null depth
-6. Filter out nodeIds in context.fetchState.expandedNodeIds
+5. Merge duplicates: lowest priority, OR requireGeometry, max non-null depth. Targets that lose deduplication become SkippedExpansion with `skippedBecause: 'deduplicated-lower-priority'`
+6. Filter out nodeIds in context.fetchState.expandedNodeIds → SkippedExpansion with `skippedBecause: 'already-expanded'`
 7. Sort by priority (stable: ties broken by discovery order)
-8. Take top config.maxTargets
-9. Remaining become SkippedExpansion entries with appropriate skip reasons
+8. Take top config.maxTargets. Targets beyond the cap become SkippedExpansion with `skippedBecause: 'max-targets-exceeded'`
 
 ## Raw tree merge (`src/expand/merge.ts`)
 
@@ -240,7 +239,7 @@ function mergeExpansions(
 Rules:
 - **Whole-node replacement**: replace the entire target node with the refetched node
 - **Immutable**: path-clone along modified branches; original tree untouched
-- **Apply order**: depth-first (parents before children) for predictable overlapping replacements
+- **Apply order**: deepest nodes first (children before parents). A parent replacement replaces the entire subtree including any already-applied child replacements, so applying children first ensures their work is preserved if the parent is *not* also a target. If the parent *is* also a target, child replacements are intentionally superseded by the richer parent refetch. This is a deliberate rule, not an accidental consequence.
 - **Assumes unique nodeIds**: deduplication happens upstream in trigger evaluation
 - **Supports root replacement**: parent: null, childIndex: null
 - **Soft failure**: missing targets recorded in notFound, not fatal
