@@ -515,7 +515,7 @@ src/
 
 - **FR-010**: `normalize/components.ts` MUST extract component/instance metadata including componentId, componentName, componentSetId, variant properties, property references, and reusability assessment.
 
-- **FR-011**: `normalize/assets.ts` MUST classify nodes as likely assets based on: image fills, vector complexity, naming patterns, boolean operations. MUST produce export suggestions with reason strings.
+- **FR-011**: `normalize/assets.ts` MUST classify nodes as likely assets based on: image fills, vector complexity, naming patterns, boolean operations. MUST produce export suggestions with reason strings. `src/assets/collect.ts` MUST walk the normalized tree to collect export-suggested nodes, prioritised by kind (bitmap first), capped by `maxAssets`. `src/assets/fetch.ts` MUST batch-fetch collected targets via the image export infrastructure with kind-driven format selection (bitmap→PNG, svg→SVG, mixed→both) and an optional format override. Per-asset fetch failure MUST be non-blocking. *(Updated by AUD-007: added collect/fetch pipeline.)*
 
 - **FR-012**: `summary/tokens-used.ts` MUST aggregate variable and style references encountered during normalization of the selected subtree into a `tokens-used.json` artifact. The artifact MUST include: scope metadata (`fileKey`, `rootNodeId`, `isFullInventory: false`), deduplicated variable references (token ID, name (nullable), collection ID, resolved type, encountered-on locations), style references (type, ID, name, encountered-on locations), and a count summary by category. Fields unresolvable without the Variables API MUST accept null.
 
@@ -544,7 +544,7 @@ src/
 
 - **FR-014**: `output/context-md.ts` MUST generate `context.md` with sections: source metadata, visual reference, structural summary, important children, tokens used, assets, implementation notes.
 
-- **FR-015**: `output/write.ts` MUST create the artifact directory structure (`visual/`, `structure/`, `tokens/`, `assets/`, `logs/`) and write all artifacts. `output/manifest.ts` MUST generate `manifest.json` describing all produced artifacts. The `tokens/` directory contains `tokens-used.json` only.
+- **FR-015**: `output/write.ts` MUST create the artifact directory structure (`visual/`, `structure/`, `tokens/`, `assets/`, `logs/`) and write all artifacts. `output/manifest.ts` MUST generate `manifest.json` describing all produced artifacts. The `tokens/` directory contains `tokens-used.json` only. The `assets/` directory MUST contain fetched asset files named `{sanitized-name}-{node-id}.{ext}`; `manifest.outputs.assets` MUST list relative paths for all written assets. *(Updated by AUD-007: added asset writing behavior.)*
 
 - **FR-016**: `errors.ts` MUST define a typed error hierarchy: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`, `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Each error MUST carry actionable context (message, cause, relevant IDs). Partial failures MUST preserve best-effort output with diagnostics.
 
