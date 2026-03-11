@@ -26,6 +26,8 @@ Or pass the token inline:
 ligma <figma-url> --token <token>
 ```
 
+Note: it takes a hot minute and there's no feedback during download. Little spinner coming soon (ironic, eh?).
+
 ### Options
 
 | Flag | Default | Description |
