@@ -69,3 +69,40 @@ All 5 tasks done, 36 new tests pass, `mise run check` green (766 total tests, ze
 - `variant-set` included in container types per DR-006 §6. If real-world data shows this produces excessive false positives, reconsider in a future delta.
 - Triggers don't read `childCount` (per DR-006 §11 adversarial finding). The truncation signal is purely type + depth + empty children array.
 
+## Phase 03 — Integration and CLI
+
+### Status: complete
+
+All 4 tasks done, 16 new tests pass (9 config + 7 orchestrate expansion), `mise run check` green (782 total tests, zero regressions).
+
+### What was built
+
+- `src/config.ts` — gained 5 new fields (expansionEnabled, maxExpansionTargets, expansionDepth, cacheEnabled, cacheDirectory) with validation in resolveConfig
+- `src/orchestrate.ts` — refactored into helpers: buildCache, fetchInitialData, runExpansionLoop, fetchExpansionTargets, fetchSingleExpansion. OrchestrateResult gains `expansion: ExpansionResult | null`
+- `src/cli.ts` — 5 new flags: --no-expand, --max-expand, --expand-depth, --no-cache, --cache-directory
+- `tests/config.test.ts` — new test suite for config defaults and validation (VT-038)
+- `tests/orchestrate.test.ts` — expansion tests (VT-034–037), existing tests updated with cacheEnabled/expansionEnabled: false
+
+### Surprises / adaptations
+
+- **Cache side-effect in tests**: Existing orchestrate tests started hitting real file cache because `cacheEnabled` defaults to `true`. Fixed by explicitly disabling cache and expansion in legacy test configs. This was the predicted regression risk from the phase sheet.
+- **Retry + mock 500**: Expansion failure mock returning 500 caused retry delays (3 retries × exponential backoff = timeout). Switched to 403 (non-retriable) for the failure mock.
+- **Orchestrate complexity**: Extracted 6 helper functions to stay under `max-lines-per-function: 80` and `complexity: 8`. `orchestrate()` itself is now a clean pipeline.
+- **Mock complexity**: Expansion mocks have many URL routes. Extracted `matchNodeRoute` and `routeImageAndCdn` route-matcher helpers to stay under `complexity: 8`.
+
+### Commits
+
+- `9404e12` chore(DE-006): create P03 phase sheet
+- `f037e4b` feat(DE-006): wire expansion loop + cache into orchestrate, add CLI flags
+
+### Verification
+
+`mise run check` green at `f037e4b`. 782 tests, zero lint warnings. Contracts regenerated.
+
+### Remaining follow-ups (post-DE-006)
+
+- `pluginData` in NodeCacheKey still hardcoded to `'none'` — needs wiring when pluginData option is exposed
+- `fetchImageCached` sourceUrl on cache hit still `''` — cosmetic only
+- `fetchExpansionTargets` currently sequential — could benefit from p-limit concurrency in a future delta
+- `variant-set` in container trigger types: monitor for false positive rate
+
