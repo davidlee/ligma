@@ -4,7 +4,7 @@ slug: 009-asset_export_pipeline_fetch_and_write_detected_assets_to_disk-phase-01
 name: IP-009 Phase 01 — Core asset modules and config
 created: '2026-03-12'
 updated: '2026-03-12'
-status: draft
+status: complete
 kind: phase
 ---
 
@@ -71,12 +71,12 @@ units without wiring into orchestrate.
 - [x] DR-009 approved
 
 ## 4. Exit Criteria / Done When
-- [ ] `src/assets/collect.ts` — `collectExportTargets()` + `assetFileName()` + `sanitizeName()`
-- [ ] `src/assets/fetch.ts` — `fetchAssets()` with format logic and error handling
-- [ ] `config.ts` — `maxAssets: number`, `assetFormat: 'png' | 'svg' | 'auto'`
-- [ ] `cli.ts` — `--max-assets`, `--asset-format` flags wired
-- [ ] All new code has tests
-- [ ] `mise run quickcheck` passes
+- [x] `src/assets/collect.ts` — `collectExportTargets()` + `assetFileName()` + `sanitizeName()`
+- [x] `src/assets/fetch.ts` — `fetchAssets()` with format logic and error handling
+- [x] `config.ts` — `maxAssets: number`, `assetFormat: 'png' | 'svg' | 'auto'`
+- [x] `cli.ts` — `--max-assets`, `--asset-format` flags wired
+- [x] All new code has tests (26 new + 2 extended)
+- [x] `mise run check` passes (810 tests, 0 lint errors)
 
 ## 5. Verification
 - `pnpm exec vitest run tests/assets/`
@@ -91,10 +91,10 @@ units without wiring into orchestrate.
 
 | Status | ID | Description | Parallel? | Notes |
 |--------|-----|-------------|-----------|-------|
-| [ ] | 1.1 | `src/assets/collect.ts` | | ExportTarget, collectExportTargets, assetFileName, sanitizeName |
-| [ ] | 1.2 | `tests/assets/collect.test.ts` | [P] with 1.1 (TDD) | Priority ordering, cap, mixed, sanitize edge cases |
-| [ ] | 1.3 | `src/assets/fetch.ts` | | FetchedAsset, AssetFetchResult, fetchAssets |
-| [ ] | 1.4 | `tests/assets/fetch.test.ts` | [P] with 1.3 (TDD) | Format logic, error handling, mixed both-format |
-| [ ] | 1.5 | Extend `config.ts` | | maxAssets (default 20), assetFormat (default 'auto') |
-| [ ] | 1.6 | Extend `cli.ts` | [P] with 1.5 | --max-assets, --asset-format flags |
-| [ ] | 1.7 | Extend `tests/config.test.ts` | | Validation for new fields |
+| [x] | 1.1 | `src/assets/collect.ts` | | ExportTarget, collectExportTargets, assetFileName, sanitizeName |
+| [x] | 1.2 | `tests/assets/collect.test.ts` | [P] with 1.1 (TDD) | 18 tests — priority, cap, mixed, sanitize |
+| [x] | 1.3 | `src/assets/fetch.ts` | | FetchedAsset, AssetFetchResult, fetchAssets with ImageFetcher DI |
+| [x] | 1.4 | `tests/assets/fetch.test.ts` | [P] with 1.3 (TDD) | 8 tests — format logic, error handling, mixed |
+| [x] | 1.5 | Extend `config.ts` | | maxAssets (default 20), assetFormat (default 'auto') |
+| [x] | 1.6 | Extend `cli.ts` | [P] with 1.5 | --max-assets, --asset-format flags |
+| [x] | 1.7 | Extend `tests/config.test.ts` | | maxAssets validation + defaults |
