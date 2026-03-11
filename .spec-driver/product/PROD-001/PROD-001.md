@@ -339,6 +339,16 @@ entries:
     requirement: PROD-001.NF-002
     status: verified
     notes: Determinism — 5 tests in tests/output/context-md-determinism.test.ts (DE-005)
+  - artefact: VT-028
+    kind: VT
+    requirement: PROD-001.FR-014
+    status: verified
+    notes: File-based caching — 41 tests across cache/keys, cache/store, cache/index suites (DE-006)
+  - artefact: VT-029
+    kind: VT
+    requirement: PROD-001.FR-015
+    status: verified
+    notes: Selective expansion — 52 tests across expand/triggers, expand/merge, orchestrate expansion, config validation suites (DE-006)
 ```
 
 ## 1. Intent & Summary
@@ -421,7 +431,7 @@ See `supekku:spec.capabilities@v1` block above for structured capability definit
 
 - **FR-014**: System MUST implement file-based caching under `.cache/figma-fetch`. Cache key MUST include: file key, node ID, requested depth, version (if pinned), and relevant fetch flags. Caching is a day-one requirement, not optional quality-of-life.
 
-- **FR-015**: System MUST support selective expansion of child nodes when normalization detects ambiguity or truncation. Expansion triggers MUST be configurable with documented default thresholds. Triggers include: child count exceeding threshold, incomplete layout container children, text nodes needing deeper inspection, component instances needing referenced metadata, vector/icon nodes needing export data, image fills needing extraction, and incomplete variable binding context. The requirement is testable by verifying that triggers are configurable and that defaults are documented.
+- **FR-015**: System MUST support selective expansion of child nodes when normalization detects ambiguity or truncation. Expansion triggers MUST be configurable with documented default thresholds. v1 triggers: depth-truncated containers (container-type nodes with no children at the depth boundary) and geometry-needed vectors (export-worthy vector/boolean-operation nodes fetched without geometry data). The trigger architecture MUST be extensible to support future triggers (e.g., text nodes needing deeper inspection, image fills needing extraction, incomplete variable binding context). The requirement is testable by verifying that triggers fire correctly, are configurable, and that defaults are documented.
 
 - **FR-016**: System MUST emit a `tokens-used.json` artifact containing a best-effort aggregation of variable and style references encountered during normalization of the selected node subtree. This is NOT a full file-level inventory. The artifact MUST include: scope metadata (fileKey, rootNodeId, `isFullInventory: false`), deduplicated variable references with token ID, name (nullable), collection ID, resolved type, and encountered-on locations, style references with type, ID, name, and encountered-on locations, and a count summary by category (colors, typography, spacing). Fields that cannot be resolved without the Variables API (token name, collection name, resolved values by mode) MUST accept null.
 

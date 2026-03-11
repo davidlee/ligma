@@ -340,6 +340,16 @@ entries:
     requirement: SPEC-001.NF-003
     status: verified
     notes: Determinism — 5 tests in tests/output/context-md-determinism.test.ts (DE-005)
+  - artefact: VT-028
+    kind: VT
+    requirement: SPEC-001.FR-009
+    status: verified
+    notes: File-based caching — 41 tests across cache/keys, cache/store, cache/index suites (DE-006)
+  - artefact: VT-029
+    kind: VT
+    requirement: SPEC-001.FR-017
+    status: verified
+    notes: Selective expansion — 52 tests across expand/triggers, expand/merge, orchestrate expansion, config validation suites (DE-006)
 ```
 
 ## 1. Intent & Summary
@@ -407,7 +417,18 @@ src/
   summary/
     tokens-used.ts    → Used-token summary aggregation
 
-  orchestrate.ts      → Pipeline orchestration (normalize → summary → output)
+  cache/
+    types.ts          → Cache interface, key types, config types
+    keys.ts           → Deterministic cache key derivation (sorted-key JSON → SHA-256)
+    store.ts          → File-based store with atomic writes, metadata sidecars
+    index.ts          → createCache, createNoopCache, fetchNodeCached, fetchImageCached
+
+  expand/
+    types.ts          → Expansion target, trigger, config, result types
+    triggers.ts       → depthTruncatedContainer, geometryNeeded, evaluateExpansionTriggers
+    merge.ts          → findRawNodeById, mergeExpansions (immutable path-cloning)
+
+  orchestrate.ts      → Pipeline orchestration (normalize → expand → summary → output)
 
   output/
     manifest.ts       → Manifest generation
@@ -422,7 +443,6 @@ src/
     manifest.ts       → Zod schemas for manifest
 
   util/
-    cache.ts          → File-based caching (FR-009)
     fs.ts             → Filesystem helpers
     hash.ts           → Content hashing for cache keys
     log.ts            → Logging
@@ -446,8 +466,8 @@ src/
 | FR-011 | Outline generation | FR-013 | `normalize/outline.ts` |
 | FR-012 | context.md | FR-014 | `output/context-md.ts` |
 | FR-013 | Artifact directory + manifest | FR-015 | `output/manifest.ts`, `write.ts` |
-| FR-014 | Caching | FR-009 | `util/cache.ts` |
-| FR-015 | Selective expansion | FR-017 | cross-cutting |
+| FR-014 | Caching | FR-009 | `src/cache/` |
+| FR-015 | Selective expansion | FR-017 | `src/expand/`, `src/orchestrate.ts` |
 | FR-016 | Used-token summary | FR-012 | `summary/tokens-used.ts` |
 | FR-017 | Typed error hierarchy | FR-016 | `errors.ts` |
 | NF-001 | Representation efficiency (RE-002) | NF-001 | — |
@@ -491,7 +511,7 @@ src/
 
 - **FR-008**: `normalize/variables.ts` MUST extract `boundVariables` and `explicitVariableModes` from node JSON, mapping them to `NormalizedVariableBindings` with resolved token names where available. Both literal value and token reference MUST be surfaced. This is per-node extraction only — file-level variable inventory is out of scope.
 
-- **FR-009**: `util/cache.ts` MUST implement file-based caching under `.cache/figma-fetch`. Cache key MUST include: file key, node ID, requested depth, version (if pinned), and relevant fetch flags. Caching is a day-one requirement. Cache MUST be wrapping Figma client calls.
+- **FR-009**: `src/cache/` MUST implement file-based caching under `.cache/figma-fetch`. Cache key MUST include: file key, node ID, requested depth, geometry flag, pluginData mode, version (if pinned), and relevant fetch flags. Caching is a day-one requirement. Cache MUST wrap at the semantic fetch boundary (`fetchNodeCached`, `fetchImageCached`), not at the HTTP client level. The module provides `createCache()` for file-backed caching and `createNoopCache()` for disabled caching. *(Updated by AUD-006: module path changed from `util/cache.ts` to `src/cache/`, key fields expanded.)*
 
 - **FR-010**: `normalize/components.ts` MUST extract component/instance metadata including componentId, componentName, componentSetId, variant properties, property references, and reusability assessment.
 
@@ -528,7 +548,7 @@ src/
 
 - **FR-016**: `errors.ts` MUST define a typed error hierarchy: `FigmaUrlParseError`, `FigmaAuthError`, `FigmaNotFoundError`, `FigmaRateLimitError`, `FigmaRenderError`, `NormalizationError`. Each error MUST carry actionable context (message, cause, relevant IDs). Partial failures MUST preserve best-effort output with diagnostics.
 
-- **FR-017**: Selective expansion MUST evaluate configurable expansion triggers with documented default thresholds after initial normalization. Triggers: child count exceeding configurable threshold, incomplete layout container children, text nodes needing deeper inspection, component instances needing referenced component metadata, vector/icon nodes needing export data, image fills needing extraction, incomplete variable binding context. Default thresholds MUST be documented and overridable via configuration. The system MUST refetch specific child nodes and merge expanded data into the normalized tree.
+- **FR-017**: `src/expand/` MUST evaluate configurable expansion triggers with documented default thresholds after initial normalization. v1 triggers: `depthTruncatedContainer` (container-type nodes with no children at the depth boundary, priority 1-2) and `geometryNeeded` (export-worthy vector/boolean-operation nodes fetched without geometry data, priority 3). The trigger architecture MUST be extensible to support future triggers. Default thresholds (maxTargets: 10, expansionDepth: 2) MUST be documented and overridable via configuration. The system MUST refetch specific child nodes via the cache-aware fetch helpers and merge expanded data into the raw tree (immutable path-cloning, whole-node replacement, deepest-first ordering), followed by full re-normalization. *(Updated by AUD-006: narrowed from 7 speculative trigger categories to 2 implemented triggers with extensible architecture per DR-006 DEC-036.)*
 
 - **FR-018**: `normalize/interactions.ts` MUST extract Figma `interactions` arrays into `NormalizedInteraction[]`. Trigger types MUST be normalized to lowercase kebab-case. Action kinds for node-navigation MUST be derived from the `navigation` field, not the top-level action type. Direct actions (BACK, CLOSE, URL/OPEN_URL) MUST be mapped to their respective kinds. Unsupported action families (SET_VARIABLE, SET_VARIABLE_MODE, CONDITIONAL, UPDATE_MEDIA_RUNTIME) and media triggers (ON_MEDIA_HIT, ON_MEDIA_END) MUST normalize to `unknown` with warnings. Absent or empty interactions MUST normalize to `null`. *(Added by DE-008.)*
 
@@ -556,7 +576,7 @@ CLI (cli.ts)
   ├─ URL Parser (figma/url.ts)
   ├─ Auth (figma/auth.ts)           ← FR-002: swappable auth module
   │
-  ├─ Cache (util/cache.ts)          ← FR-009: wraps client calls
+  ├─ Cache (src/cache/)             ← FR-009: wraps semantic fetch boundary
   │    │
   │    └─ Figma Client (figma/client.ts)  ← FR-003: retry + rate-limit
   │         ├─ fetch-node.ts  ─→ raw node JSON
@@ -578,9 +598,13 @@ CLI (cli.ts)
   │    ├─ infer/           ─→ role inference (13 rules), text-kind, semantic flags
   │    └─ outline.ts       ─→ JSON + XML outlines (defined element vocabulary)
   │
+  ├─ Expand (src/expand/)           ← FR-017: selective expansion
+  │    ├─ triggers.ts  ─→ trigger evaluation (depth-truncated, geometry-needed)
+  │    └─ merge.ts     ─→ raw tree merge (immutable path-cloning)
+  │
   ├─ Summary (summary/tokens-used.ts) ─→ token aggregation
   │
-  ├─ Orchestrate (orchestrate.ts)  ─→ normalize → summary → output
+  ├─ Orchestrate (orchestrate.ts)  ─→ fetch → normalize → expand → summary → output
   │
   └─ Output (output/)
        ├─ manifest.ts    ─→ manifest.json
@@ -592,11 +616,12 @@ CLI (cli.ts)
 
 1. `cli.ts` parses args, calls `figma/url.ts` to parse URL
 2. `figma/auth.ts` builds auth headers
-3. `util/cache.ts` wraps `figma/client.ts` — fetches node JSON + image in parallel
+3. `src/cache/` wraps `figma/client.ts` — fetches node JSON + image in parallel
 4. `normalize/index.ts` orchestrates extraction → assembly → inference post-pass
-5. `summary/tokens-used.ts` aggregates encountered token references
-6. `normalize/outline.ts` generates outlines from normalized tree
-7. `output/` writes everything to disk with manifest
+5. If expansion enabled: `src/expand/triggers.ts` evaluates triggers, `src/cache/` refetches targets, `src/expand/merge.ts` merges into raw tree, re-normalize
+6. `summary/tokens-used.ts` aggregates encountered token references
+7. `normalize/outline.ts` generates outlines from normalized tree
+8. `output/` writes everything to disk with manifest
 
 ### Key Types
 

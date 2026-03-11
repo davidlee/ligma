@@ -343,38 +343,47 @@ requirements:
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-006
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-028
+    coverage_entries:
+    - artefact: VT-028
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-015:
     label: FR-015
     title: 'System MUST support selective expansion of child nodes when normalization
       detects ambiguity or truncation. Expansion triggers MUST be configurable with
-      documented default thresholds. Triggers include: child count exceeding threshold,
-      incomplete layout container children, text nodes needing deeper inspection,
-      component instances needing referenced metadata, vector/icon nodes needing export
-      data, image fills needing extraction, and incomplete variable binding context.
-      The requirement is testable by verifying that triggers are configurable and
-      that defaults are documented.'
+      documented default thresholds. v1 triggers: depth-truncated containers (container-type
+      nodes with no children at the depth boundary) and geometry-needed vectors (export-worthy
+      vector/boolean-operation nodes fetched without geometry data). The trigger architecture
+      MUST be extensible to support future triggers (e.g., text nodes needing deeper
+      inspection, image fills needing extraction, incomplete variable binding context).
+      The requirement is testable by verifying that triggers fire correctly, are configurable,
+      and that defaults are documented.'
     specs:
     - PROD-001
     primary_spec: PROD-001
     kind: functional
     category: null
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by:
     - DE-006
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-029
+    coverage_entries:
+    - artefact: VT-029
+      status: verified
+      kind: VT
     path: .spec-driver/product/PROD-001/PROD-001.md
   PROD-001.FR-016:
     label: FR-016
@@ -785,10 +794,13 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-009:
     label: FR-009
-    title: '`util/cache.ts` MUST implement file-based caching under `.cache/figma-fetch`.
-      Cache key MUST include: file key, node ID, requested depth, version (if pinned),
-      and relevant fetch flags. Caching is a day-one requirement. Cache MUST be wrapping
-      Figma client calls.'
+    title: '`src/cache/` MUST implement file-based caching under `.cache/figma-fetch`.
+      Cache key MUST include: file key, node ID, requested depth, geometry flag, pluginData
+      mode, version (if pinned), and relevant fetch flags. Caching is a day-one requirement.
+      Cache MUST wrap at the semantic fetch boundary (`fetchNodeCached`, `fetchImageCached`),
+      not at the HTTP client level. The module provides `createCache()` for file-backed
+      caching and `createNoopCache()` for disabled caching. *(Updated by AUD-006:
+      module path changed from `util/cache.ts` to `src/cache/`, key fields expanded.)*'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
@@ -802,11 +814,15 @@ requirements:
     coverage_evidence:
     - VT-011
     - VT-018
+    - VT-028
     coverage_entries:
     - artefact: VT-011
       status: verified
       kind: VT
     - artefact: VT-018
+      status: verified
+      kind: VT
+    - artefact: VT-028
       status: verified
       kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
@@ -972,26 +988,34 @@ requirements:
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-017:
     label: FR-017
-    title: 'Selective expansion MUST evaluate configurable expansion triggers with
-      documented default thresholds after initial normalization. Triggers: child count
-      exceeding configurable threshold, incomplete layout container children, text
-      nodes needing deeper inspection, component instances needing referenced component
-      metadata, vector/icon nodes needing export data, image fills needing extraction,
-      incomplete variable binding context. Default thresholds MUST be documented and
-      overridable via configuration. The system MUST refetch specific child nodes
-      and merge expanded data into the normalized tree.'
+    title: '`src/expand/` MUST evaluate configurable expansion triggers with documented
+      default thresholds after initial normalization. v1 triggers: `depthTruncatedContainer`
+      (container-type nodes with no children at the depth boundary, priority 1-2)
+      and `geometryNeeded` (export-worthy vector/boolean-operation nodes fetched without
+      geometry data, priority 3). The trigger architecture MUST be extensible to support
+      future triggers. Default thresholds (maxTargets: 10, expansionDepth: 2) MUST
+      be documented and overridable via configuration. The system MUST refetch specific
+      child nodes via the cache-aware fetch helpers and merge expanded data into the
+      raw tree (immutable path-cloning, whole-node replacement, deepest-first ordering),
+      followed by full re-normalization. *(Updated by AUD-006: narrowed from 7 speculative
+      trigger categories to 2 implemented triggers with extensible architecture per
+      DR-006 DEC-036.)*'
     specs:
     - SPEC-001
     primary_spec: SPEC-001
     kind: functional
     category: assembly
-    status: pending
+    status: active
     tags: []
     introduced: null
     implemented_by: []
     verified_by: []
-    coverage_evidence: []
-    coverage_entries: []
+    coverage_evidence:
+    - VT-029
+    coverage_entries:
+    - artefact: VT-029
+      status: verified
+      kind: VT
     path: .spec-driver/tech/SPEC-001/SPEC-001.md
   SPEC-001.FR-018:
     label: FR-018
