@@ -1,3 +1,5 @@
+import { assetFileName, collectExportTargets } from './assets/collect.js'
+import { fetchAssets } from './assets/fetch.js'
 import {
   createCache,
   createNoopCache,
@@ -20,6 +22,7 @@ import { generateContextMd } from './output/context-md.js'
 import { buildManifest } from './output/manifest.js'
 import { aggregateTokensUsed } from './summary/tokens-used.js'
 
+import type { AssetFetchResult, FetchedAsset, ImageFetcher } from './assets/fetch.js'
 import type { Cache, FetchNodeCachedResult } from './cache/index.js'
 import type { FetchConfig } from './config.js'
 import type {
@@ -46,6 +49,7 @@ export interface OrchestrateResult {
   readonly outlineXml: string
   readonly contextMd: string
   readonly image?: FetchImageResult | undefined
+  readonly assets: readonly FetchedAsset[]
   readonly expansion: ExpansionResult | null
 }
 
@@ -76,6 +80,15 @@ export async function orchestrate(
     expansion = result.expansionResult
   }
 
+  const assetResult = await collectAndFetchAssets(
+    client, cache, parsed.fileKey, normalizedNode, config,
+  )
+  errors.push(...assetResult.errors)
+
+  const assetPaths = assetResult.fetched.map(
+    (asset) => `assets/${assetFileName(asset.target, asset.format)}`,
+  )
+
   const tokensUsed = aggregateTokensUsed(normalizedNode, parsed.fileKey, parsed.nodeId)
   const { outline, hiddenNodesOmitted } = buildOutline(normalizedNode, {
     includeHidden: config.includeHidden,
@@ -103,7 +116,7 @@ export async function orchestrate(
       ...(config.format === 'png'
         ? { png: imageOutputPath }
         : { svg: imageOutputPath }),
-      assets: [],
+      assets: assetPaths,
     },
     errors,
   })
@@ -125,6 +138,7 @@ export async function orchestrate(
     outlineXml: xmlString,
     contextMd,
     image,
+    assets: assetResult.fetched,
     expansion,
   }
 }
@@ -351,6 +365,35 @@ async function fetchSingleExpansion(
     fetchedFromCache: result.fromCache,
     fetchedNode: result.response.document,
   }
+}
+
+function resolveAssetFormatOverride(
+  assetFormat: FetchConfig['assetFormat'],
+): 'png' | 'svg' | null {
+  if (assetFormat === 'auto') {
+    return null
+  }
+  return assetFormat
+}
+
+async function collectAndFetchAssets(
+  client: FigmaClient,
+  cache: Cache,
+  fileKey: string,
+  normalizedNode: NormalizedNode,
+  config: FetchConfig,
+): Promise<AssetFetchResult> {
+  const targets = collectExportTargets(normalizedNode, config.maxAssets)
+  if (targets.length === 0) {
+    return { fetched: [], errors: [] }
+  }
+
+  const formatOverride = resolveAssetFormatOverride(config.assetFormat)
+  const fetcher: ImageFetcher = (nodeId, format) =>
+    fetchImageCached(client, cache, fileKey, nodeId, { format, version: null })
+      .then((r) => r.result.buffer)
+
+  return await fetchAssets(fetcher, targets, formatOverride)
 }
 
 function buildImageError(

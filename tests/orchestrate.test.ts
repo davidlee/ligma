@@ -62,6 +62,51 @@ function mockFetchImageFailure(): void {
   }))
 }
 
+// Mock response with an asset-exportable child (bitmap fill triggers exportSuggested)
+const MOCK_NODES_WITH_ASSET = {
+  name: 'Test File',
+  lastModified: '2026-03-10T00:00:00Z',
+  version: '12345',
+  nodes: {
+    '0:1': {
+      document: {
+        id: '0:1', name: 'Frame', type: 'FRAME',
+        children: [
+          {
+            id: '5:1', name: 'Hero Image', type: 'RECTANGLE',
+            fills: [{ type: 'IMAGE', imageRef: 'img:hero' }],
+          },
+        ],
+      },
+      components: {},
+      schemaVersion: 0,
+    },
+  },
+}
+
+const MOCK_ASSET_CDN_URL = 'https://figma-cdn.example.com/asset-5-1.png'
+
+function mockFetchWithAssets(): void {
+  vi.stubGlobal('fetch', vi.fn((url: string) => {
+    if (url.includes('/v1/files/') && url.includes('/nodes')) {
+      return Promise.resolve(new Response(JSON.stringify(MOCK_NODES_WITH_ASSET)))
+    }
+    if (url.includes('/v1/images/')) {
+      // Return CDN URLs for both the root node and any asset node
+      return Promise.resolve(new Response(JSON.stringify({
+        images: {
+          '0:1': 'https://figma-cdn.example.com/rendered.png',
+          '5:1': MOCK_ASSET_CDN_URL,
+        },
+      })))
+    }
+    if (url.includes('figma-cdn.example.com')) {
+      return Promise.resolve(new Response(MOCK_IMAGE_BINARY))
+    }
+    return Promise.resolve(new Response('Not Found', { status: 404 }))
+  }))
+}
+
 const validConfig: FetchConfig = resolveConfig({
   url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
   token: 'test-token',
@@ -588,5 +633,63 @@ describe('expansion maxTargets bound (VT-037)', () => {
       expect(result.expansion.totalExecuted).toBeLessThanOrEqual(1)
       expect(result.expansion.skipped.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('asset export pipeline (VT-038)', () => {
+  it('populates manifest.outputs.assets when exportable nodes exist', async () => {
+    mockFetchWithAssets()
+    const config = resolveConfig({
+      url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+      token: 'test-token',
+      cacheEnabled: false,
+      expansionEnabled: false,
+    })
+    const result = await orchestrate(config)
+
+    expect(result.manifest.outputs.assets.length).toBeGreaterThan(0)
+    for (const assetPath of result.manifest.outputs.assets) {
+      expect(assetPath).toMatch(/^assets\//)
+    }
+  })
+
+  it('returns fetched assets in result', async () => {
+    mockFetchWithAssets()
+    const config = resolveConfig({
+      url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+      token: 'test-token',
+      cacheEnabled: false,
+      expansionEnabled: false,
+    })
+    const result = await orchestrate(config)
+
+    expect(result.assets.length).toBeGreaterThan(0)
+    for (const asset of result.assets) {
+      expect(asset.buffer).toBeInstanceOf(Buffer)
+      expect(asset.target.nodeId).toBe('5:1')
+    }
+  })
+
+  it('produces empty assets when maxAssets is 0', async () => {
+    mockFetchWithAssets()
+    const config = resolveConfig({
+      url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
+      token: 'test-token',
+      cacheEnabled: false,
+      expansionEnabled: false,
+      maxAssets: 0,
+    })
+    const result = await orchestrate(config)
+
+    expect(result.manifest.outputs.assets).toHaveLength(0)
+    expect(result.assets).toHaveLength(0)
+  })
+
+  it('produces empty assets when no exportable nodes exist', async () => {
+    mockFetchSuccess()
+    const result = await orchestrate(validConfig)
+
+    expect(result.manifest.outputs.assets).toHaveLength(0)
+    expect(result.assets).toHaveLength(0)
   })
 })

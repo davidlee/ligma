@@ -4,7 +4,7 @@ slug: 009-asset_export_pipeline_fetch_and_write_detected_assets_to_disk-phase-02
 name: IP-009 Phase 02 — Integration wiring and verification
 created: '2026-03-12'
 updated: '2026-03-12'
-status: draft
+status: in-progress
 kind: phase
 ---
 
@@ -70,12 +70,12 @@ collection, fetching, writing, and into the manifest.
 - [x] P01 complete
 
 ## 4. Exit Criteria / Done When
-- [ ] `output/write.ts` writes fetched assets to `assets/` subdir
-- [ ] `orchestrate.ts` wires collect → fetch → manifest → write
-- [ ] `manifest.outputs.assets` populated with real paths
-- [ ] Tests extended for both orchestrate and write
-- [ ] `mise run check` passes
-- [ ] Smoke test on real Figma document
+- [x] `output/write.ts` writes fetched assets to `assets/` subdir
+- [x] `orchestrate.ts` wires collect → fetch → manifest → write
+- [x] `manifest.outputs.assets` populated with real paths
+- [x] Tests extended for both orchestrate and write
+- [x] `mise run check` passes
+- [x] Smoke test on real Figma document
 
 ## 5. Verification
 - `pnpm exec vitest run tests/orchestrate.test.ts`
@@ -92,12 +92,12 @@ collection, fetching, writing, and into the manifest.
 
 | Status | ID | Description | Notes |
 |--------|-----|-------------|-------|
-| [ ] | 2.1 | Extend `output/write.ts` | Add `assets` to `OutputArtifacts`, add `writeAssets()` using `assetFileName` |
-| [ ] | 2.2 | Wire `orchestrate.ts` | Import collect/fetch, build `ImageFetcher` adapter, replace `assets: []` |
-| [ ] | 2.3 | Extend write tests | Asset writing, correct filenames, empty assets case |
-| [ ] | 2.4 | Extend orchestrate tests | Asset mock node, verify manifest.outputs.assets populated |
-| [ ] | 2.5 | `mise run check` | All green |
-| [ ] | 2.6 | Smoke test | Real document, verify `artifacts/assets/` populated |
+| [x] | 2.1 | Extend `output/write.ts` | Added `assets?: readonly FetchedAsset[] \| undefined` to `OutputArtifacts`, added `writeAssets()` |
+| [x] | 2.2 | Wire `orchestrate.ts` | Added `collectAndFetchAssets` helper, `resolveAssetFormatOverride`, fetcher adapter, asset paths in manifest |
+| [x] | 2.3 | Extend write tests | 3 tests: correct filenames, empty array, undefined assets |
+| [x] | 2.4 | Extend orchestrate tests | 4 tests (VT-038): manifest populated, result.assets, maxAssets=0, no exportable nodes |
+| [x] | 2.5 | `mise run check` | 817/817 tests pass, zero lint, typecheck clean |
+| [x] | 2.6 | Smoke test | MyCareSpace node 9292-2202 depth=10: 1 bitmap asset exported (imagewithfallback-9292-2516.png, 1.2MB) |
 
 ### Task Details
 

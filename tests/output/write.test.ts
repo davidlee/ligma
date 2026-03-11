@@ -1,4 +1,4 @@
-import { readFile, rm, stat } from 'node:fs/promises'
+import { readFile, readdir, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -8,6 +8,7 @@ import { buildManifest } from '../../src/output/manifest.js'
 import { writeOutput } from '../../src/output/write.js'
 import { ManifestSchema } from '../../src/schemas/manifest.js'
 
+import type { FetchedAsset } from '../../src/assets/fetch.js'
 import type { OutputArtifacts } from '../../src/output/write.js'
 import type { NormalizedNode } from '../../src/schemas/normalized.js'
 import type { OutlineNode } from '../../src/schemas/outline.js'
@@ -259,5 +260,47 @@ describe('writeOutput', () => {
     const content = await readFile(join(outputDirectory, 'manifest.json'), 'utf-8')
     expect(content).toContain('\n  ')
     expect(content.endsWith('\n')).toBe(true)
+  })
+})
+
+describe('writeOutput — asset writing', () => {
+  const STUB_ASSETS: readonly FetchedAsset[] = [
+    {
+      target: { nodeId: '10:1', nodeName: 'Logo', kind: 'bitmap' },
+      format: 'png',
+      buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+    },
+    {
+      target: { nodeId: '10:2', nodeName: 'Icon/Star', kind: 'svg' },
+      format: 'svg',
+      buffer: Buffer.from('<svg></svg>'),
+    },
+  ]
+
+  it('writes assets to assets/ with correct filenames', async () => {
+    const artifacts = makeArtifacts({ assets: STUB_ASSETS })
+    await writeOutput(outputDirectory, artifacts)
+
+    const pngData = await readFile(join(outputDirectory, 'assets', 'logo-10-1.png'))
+    expect(Buffer.compare(pngData, Buffer.from([0x89, 0x50, 0x4e, 0x47]))).toBe(0)
+
+    const svgData = await readFile(join(outputDirectory, 'assets', 'icon-star-10-2.svg'), 'utf-8')
+    expect(svgData).toBe('<svg></svg>')
+  })
+
+  it('writes no asset files when assets array is empty', async () => {
+    const artifacts = makeArtifacts({ assets: [] })
+    await writeOutput(outputDirectory, artifacts)
+
+    const files = await readdir(join(outputDirectory, 'assets'))
+    expect(files).toHaveLength(0)
+  })
+
+  it('writes no asset files when assets is undefined', async () => {
+    const artifacts = makeArtifacts({ assets: undefined })
+    await writeOutput(outputDirectory, artifacts)
+
+    const files = await readdir(join(outputDirectory, 'assets'))
+    expect(files).toHaveLength(0)
   })
 })

@@ -1,7 +1,9 @@
 import { join } from 'node:path'
 
+import { assetFileName } from '../assets/collect.js'
 import { ensureDirectory, writeBinaryFile, writeJsonFile, writeTextFile } from '../util/fs.js'
 
+import type { FetchedAsset } from '../assets/fetch.js'
 import type { FetchImageResult } from '../figma/fetch-image.js'
 import type { Manifest } from '../schemas/manifest.js'
 import type { NormalizedNode } from '../schemas/normalized.js'
@@ -17,6 +19,7 @@ export interface OutputArtifacts {
   readonly contextMd: string
   readonly tokensUsed: TokensUsedSummary
   readonly image?: FetchImageResult | undefined
+  readonly assets?: readonly FetchedAsset[] | undefined
 }
 
 const SUBDIRS = ['visual', 'structure', 'tokens', 'assets', 'logs'] as const
@@ -36,6 +39,10 @@ export async function writeOutput(
 
   if (artifacts.image !== undefined) {
     await writeImage(outputDirectory, artifacts)
+  }
+
+  if (artifacts.assets !== undefined && artifacts.assets.length > 0) {
+    await writeAssets(outputDirectory, artifacts.assets)
   }
 }
 
@@ -105,4 +112,14 @@ async function writeImage(
   const nodeId = artifacts.manifest.source.nodeId
   const fileName = `${nodeId}.${image.format}`
   await writeBinaryFile(join(outputDirectory, 'visual', fileName), image.buffer)
+}
+
+async function writeAssets(
+  outputDirectory: string,
+  assets: readonly FetchedAsset[],
+): Promise<void> {
+  for (const asset of assets) {
+    const fileName = assetFileName(asset.target, asset.format)
+    await writeBinaryFile(join(outputDirectory, 'assets', fileName), asset.buffer)
+  }
 }
