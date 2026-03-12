@@ -1,7 +1,15 @@
-# ligma
+# Ligma: a better Figma MCP tool / CLI command for coding agents
 
 CLI alternative to the Figma MCP. Fetches a Figma node and emits a
 deterministic, token-efficient artifact bundle optimized for code agents.
+
+The problem it sets out to solve: helping agents make sense of the things they
+need to know to implement a design. Figma json is geared towards accurately
+recording document structure, not revealing intent and guiding implemention.
+
+Files are downloaded to disk instead of dumped into the agent's context window
+(`./artifact` by default, but can be specified), and can list / download
+additional assets (as png or svg).
 
 Made with [spec-driver](https://github.com/davidlee/spec-driver).
 
