@@ -1,10 +1,11 @@
 {
-  "name": "ligma-cli",
+  "name": "ligma-mcp",
   "version": "0.1.0",
   "description": "CLI alternative to the Figma MCP — fetch a Figma node and emit agent-friendly artifacts",
   "type": "module",
   "bin": {
-    "ligma": "./dist/cli.js"
+    "ligma": "./dist/cli.js",
+    "ligma-mcp": "./dist/mcp.js"
   },
   "files": [
     "dist"
@@ -31,6 +32,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "commander": "^13.1.0",
     "p-limit": "^6.2.0",
     "zod": "^3.24.0"
