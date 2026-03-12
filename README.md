@@ -130,3 +130,4 @@ Writes the asset file and prints the absolute path to stdout.
 | [DR-007](.spec-driver/deltas/DE-007-adopt_strict_lint_config_from_docs_lint_md/DR-007.md) | DE-007 | Adopt strict lint config |
 | [DR-008](.spec-driver/deltas/DE-008-backlog_fixes_individualstrokeweights_and_interaction_extraction/DR-008.md) | DE-008 | Backlog fixes: individualStrokeWeights and interaction extraction |
 | [DR-009](.spec-driver/deltas/DE-009-asset_export_pipeline_fetch_and_write_detected_assets_to_disk/DR-009.md) | DE-009 | Asset export pipeline |
+| [DR-010](.spec-driver/deltas/DE-010-minimal_mcp_transport_layer/DR-010.md) | DE-010 | Minimal MCP transport layer |
