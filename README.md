@@ -8,21 +8,21 @@ Made with [spec-driver](https://github.com/davidlee/spec-driver).
 ## Install
 
 ```sh
+git clone <repo-url> && cd ligma
 pnpm install
 pnpm build
+pnpm link --global
 ```
 
-Requires Node >= 18.
+Requires Node >= 18. After linking, `ligma` is available globally.
 
 ### MCP server setup (Claude Code)
-
-Add ligma as an MCP server so Claude can fetch Figma nodes directly:
 
 ```sh
 claude mcp add ligma -- ligma mcp
 ```
 
-Set `FIGMA_TOKEN` in your environment, or pass it via the MCP config:
+Requires `FIGMA_TOKEN` in your shell environment. Alternatively, pass it explicitly:
 
 ```json
 {
@@ -38,7 +38,7 @@ Set `FIGMA_TOKEN` in your environment, or pass it via the MCP config:
 }
 ```
 
-The server exposes 6 tools: `figma_get_node`, `figma_get_outline`, `figma_get_render`, `figma_list_assets`, `figma_get_asset`, `figma_get_assets`.
+6 tools: `figma_get_node`, `figma_get_outline`, `figma_get_render`, `figma_list_assets`, `figma_get_asset`, `figma_get_assets`.
 
 ## Usage
 
