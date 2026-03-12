@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -312,21 +310,10 @@ export function createMcpServer(token: string): McpServer {
   return server
 }
 
-// --- Main ---
+// --- Server start ---
 
-async function main(): Promise<void> {
-  const token = process.env.FIGMA_TOKEN
-  if (token === undefined || token === '') {
-    console.error('FIGMA_TOKEN environment variable is required.')
-    process.exit(1)
-  }
-
+export async function startMcpServer(token: string): Promise<void> {
   const server = createMcpServer(token)
   const transport = new StdioServerTransport()
   await server.connect(transport)
 }
-
-main().catch((error: unknown) => {
-  console.error('Fatal:', error)
-  process.exit(1)
-})

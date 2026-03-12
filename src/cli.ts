@@ -9,6 +9,7 @@ import { assetFileName, collectExportTargets, toAssetListEntry } from './assets/
 import { fetchImageCached, fetchNodeCached } from './cache/index.js'
 import { resolveConfig } from './config.js'
 import { FigmaError } from './errors.js'
+import { startMcpServer } from './mcp.js'
 import { normalize } from './normalize/index.js'
 import { orchestrate } from './orchestrate.js'
 import { writeOutput } from './output/write.js'
@@ -35,7 +36,7 @@ function handleError(error: unknown): never {
   process.exit(1)
 }
 
-function resolveToken(options: { token?: string }): string {
+function resolveToken(options: { token?: string | undefined }): string {
   const token = options.token !== undefined && options.token !== ''
     ? options.token
     : process.env.FIGMA_TOKEN
@@ -200,6 +201,16 @@ program
     const filePath = join(directory, fileName)
     await writeFile(filePath, result.buffer)
     process.stdout.write(`${resolve(filePath)}\n`)
+  })
+
+// --- mcp subcommand ---
+
+program
+  .command('mcp')
+  .description('Start the MCP server (stdio transport)')
+  .action(async () => {
+    const token = resolveToken({ token: process.env.FIGMA_TOKEN ?? undefined })
+    await startMcpServer(token)
   })
 
 program.parseAsync(process.argv).catch(handleError)

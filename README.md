@@ -14,6 +14,32 @@ pnpm build
 
 Requires Node >= 18.
 
+### MCP server setup (Claude Code)
+
+Add ligma as an MCP server so Claude can fetch Figma nodes directly:
+
+```sh
+claude mcp add ligma -- ligma mcp
+```
+
+Set `FIGMA_TOKEN` in your environment, or pass it via the MCP config:
+
+```json
+{
+  "mcpServers": {
+    "ligma": {
+      "command": "ligma",
+      "args": ["mcp"],
+      "env": {
+        "FIGMA_TOKEN": "your-figma-token"
+      }
+    }
+  }
+}
+```
+
+The server exposes 6 tools: `figma_get_node`, `figma_get_outline`, `figma_get_render`, `figma_list_assets`, `figma_get_asset`, `figma_get_assets`.
+
 ## Usage
 
 ```sh

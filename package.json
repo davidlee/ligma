@@ -4,8 +4,7 @@
   "description": "CLI alternative to the Figma MCP — fetch a Figma node and emit agent-friendly artifacts",
   "type": "module",
   "bin": {
-    "ligma": "./dist/cli.js",
-    "ligma-mcp": "./dist/mcp.js"
+    "ligma": "./dist/cli.js"
   },
   "files": [
     "dist"
