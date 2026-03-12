@@ -134,14 +134,41 @@ Add `list-assets <url>` and `get-asset <url> <node-id>` CLI subcommands per DR-0
 ## 9. Decisions & Outcomes
 - `2026-03-12` — Phase 3 scoped from DR-010 §5, IP-010 Phase 3 definition
 - `2026-03-12` — Fixed MCP `figma_list_assets` to output DR-specified shape rather than raw ExportTarget. Added `reason` field to ExportTarget and `toAssetListEntry` mapper. Rationale: DR had been more carefully scrutinized; MCP dumping raw internal type was an oversight.
+- `2026-03-12` — Unified MCP server as `ligma mcp` subcommand instead of separate `ligma-mcp` bin. Single entry point, simpler install. Removed `ligma-mcp` from package.json `bin`. Extracted `startMcpServer()` from self-executing `main()` in mcp.ts.
 
 ## 10. Findings / Research Notes
 - Commander handles `program.command('list-assets')` alongside `program.argument('<url>').action(...)` without conflict
 - `NormalizedAssetInfo` already had `reason: string | null` — the data was available but `ExportTarget` wasn't carrying it
 - `ExportTarget.kind` maps cleanly to consumer-facing format: bitmap→png, svg→svg, mixed→png,svg
 - Extracted `resolveToken()` helper in cli.ts to share token resolution across default action and subcommands
+- `exactOptionalPropertyTypes` gotcha with `process.env.X`: env values are `string | undefined`, but `prop?: string` doesn't accept `undefined` as a value — must declare `prop?: string | undefined`
 
-## 11. Wrap-up Checklist
+## 11. Implementation Notes
+
+**What's done**: All 3 phases of DE-010 complete. Session extraction (P01), MCP server with 6 tools (P02), CLI subcommands + MCP output shape fix + `ligma mcp` unification (P03).
+
+**Surprises / adaptations**:
+- DR-010 §4 specified `{ nodeId, name, format, reason }` for list-assets output but Phase 2 MCP tool was dumping raw `ExportTarget` — fixed in P03 by adding `reason` to ExportTarget and a `toAssetListEntry` mapper
+- `ligma-mcp` separate bin replaced with `ligma mcp` subcommand post-P03 (user direction)
+
+**Rough edges / follow-ups**:
+- DR-010 operational notes (§9) still reference `ligma-mcp` bin entry — needs reconciliation during audit
+- Phase-02 sheet references `ligma-mcp` bin — same
+- DE-010 §5 approach overview references `ligma-mcp` bin entry — same
+- `get-asset` constructs a synthetic `ExportTarget` with `nodeName: nodeId` (no name lookup) — matches MCP tool pattern but the name in the filename is just the node ID
+- Coverage drift warnings from contracts sync are pre-existing (SPEC-001.FR-004/006/011/015), not from this delta
+
+**Verification**: `mise run check` — 842/842 tests, typecheck clean, lint clean. Last run after final code change.
+
+**Commits** (all on main):
+- `c9ba07f` feat(DE-010): CLI subcommands + fix MCP list-assets output shape (P03)
+- `99bf656` refactor(DE-010): unify MCP server as `ligma mcp` subcommand
+- `ba1c2fc` docs: update install and MCP setup instructions
+- `3d7cdf9` chore: sync backlog registry after contracts regen
+
+**.spec-driver changes**: committed with code per doctrine. Phase sheet and IP-010 updated inline.
+
+## 12. Wrap-up Checklist
 - [x] Exit criteria satisfied
 - [x] Verification evidence stored (mise run check: 842/842 tests, lint clean, typecheck clean)
-- [ ] Hand-off to audit
+- [ ] Hand-off to audit (DR references to `ligma-mcp` bin need reconciliation)
