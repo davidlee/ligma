@@ -1,5 +1,5 @@
 {
-  "name": "ligma",
+  "name": "ligma-cli",
   "version": "0.1.0",
   "description": "CLI alternative to the Figma MCP — fetch a Figma node and emit agent-friendly artifacts",
   "type": "module",

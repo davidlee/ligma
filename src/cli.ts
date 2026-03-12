@@ -6,6 +6,7 @@ import { resolveConfig } from './config.js'
 import { FigmaError } from './errors.js'
 import { orchestrate } from './orchestrate.js'
 import { writeOutput } from './output/write.js'
+import { createSession } from './session.js'
 import { log } from './util/log.js'
 
 import type { ErrorContext } from './errors.js'
@@ -85,7 +86,8 @@ const program = new Command()
       maxAssets: Number(options.maxAssets),
       assetFormat: parseAssetFormat(options.assetFormat),
     })
-    const result = await orchestrate(config)
+    const session = createSession(config)
+    const result = await orchestrate(session)
     await writeOutput(config.outputDir, result)
     log.info(`Artifacts written to ${config.outputDir}`)
   })

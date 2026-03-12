@@ -11,8 +11,13 @@ import { writeOutput } from '../src/output/write.js'
 import { ManifestSchema } from '../src/schemas/manifest.js'
 import { OutlineNodeSchema } from '../src/schemas/outline.js'
 import { TokensUsedSummarySchema } from '../src/schemas/tokens-used.js'
+import { createSession } from '../src/session.js'
 
 import type { FetchConfig } from '../src/config.js'
+
+function run(config: FetchConfig): Promise<Awaited<ReturnType<typeof orchestrate>>> {
+  return orchestrate(createSession(config))
+}
 
 const MOCK_NODES_RESPONSE = {
   name: 'Test File',
@@ -121,7 +126,7 @@ afterAll(() => {
 describe('orchestrate', () => {
   it('returns OrchestrateResult with manifest and rawNode', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.manifest).toBeDefined()
     expect(result.rawNode).toBeDefined()
@@ -130,14 +135,14 @@ describe('orchestrate', () => {
 
   it('produces a valid manifest', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
     const validation = ManifestSchema.safeParse(result.manifest)
     expect(validation.success).toBe(true)
   })
 
   it('populates source metadata from API response', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.manifest.source.fileKey).toBe('abc123')
     expect(result.manifest.source.nodeId).toBe('0:1')
@@ -147,7 +152,7 @@ describe('orchestrate', () => {
 
   it('returns raw node document', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     const document = result.rawNode
     expect(document).toEqual({
@@ -160,32 +165,32 @@ describe('orchestrate', () => {
 
   it('returns image result on success', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.image).toBeDefined()
     expect(result.image?.format).toBe('png')
     expect(result.image?.buffer).toBeInstanceOf(Buffer)
   })
 
-  it('throws on invalid URL', async () => {
+  it('throws on invalid URL', () => {
     const config = resolveConfig({
       url: 'https://not-figma.com/foo',
       token: 'test-token',
     })
-    await expect(orchestrate(config)).rejects.toThrow(FigmaUrlParseError)
+    expect(() => createSession(config)).toThrow(FigmaUrlParseError)
   })
 
-  it('throws on empty token', async () => {
+  it('throws on empty token', () => {
     const config = resolveConfig({
       url: 'https://www.figma.com/design/abc123/MyFile?node-id=0-1',
       token: '',
     })
-    await expect(orchestrate(config)).rejects.toThrow(FigmaAuthError)
+    expect(() => createSession(config)).toThrow(FigmaAuthError)
   })
 
   it('records image error in manifest when image export fails', async () => {
     mockFetchImageFailure()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.image).toBeUndefined()
     expect(result.manifest.errors).toHaveLength(1)
@@ -197,7 +202,7 @@ describe('orchestrate', () => {
 
   it('still returns rawNode when image export fails', async () => {
     mockFetchImageFailure()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.rawNode).toBeDefined()
     expect(result.manifest.source.fileKey).toBe('abc123')
@@ -205,7 +210,7 @@ describe('orchestrate', () => {
 
   it('returns tokensUsed summary', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.tokensUsed).toBeDefined()
     const parsed = TokensUsedSummarySchema.safeParse(result.tokensUsed)
@@ -214,7 +219,7 @@ describe('orchestrate', () => {
 
   it('tokensUsed scope matches parsed URL', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.tokensUsed.scope.fileKey).toBe('abc123')
     expect(result.tokensUsed.scope.rootNodeId).toBe('0:1')
@@ -223,7 +228,7 @@ describe('orchestrate', () => {
 
   it('sets correct output paths in manifest', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.manifest.outputs.rawNodeJson).toBe('structure/raw-node.json')
     expect(result.manifest.outputs.normalizedNodeJson).toBe('structure/normalized-node.json')
@@ -243,14 +248,14 @@ describe('orchestrate', () => {
       cacheEnabled: false,
       expansionEnabled: false,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
     expect(result.manifest.outputs.svg).toBe('visual/0:1.svg')
     expect(result.manifest.outputs.png).toBeUndefined()
   })
 
   it('returns outlineJson as valid OutlineNode', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.outlineJson).toBeDefined()
     const parsed = OutlineNodeSchema.safeParse(result.outlineJson)
@@ -259,7 +264,7 @@ describe('orchestrate', () => {
 
   it('returns outlineXml as string', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(typeof result.outlineXml).toBe('string')
     expect(result.outlineXml).toContain('<frame')
@@ -267,7 +272,7 @@ describe('orchestrate', () => {
 
   it('returns contextMd as string', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(typeof result.contextMd).toBe('string')
     expect(result.contextMd).toContain('## Source')
@@ -297,7 +302,7 @@ describe('orchestrate + writeOutput integration', () => {
       cacheEnabled: false,
       expansionEnabled: false,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
     await writeOutput(config.outputDir, result)
 
     // manifest.json exists and validates
@@ -364,7 +369,7 @@ describe('orchestrate + writeOutput integration', () => {
       cacheEnabled: false,
       expansionEnabled: false,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
     await writeOutput(config.outputDir, result)
 
     const manifestContent = await readFile(
@@ -516,7 +521,7 @@ const expansionConfig: FetchConfig = resolveConfig({
 describe('orchestrate expansion loop (VT-034)', () => {
   it('triggers expansion for depth-truncated containers and merges results', async () => {
     mockFetchWithExpansion()
-    const result = await orchestrate(expansionConfig)
+    const result = await run(expansionConfig)
 
     expect(result.expansion).not.toBeNull()
     expect(result.expansion?.totalExecuted).toBeGreaterThan(0)
@@ -536,7 +541,7 @@ describe('orchestrate expansion loop (VT-034)', () => {
 
   it('re-normalizes after merge', async () => {
     mockFetchWithExpansion()
-    const result = await orchestrate(expansionConfig)
+    const result = await run(expansionConfig)
 
     // The normalizedNode should reflect the expanded tree
     expect(result.normalizedNode.id).toBe('0:1')
@@ -554,7 +559,7 @@ describe('expansion disabled regression (VT-035)', () => {
       expansionEnabled: false,
       cacheEnabled: false,
     })
-    const result = await orchestrate(disabledConfig)
+    const result = await run(disabledConfig)
 
     expect(result.expansion).toBeNull()
     expect(result.normalizedNode).toBeDefined()
@@ -570,7 +575,7 @@ describe('expansion disabled regression (VT-035)', () => {
       expansionEnabled: false,
       cacheEnabled: false,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
 
     expect(result.rawNode).toEqual({
       id: '0:1', name: 'Frame', type: 'FRAME', children: [],
@@ -582,7 +587,7 @@ describe('expansion disabled regression (VT-035)', () => {
 describe('failed expansion fetch resilience (VT-036)', () => {
   it('continues pipeline when expansion fetch fails', async () => {
     mockFetchExpansionFailure()
-    const result = await orchestrate(expansionConfig)
+    const result = await run(expansionConfig)
 
     // Pipeline should complete despite expansion failures
     expect(result.normalizedNode).toBeDefined()
@@ -600,7 +605,7 @@ describe('failed expansion fetch resilience (VT-036)', () => {
 
   it('preserves original subtree on failed expansion', async () => {
     mockFetchExpansionFailure()
-    const result = await orchestrate(expansionConfig)
+    const result = await run(expansionConfig)
 
     // Original tree structure preserved — Header/Body still childless
     const card = result.normalizedNode.children[0]
@@ -626,7 +631,7 @@ describe('expansion maxTargets bound (VT-037)', () => {
       maxExpansionTargets: 1,
       cacheEnabled: false,
     })
-    const result = await orchestrate(limitedConfig)
+    const result = await run(limitedConfig)
 
     expect(result.expansion).not.toBeNull()
     if (result.expansion !== null) {
@@ -645,7 +650,7 @@ describe('asset export pipeline (VT-038)', () => {
       cacheEnabled: false,
       expansionEnabled: false,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
 
     expect(result.manifest.outputs.assets.length).toBeGreaterThan(0)
     for (const assetPath of result.manifest.outputs.assets) {
@@ -661,7 +666,7 @@ describe('asset export pipeline (VT-038)', () => {
       cacheEnabled: false,
       expansionEnabled: false,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
 
     expect(result.assets.length).toBeGreaterThan(0)
     for (const asset of result.assets) {
@@ -679,7 +684,7 @@ describe('asset export pipeline (VT-038)', () => {
       expansionEnabled: false,
       maxAssets: 0,
     })
-    const result = await orchestrate(config)
+    const result = await run(config)
 
     expect(result.manifest.outputs.assets).toHaveLength(0)
     expect(result.assets).toHaveLength(0)
@@ -687,7 +692,7 @@ describe('asset export pipeline (VT-038)', () => {
 
   it('produces empty assets when no exportable nodes exist', async () => {
     mockFetchSuccess()
-    const result = await orchestrate(validConfig)
+    const result = await run(validConfig)
 
     expect(result.manifest.outputs.assets).toHaveLength(0)
     expect(result.assets).toHaveLength(0)

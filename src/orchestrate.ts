@@ -1,11 +1,6 @@
 import { assetFileName, collectExportTargets } from './assets/collect.js'
 import { fetchAssets } from './assets/fetch.js'
-import {
-  createCache,
-  createNoopCache,
-  fetchImageCached,
-  fetchNodeCached,
-} from './cache/index.js'
+import { fetchImageCached, fetchNodeCached } from './cache/index.js'
 import { FigmaRenderError } from './errors.js'
 import { mergeExpansions } from './expand/merge.js'
 import {
@@ -13,9 +8,6 @@ import {
   evaluateExpansionTriggers,
   geometryNeeded,
 } from './expand/triggers.js'
-import { createAuth } from './figma/auth.js'
-import { createClient } from './figma/client.js'
-import { parseFigmaUrl } from './figma/url.js'
 import { normalize } from './normalize/index.js'
 import { buildOutline, outlineToXml } from './normalize/outline.js'
 import { generateContextMd } from './output/context-md.js'
@@ -39,6 +31,7 @@ import type { Manifest, ManifestError } from './schemas/manifest.js'
 import type { NormalizedNode } from './schemas/normalized.js'
 import type { OutlineNode } from './schemas/outline.js'
 import type { TokensUsedSummary } from './schemas/tokens-used.js'
+import type { Session } from './session.js'
 
 export interface OrchestrateResult {
   readonly manifest: Manifest
@@ -56,12 +49,9 @@ export interface OrchestrateResult {
 const DEFAULT_TRIGGERS = [depthTruncatedContainer, geometryNeeded]
 
 export async function orchestrate(
-  config: FetchConfig,
+  session: Session,
 ): Promise<OrchestrateResult> {
-  const parsed = parseFigmaUrl(config.url)
-  const auth = createAuth(config.token)
-  const client = createClient({ auth })
-  const cache = buildCache(config)
+  const { client, cache, parsed, config } = session
 
   const { rawNode, fileVersion, image, errors } = await fetchInitialData(
     client, cache, parsed.fileKey, parsed.nodeId, config,
@@ -156,13 +146,6 @@ interface InitialFetchResult {
   readonly fileVersion: FileVersion
   readonly image: FetchImageResult | undefined
   readonly errors: ManifestError[]
-}
-
-function buildCache(config: FetchConfig): Cache {
-  if (!config.cacheEnabled) {
-    return createNoopCache()
-  }
-  return createCache({ enabled: true, cacheDirectory: config.cacheDirectory })
 }
 
 async function fetchInitialData(
