@@ -8,13 +8,17 @@ Made with [spec-driver](https://github.com/davidlee/spec-driver).
 ## Install
 
 ```sh
-git clone <repo-url> && cd ligma
-pnpm install
-pnpm build
-pnpm link --global
+npm install -g ligma-mcp
 ```
 
-Requires Node >= 18. After linking, `ligma` is available globally.
+Or from source:
+
+```sh
+git clone https://github.com/davidlee/ligma && cd ligma
+pnpm install && pnpm build && pnpm link --global
+```
+
+Requires Node >= 18.
 
 ### MCP server setup (Claude Code)
 
