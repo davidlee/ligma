@@ -30,6 +30,44 @@ ligma <figma-url> --token <token>
 
 Note: it takes a hot minute and there's no feedback during download. Little spinner coming soon (ironic, eh?).
 
+### Subcommands
+
+#### `list-assets`
+
+List detected export targets as JSON:
+
+```sh
+ligma list-assets <figma-url>
+```
+
+Outputs a JSON array of `{ nodeId, name, format, reason }` to stdout.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-t, --token <token>` | `$FIGMA_TOKEN` | Figma personal access token |
+| `-d, --depth <n>` | `2` | Node tree depth |
+| `--max-assets <n>` | `20` | Maximum assets to list |
+| `--no-cache` | | Disable fetch caching |
+| `--cache-directory <path>` | `.cache/figma-fetch` | Cache directory path |
+
+#### `get-asset`
+
+Fetch a single asset by node ID and write to disk:
+
+```sh
+ligma get-asset <figma-url> <node-id>
+```
+
+Writes the asset file and prints the absolute path to stdout.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-t, --token <token>` | `$FIGMA_TOKEN` | Figma personal access token |
+| `-o, --out <dir>` | `./artifacts` | Output directory |
+| `-f, --format <fmt>` | `png` | Image format (`png` or `svg`) |
+| `--no-cache` | | Disable fetch caching |
+| `--cache-directory <path>` | `.cache/figma-fetch` | Cache directory path |
+
 ### Options
 
 | Flag | Default | Description |

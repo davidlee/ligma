@@ -4,6 +4,7 @@ import {
   assetFileName,
   collectExportTargets,
   sanitizeName,
+  toAssetListEntry,
 } from '../../src/assets/collect.js'
 
 import type { NormalizedNode } from '../../src/schemas/normalized.js'
@@ -74,7 +75,7 @@ describe('collectExportTargets', () => {
     })
     const targets = collectExportTargets(root, 20)
     expect(targets).toHaveLength(1)
-    expect(targets[0]).toEqual({ nodeId: '2:1', nodeName: 'Logo', kind: 'bitmap' })
+    expect(targets[0]).toEqual({ nodeId: '2:1', nodeName: 'Logo', kind: 'bitmap', reason: 'test bitmap' })
   })
 
   it('skips nodes where exportSuggested is false', () => {
@@ -186,19 +187,45 @@ describe('sanitizeName', () => {
   })
 })
 
+describe('toAssetListEntry', () => {
+  it('maps ExportTarget to consumer-facing shape', () => {
+    expect(toAssetListEntry({
+      nodeId: '2:1', nodeName: 'Logo', kind: 'bitmap', reason: 'has image fills',
+    })).toEqual({
+      nodeId: '2:1', name: 'Logo', format: 'png', reason: 'has image fills',
+    })
+  })
+
+  it('maps svg kind to svg format', () => {
+    expect(toAssetListEntry({
+      nodeId: '3:1', nodeName: 'Icon', kind: 'svg', reason: null,
+    })).toEqual({
+      nodeId: '3:1', name: 'Icon', format: 'svg', reason: null,
+    })
+  })
+
+  it('maps mixed kind to png,svg format', () => {
+    expect(toAssetListEntry({
+      nodeId: '4:1', nodeName: 'Both', kind: 'mixed', reason: 'mixed content',
+    })).toEqual({
+      nodeId: '4:1', name: 'Both', format: 'png,svg', reason: 'mixed content',
+    })
+  })
+})
+
 describe('assetFileName', () => {
   it('produces expected filename shape', () => {
-    const target = { nodeId: '12:34', nodeName: 'My Logo', kind: 'bitmap' as const }
+    const target = { nodeId: '12:34', nodeName: 'My Logo', kind: 'bitmap' as const, reason: null }
     expect(assetFileName(target, 'png')).toBe('my-logo-12-34.png')
   })
 
   it('handles node IDs with colons', () => {
-    const target = { nodeId: '1292:4418', nodeName: 'Icon', kind: 'svg' as const }
+    const target = { nodeId: '1292:4418', nodeName: 'Icon', kind: 'svg' as const, reason: null }
     expect(assetFileName(target, 'svg')).toBe('icon-1292-4418.svg')
   })
 
   it('falls back to "asset" for empty name', () => {
-    const target = { nodeId: '1:1', nodeName: '', kind: 'bitmap' as const }
+    const target = { nodeId: '1:1', nodeName: '', kind: 'bitmap' as const, reason: null }
     expect(assetFileName(target, 'png')).toBe('asset-1-1.png')
   })
 })

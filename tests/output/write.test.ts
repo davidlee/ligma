@@ -266,12 +266,12 @@ describe('writeOutput', () => {
 describe('writeOutput — asset writing', () => {
   const STUB_ASSETS: readonly FetchedAsset[] = [
     {
-      target: { nodeId: '10:1', nodeName: 'Logo', kind: 'bitmap' },
+      target: { nodeId: '10:1', nodeName: 'Logo', kind: 'bitmap', reason: null },
       format: 'png',
       buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
     },
     {
-      target: { nodeId: '10:2', nodeName: 'Icon/Star', kind: 'svg' },
+      target: { nodeId: '10:2', nodeName: 'Icon/Star', kind: 'svg', reason: null },
       format: 'svg',
       buffer: Buffer.from('<svg></svg>'),
     },

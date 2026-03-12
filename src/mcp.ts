@@ -7,7 +7,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
 
-import { assetFileName, collectExportTargets } from './assets/collect.js'
+import { assetFileName, collectExportTargets, toAssetListEntry } from './assets/collect.js'
 import { fetchAssets } from './assets/fetch.js'
 import { fetchImageCached, fetchNodeCached } from './cache/index.js'
 import { resolveConfig } from './config.js'
@@ -208,7 +208,8 @@ function registerListAssets(server: McpServer, token: string): void {
       const normalizedNode = normalize(response.document)
       const targets = collectExportTargets(normalizedNode, config.maxAssets)
 
-      return textResult(JSON.stringify(targets, null, 2))
+      const entries = targets.map(toAssetListEntry)
+      return textResult(JSON.stringify(entries, null, 2))
     },
   )
 }
@@ -234,7 +235,7 @@ function registerGetAsset(server: McpServer, token: string): void {
         version: null,
       })
 
-      const target: ExportTarget = { nodeId: args.nodeId, nodeName: args.nodeId, kind: 'bitmap' }
+      const target: ExportTarget = { nodeId: args.nodeId, nodeName: args.nodeId, kind: 'bitmap', reason: null }
       const fileName = assetFileName(target, result.format)
       const directory = join(config.outputDir, 'assets')
       const filePath = await writeImageToDisk(result.buffer, fileName, directory)

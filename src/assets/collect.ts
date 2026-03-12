@@ -4,6 +4,7 @@ export interface ExportTarget {
   readonly nodeId: string
   readonly nodeName: string
   readonly kind: AssetKind
+  readonly reason: string | null
 }
 
 const KIND_PRIORITY: Record<AssetKind, number> = {
@@ -27,6 +28,7 @@ export function collectExportTargets(
         nodeId: node.id,
         nodeName: node.name,
         kind: node.asset.kind,
+        reason: node.asset.reason,
       })
     }
   })
@@ -34,6 +36,28 @@ export function collectExportTargets(
   candidates.sort((a, b) => KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind])
 
   return candidates.slice(0, maxAssets)
+}
+
+export interface AssetListEntry {
+  readonly nodeId: string
+  readonly name: string
+  readonly format: string
+  readonly reason: string | null
+}
+
+const KIND_TO_FORMAT: Record<AssetKind, string> = {
+  bitmap: 'png',
+  svg: 'svg',
+  mixed: 'png,svg',
+}
+
+export function toAssetListEntry(target: ExportTarget): AssetListEntry {
+  return {
+    nodeId: target.nodeId,
+    name: target.nodeName,
+    format: KIND_TO_FORMAT[target.kind],
+    reason: target.reason,
+  }
 }
 
 export function assetFileName(target: ExportTarget, format: 'png' | 'svg'): string {

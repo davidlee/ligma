@@ -10,6 +10,7 @@ function makeTarget(overrides: Partial<ExportTarget> = {}): ExportTarget {
     nodeId: '1:1',
     nodeName: 'Test',
     kind: 'bitmap',
+    reason: null,
     ...overrides,
   }
 }
